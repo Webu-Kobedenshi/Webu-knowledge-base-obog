@@ -30,19 +30,23 @@ export function SearchField({
   const pathname = usePathname();
 
   const [department, setDepartment] = useState(initialDepartment || "");
-  const [graduationYear, setGraduationYear] = useState(initialGraduationYear || "");
+  const [graduationYear, setGraduationYear] = useState(
+    initialGraduationYear || "",
+  );
   const [pageSize, setPageSize] = useState(String(initialPageSize));
   const [companyInput, setCompanyInput] = useState(initialCompany);
   const [company, setCompany] = useState(initialCompany);
   const [isExpandedOnMobile, setIsExpandedOnMobile] = useState(() =>
     Boolean(initialDepartment || initialCompany || initialGraduationYear),
   );
-  const canReset = Boolean(department || companyInput || graduationYear || pageSize !== "10");
+  const canReset = Boolean(
+    department || companyInput || graduationYear || pageSize !== "12",
+  );
   const activeFilterCount =
     Number(Boolean(department)) +
     Number(Boolean(companyInput.trim())) +
     Number(Boolean(graduationYear)) +
-    Number(pageSize !== "10");
+    Number(pageSize !== "12");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -67,7 +71,7 @@ export function SearchField({
       query.set("graduationYear", graduationYear);
     }
 
-    if (pageSize !== "10") {
+    if (pageSize !== "12") {
       query.set("pageSize", pageSize);
     }
 
@@ -84,13 +88,16 @@ export function SearchField({
     setCompanyInput("");
     setCompany("");
     setGraduationYear("");
-    setPageSize("10");
+    setPageSize("12");
     setIsExpandedOnMobile(false);
     router.replace(pathname, { scroll: false });
   };
 
   return (
-    <form className="liquid-glass rounded-2xl p-4" onSubmit={(event) => event.preventDefault()}>
+    <form
+      className="liquid-glass rounded-2xl p-4"
+      onSubmit={(event) => event.preventDefault()}
+    >
       <div className="flex items-center justify-between gap-2 md:hidden">
         <p className="text-[12px] font-semibold text-stone-600 dark:text-stone-300">
           絞り込み
@@ -159,13 +166,21 @@ export function SearchField({
               <SelectItem value="ESPORTS">esportsエンジニア</SelectItem>
               <SelectItem value="CG_ANIMATION">CGアニメーション</SelectItem>
               <SelectItem value="DIGITAL_ANIME">デジタルアニメ</SelectItem>
-              <SelectItem value="GRAPHIC_DESIGN">グラフィックデザイン</SelectItem>
-              <SelectItem value="INDUSTRIAL_DESIGN">インダストリアルデザイン</SelectItem>
+              <SelectItem value="GRAPHIC_DESIGN">
+                グラフィックデザイン
+              </SelectItem>
+              <SelectItem value="INDUSTRIAL_DESIGN">
+                インダストリアルデザイン
+              </SelectItem>
               <SelectItem value="ARCHITECTURAL">建築</SelectItem>
               <SelectItem value="SOUND_CREATE">サウンドクリエイト</SelectItem>
-              <SelectItem value="SOUND_TECHNIQUE">サウンドテクニック</SelectItem>
+              <SelectItem value="SOUND_TECHNIQUE">
+                サウンドテクニック
+              </SelectItem>
               <SelectItem value="VOICE_ACTOR">声優</SelectItem>
-              <SelectItem value="INTERNATIONAL_COMM">国際コミュニケーション</SelectItem>
+              <SelectItem value="INTERNATIONAL_COMM">
+                国際コミュニケーション
+              </SelectItem>
               <SelectItem value="OTHERS">その他</SelectItem>
             </SelectContent>
           </Select>
@@ -210,9 +225,10 @@ export function SearchField({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="10">10件</SelectItem>
-              <SelectItem value="20">20件</SelectItem>
-              <SelectItem value="50">50件</SelectItem>
+              <SelectItem value="12">12件</SelectItem>
+              <SelectItem value="24">24件</SelectItem>
+              <SelectItem value="36">36件</SelectItem>
+              <SelectItem value="48">48件</SelectItem>
             </SelectContent>
           </Select>
         </label>

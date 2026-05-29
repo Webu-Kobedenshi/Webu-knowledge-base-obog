@@ -46,7 +46,7 @@ export function AlumniListTemplate({
     if (initialGraduationYear) {
       query.set("graduationYear", initialGraduationYear);
     }
-    if (pageSize !== 20) {
+    if (pageSize !== 12) {
       query.set("pageSize", String(pageSize));
     }
     if (page > 1) {
@@ -111,7 +111,9 @@ export function AlumniListTemplate({
         {initialGraduationYear ? (
           <Badge variant="default">卒業年度: {initialGraduationYear}</Badge>
         ) : null}
-        {initialCompany ? <Badge variant="default">企業: {initialCompany}</Badge> : null}
+        {initialCompany ? (
+          <Badge variant="default">企業: {initialCompany}</Badge>
+        ) : null}
         <Link
           href="/account"
           className="ml-auto inline-flex h-8 items-center rounded-lg border border-violet-200/80 bg-violet-50/80 px-3 text-xs font-semibold text-violet-700 transition hover:bg-violet-100/80 dark:border-violet-700/60 dark:bg-violet-900/30 dark:text-violet-200 dark:hover:bg-violet-900/50"
@@ -155,7 +157,9 @@ export function AlumniListTemplate({
           )}
 
           <span className="px-3 text-[13px] tabular-nums text-stone-600 dark:text-stone-400">
-            <span className="font-semibold text-stone-900 dark:text-stone-200">{currentPage}</span>
+            <span className="font-semibold text-stone-900 dark:text-stone-200">
+              {currentPage}
+            </span>
             <span className="mx-1 text-stone-300 dark:text-stone-600">/</span>
             <span>{totalPages}</span>
           </span>

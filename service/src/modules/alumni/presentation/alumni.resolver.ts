@@ -42,7 +42,7 @@ export class AlumniResolver {
       department,
       company,
       graduationYear,
-      limit: limit ?? 10,
+      limit: limit ?? 12,
       offset: offset ?? 0,
     });
   }

@@ -91,7 +91,7 @@ export async function fetchAlumniList(params: {
   }
 
   const endpoint = process.env.GRAPHQL_ENDPOINT ?? "http://localhost:4000/graphql";
-  const limit = params.limit ?? 10;
+  const limit = params.limit ?? 12;
   const offset = params.offset ?? 0;
 
   try {
