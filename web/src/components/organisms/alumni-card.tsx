@@ -63,9 +63,6 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
   const selectionExperienceCount = alumni.companyExperiences.filter(
     (company) => company.selectionExperience,
   ).length;
-  const hasInterviewQuestions = alumni.companyExperiences.some((company) =>
-    company.selectionExperience?.steps.some((step) => Boolean(step.questions)),
-  );
   const canContact = alumni.acceptContact && Boolean(alumni.contactEmail);
   const displayName = alumni.nickname ?? "匿名";
 
@@ -205,19 +202,6 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
             <span className="italic text-stone-300 dark:text-stone-600">なし</span>
           )}
         </p>
-
-        {selectionExperienceCount > 0 ? (
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            <span className="rounded-md bg-emerald-100 px-2 py-1 text-[10px] font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-              選考フローあり
-            </span>
-            {hasInterviewQuestions ? (
-              <span className="rounded-md bg-sky-100 px-2 py-1 text-[10px] font-bold text-sky-700 dark:bg-sky-900/30 dark:text-sky-300">
-                面接質問あり
-              </span>
-            ) : null}
-          </div>
-        ) : null}
 
         {/* ── Detail Link ── */}
         {alumni.skills.length > 0 ||

@@ -212,23 +212,23 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
 
       {/* ── Company Selection Experience ── */}
       <section className="mt-4 rounded-2xl border border-stone-200/90 bg-white p-5 shadow-[0_8px_24px_-18px_rgba(0,0,0,0.15)] dark:border-stone-800/80 dark:bg-stone-900/40">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100">
-              企業別の選考体験
-            </h2>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                企業別の選考体験
+              </h2>
             <p className="mt-1 text-[11px] text-stone-500 dark:text-stone-400">
               {companiesWithExperienceCount > 0
                 ? `${companiesWithExperienceCount}社の選考フローが公開されています`
                 : "この先輩は企業名のみ公開しています"}
             </p>
+            </div>
+            {selectedExperience ? (
+              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700 shadow-sm dark:border-emerald-900/50 dark:bg-emerald-900/30 dark:text-emerald-300">
+                選考フローあり
+              </span>
+            ) : null}
           </div>
-          {selectedExperience ? (
-            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-              選考フローあり
-            </span>
-          ) : null}
-        </div>
 
         {companyExperiences.length > 1 ? (
           <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
@@ -268,7 +268,7 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
                 {selectedCompany.companyName}
               </h3>
               {selectedExperience?.entryTrigger ? (
-                <span className="shrink-0 rounded-lg bg-stone-100 px-2 py-1 text-[10px] font-semibold text-stone-600 dark:bg-stone-800 dark:text-stone-300">
+                <span className="shrink-0 rounded-lg border border-stone-200 bg-stone-100 px-2 py-1 text-[10px] font-semibold text-stone-600 shadow-sm dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300">
                   {selectedExperience.entryTrigger}
                 </span>
               ) : null}
@@ -294,19 +294,19 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
                                 selectionStepKindLabel[step.stepKind] ||
                                 "選考ステップ"}
                             </h4>
-                            <span className="rounded-md bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 dark:bg-stone-900 dark:text-stone-400">
+                            <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
                               {selectionStepKindLabel[step.stepKind] ?? step.stepKind}
                             </span>
-                            <span className="rounded-md bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 dark:bg-stone-900 dark:text-stone-400">
+                            <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
                               {selectionFormatLabel[step.format] ?? step.format}
                             </span>
                             {step.interviewerCount ? (
-                              <span className="rounded-md bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 dark:bg-stone-900 dark:text-stone-400">
+                              <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
                                 面接官 {step.interviewerCount}人
                               </span>
                             ) : null}
                             {step.durationMinutes ? (
-                              <span className="rounded-md bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 dark:bg-stone-900 dark:text-stone-400">
+                              <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
                                 {step.durationMinutes}分
                               </span>
                             ) : null}
