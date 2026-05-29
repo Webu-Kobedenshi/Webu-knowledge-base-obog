@@ -39,6 +39,7 @@ type AccountProfileFormProps = {
   initialEmail?: string | null;
   title?: string;
   description?: string;
+  showBasicProfileFields?: boolean;
   showPublicProfileFields?: boolean;
   showLinkedGmailField?: boolean;
   onSuccess?: () => void;
@@ -250,6 +251,7 @@ export function AccountProfileForm({
   initialEmail,
   title = "プロフィール・公開情報",
   description = "初期設定で入力した項目を更新できます。公開する内定先情報もここで管理します。",
+  showBasicProfileFields = true,
   showPublicProfileFields = true,
   showLinkedGmailField = true,
   onSuccess,
@@ -747,25 +749,27 @@ export function AccountProfileForm({
 
   return (
     <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-      <BasicProfileSection
-        name={state.name}
-        studentId={state.studentId}
-        enrollmentYear={state.enrollmentYear}
-        department={state.department}
-        durationYears={state.durationYears}
-        departmentOptions={departmentOptions}
-        onNameChange={(value) => setField("name", value)}
-        onStudentIdChange={(value) => setField("studentId", value)}
-        onEnrollmentYearChange={(value) => setField("enrollmentYear", value)}
-        onDepartmentChange={(dept) => {
-          setField("department", dept);
-          if (dept) {
-            setField("durationYears", getDurationYears(dept));
-          } else {
-            setField("durationYears", "");
-          }
-        }}
-      />
+      {showBasicProfileFields ? (
+        <BasicProfileSection
+          name={state.name}
+          studentId={state.studentId}
+          enrollmentYear={state.enrollmentYear}
+          department={state.department}
+          durationYears={state.durationYears}
+          departmentOptions={departmentOptions}
+          onNameChange={(value) => setField("name", value)}
+          onStudentIdChange={(value) => setField("studentId", value)}
+          onEnrollmentYearChange={(value) => setField("enrollmentYear", value)}
+          onDepartmentChange={(dept) => {
+            setField("department", dept);
+            if (dept) {
+              setField("durationYears", getDurationYears(dept));
+            } else {
+              setField("durationYears", "");
+            }
+          }}
+        />
+      ) : null}
 
       {shouldShowLinkedGmailField ? (
         <LinkedGmailSection

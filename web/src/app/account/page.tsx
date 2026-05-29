@@ -114,6 +114,9 @@ export default async function AccountPage() {
               initialProfile={profile}
               initialName={profile?.name ?? session?.user?.name}
               initialEmail={profile?.email ?? session?.user?.email}
+              title="プロフィール"
+              description="初期設定で入力した項目を更新できます。"
+              showPublicProfileFields={false}
             />
 
             {/* ── Account Actions ── */}

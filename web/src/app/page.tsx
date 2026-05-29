@@ -38,8 +38,7 @@ export default async function Home({ searchParams }: PageProps) {
     redirect("/initial-setup");
   }
 
-  const params: Record<string, string | string[] | undefined> =
-    (await searchParams) ?? {};
+  const params: Record<string, string | string[] | undefined> = (await searchParams) ?? {};
   const departmentParam = params.department;
   const companyParam = params.company;
   const graduationYearParam = params.graduationYear;
@@ -47,36 +46,23 @@ export default async function Home({ searchParams }: PageProps) {
   const pageSizeParam = params.pageSize;
 
   const department =
-    (Array.isArray(departmentParam)
-      ? departmentParam[0]
-      : departmentParam
-    )?.trim() ?? "";
-  const company =
-    (Array.isArray(companyParam) ? companyParam[0] : companyParam)?.trim() ??
-    "";
+    (Array.isArray(departmentParam) ? departmentParam[0] : departmentParam)?.trim() ?? "";
+  const company = (Array.isArray(companyParam) ? companyParam[0] : companyParam)?.trim() ?? "";
   const graduationYearRaw =
-    (Array.isArray(graduationYearParam)
-      ? graduationYearParam[0]
-      : graduationYearParam
-    )?.trim() ?? "";
+    (Array.isArray(graduationYearParam) ? graduationYearParam[0] : graduationYearParam)?.trim() ??
+    "";
   const parsedGraduationYear = Number(graduationYearRaw);
   const graduationYear =
     Number.isInteger(parsedGraduationYear) && parsedGraduationYear >= 1900
       ? parsedGraduationYear
       : undefined;
 
-  const parsedPage = Number(
-    (Array.isArray(pageParam) ? pageParam[0] : pageParam)?.trim() ?? "1",
-  );
-  const currentPage =
-    Number.isFinite(parsedPage) && parsedPage > 0 ? Math.floor(parsedPage) : 1;
+  const parsedPage = Number((Array.isArray(pageParam) ? pageParam[0] : pageParam)?.trim() ?? "1");
+  const currentPage = Number.isFinite(parsedPage) && parsedPage > 0 ? Math.floor(parsedPage) : 1;
   const parsedPageSize = Number(
-    (Array.isArray(pageSizeParam) ? pageSizeParam[0] : pageSizeParam)?.trim() ??
-      "12",
+    (Array.isArray(pageSizeParam) ? pageSizeParam[0] : pageSizeParam)?.trim() ?? "12",
   );
-  const pageSize = [12, 24, 36, 48].includes(parsedPageSize)
-    ? parsedPageSize
-    : 12;
+  const pageSize = [12, 24, 36, 48].includes(parsedPageSize) ? parsedPageSize : 12;
   const offset = (currentPage - 1) * pageSize;
 
   const { alumniList, totalCount, hasNextPage, error } = await fetchAlumniList({

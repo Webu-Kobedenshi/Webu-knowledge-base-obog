@@ -30,18 +30,14 @@ export function SearchField({
   const pathname = usePathname();
 
   const [department, setDepartment] = useState(initialDepartment || "");
-  const [graduationYear, setGraduationYear] = useState(
-    initialGraduationYear || "",
-  );
+  const [graduationYear, setGraduationYear] = useState(initialGraduationYear || "");
   const [pageSize, setPageSize] = useState(String(initialPageSize));
   const [companyInput, setCompanyInput] = useState(initialCompany);
   const [company, setCompany] = useState(initialCompany);
   const [isExpandedOnMobile, setIsExpandedOnMobile] = useState(() =>
     Boolean(initialDepartment || initialCompany || initialGraduationYear),
   );
-  const canReset = Boolean(
-    department || companyInput || graduationYear || pageSize !== "12",
-  );
+  const canReset = Boolean(department || companyInput || graduationYear || pageSize !== "12");
   const activeFilterCount =
     Number(Boolean(department)) +
     Number(Boolean(companyInput.trim())) +
@@ -94,10 +90,7 @@ export function SearchField({
   };
 
   return (
-    <form
-      className="liquid-glass rounded-2xl p-4"
-      onSubmit={(event) => event.preventDefault()}
-    >
+    <form className="liquid-glass rounded-2xl p-4" onSubmit={(event) => event.preventDefault()}>
       <div className="flex items-center justify-between gap-2 md:hidden">
         <p className="text-[12px] font-semibold text-stone-600 dark:text-stone-300">
           絞り込み
@@ -166,21 +159,13 @@ export function SearchField({
               <SelectItem value="ESPORTS">esportsエンジニア</SelectItem>
               <SelectItem value="CG_ANIMATION">CGアニメーション</SelectItem>
               <SelectItem value="DIGITAL_ANIME">デジタルアニメ</SelectItem>
-              <SelectItem value="GRAPHIC_DESIGN">
-                グラフィックデザイン
-              </SelectItem>
-              <SelectItem value="INDUSTRIAL_DESIGN">
-                インダストリアルデザイン
-              </SelectItem>
+              <SelectItem value="GRAPHIC_DESIGN">グラフィックデザイン</SelectItem>
+              <SelectItem value="INDUSTRIAL_DESIGN">インダストリアルデザイン</SelectItem>
               <SelectItem value="ARCHITECTURAL">建築</SelectItem>
               <SelectItem value="SOUND_CREATE">サウンドクリエイト</SelectItem>
-              <SelectItem value="SOUND_TECHNIQUE">
-                サウンドテクニック
-              </SelectItem>
+              <SelectItem value="SOUND_TECHNIQUE">サウンドテクニック</SelectItem>
               <SelectItem value="VOICE_ACTOR">声優</SelectItem>
-              <SelectItem value="INTERNATIONAL_COMM">
-                国際コミュニケーション
-              </SelectItem>
+              <SelectItem value="INTERNATIONAL_COMM">国際コミュニケーション</SelectItem>
               <SelectItem value="OTHERS">その他</SelectItem>
             </SelectContent>
           </Select>
