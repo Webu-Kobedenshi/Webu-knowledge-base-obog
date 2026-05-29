@@ -12,8 +12,6 @@ describe("AlumniProfileDraft", () => {
         skills: [" React ", "Node", "React", "TypeScript"],
         portfolioUrl: "  https://example.com  ",
         gakuchika: "  project  ",
-        entryTrigger: "  学校求人 ",
-        interviewTip: "  tip  ",
         usefulCoursework: "  coursework  ",
       },
       "fallback@example.com",
@@ -29,8 +27,6 @@ describe("AlumniProfileDraft", () => {
       skills: ["React", "Node", "TypeScript"],
       portfolioUrl: "https://example.com",
       gakuchika: "project",
-      entryTrigger: "学校求人",
-      interviewTip: "tip",
       usefulCoursework: "coursework",
     });
   });

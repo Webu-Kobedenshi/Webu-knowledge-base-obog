@@ -62,8 +62,6 @@ const alumniListQuery = `
         skills
         portfolioUrl
         gakuchika
-        entryTrigger
-        interviewTip
         usefulCoursework
         createdAt
         updatedAt
@@ -187,8 +185,6 @@ const alumniDetailQuery = `
       skills
       portfolioUrl
       gakuchika
-      entryTrigger
-      interviewTip
       usefulCoursework
       createdAt
       updatedAt

@@ -35,8 +35,6 @@ type UpdateAlumniProfileInput = {
   skills?: string[];
   portfolioUrl?: string;
   gakuchika?: string;
-  entryTrigger?: string;
-  interviewTip?: string;
   usefulCoursework?: string;
 };
 
@@ -142,8 +140,6 @@ const alumniProfileSelect = {
   skills: true,
   portfolioUrl: true,
   gakuchika: true,
-  entryTrigger: true,
-  interviewTip: true,
   usefulCoursework: true,
   isPublic: true,
   acceptContact: true,
@@ -232,8 +228,6 @@ export class AlumniRepository {
       skills: (record as { skills?: string[] }).skills ?? [],
       portfolioUrl: (record as { portfolioUrl?: string | null }).portfolioUrl ?? null,
       gakuchika: (record as { gakuchika?: string | null }).gakuchika ?? null,
-      entryTrigger: (record as { entryTrigger?: string | null }).entryTrigger ?? null,
-      interviewTip: (record as { interviewTip?: string | null }).interviewTip ?? null,
       usefulCoursework: (record as { usefulCoursework?: string | null }).usefulCoursework ?? null,
       isPublic: record.isPublic,
       acceptContact: record.acceptContact,
@@ -363,8 +357,6 @@ export class AlumniRepository {
           skills: input.skills ?? [],
           portfolioUrl: input.portfolioUrl,
           gakuchika: input.gakuchika,
-          entryTrigger: input.entryTrigger,
-          interviewTip: input.interviewTip,
           usefulCoursework: input.usefulCoursework,
         },
         update: {
@@ -378,8 +370,6 @@ export class AlumniRepository {
           skills: input.skills ?? [],
           portfolioUrl: input.portfolioUrl,
           gakuchika: input.gakuchika,
-          entryTrigger: input.entryTrigger,
-          interviewTip: input.interviewTip,
           usefulCoursework: input.usefulCoursework,
         },
         select: {

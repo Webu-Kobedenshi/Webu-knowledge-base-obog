@@ -21,8 +21,6 @@ export type UpdateAlumniProfileInput = {
   skills?: string[];
   portfolioUrl?: string;
   gakuchika?: string;
-  entryTrigger?: string;
-  interviewTip?: string;
   usefulCoursework?: string;
 };
 

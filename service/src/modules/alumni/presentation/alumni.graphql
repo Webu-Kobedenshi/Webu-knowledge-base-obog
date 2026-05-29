@@ -84,8 +84,6 @@ type AlumniProfile {
   skills: [String!]!
   portfolioUrl: String
   gakuchika: String
-  entryTrigger: String
-  interviewTip: String
   usefulCoursework: String
   isPublic: Boolean!
   acceptContact: Boolean!
@@ -139,8 +137,6 @@ input UpdateAlumniProfileInput {
   skills: [String!]
   portfolioUrl: String
   gakuchika: String
-  entryTrigger: String
-  interviewTip: String
   usefulCoursework: String
 }
 

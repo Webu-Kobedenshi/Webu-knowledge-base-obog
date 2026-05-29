@@ -42,8 +42,6 @@ type SeedAlumni = {
   skills: string[];
   portfolioUrl?: string;
   gakuchika: string;
-  entryTrigger: string;
-  interviewTip: string;
   usefulCoursework: string;
   acceptContact: boolean;
 };
@@ -209,8 +207,6 @@ const seedAlumni: SeedAlumni[] = [
     portfolioUrl: "https://example.com/aoi-portfolio",
     gakuchika:
       "学内チームで予約管理アプリを制作し、画面設計とフロント実装を担当しました。利用者の操作迷いを減らすため、先生へのヒアリングをもとに導線を改善しました。",
-    entryTrigger: "逆求人・スカウト",
-    interviewTip: "ポートフォリオの画面を見せながら、なぜそのUIにしたかを説明できると強いです。",
     usefulCoursework: "Webアプリ開発演習とUI/UXの授業が、面接で話す材料になりました。",
     acceptContact: true,
   },
@@ -231,8 +227,6 @@ const seedAlumni: SeedAlumni[] = [
     skills: ["Java", "SQL", "基本情報"],
     gakuchika:
       "データベースを使った在庫管理システムを制作し、ER図設計からAPI実装まで担当しました。",
-    entryTrigger: "学校求人",
-    interviewTip: "チーム開発での役割と、報連相で意識したことをかなり聞かれました。",
     usefulCoursework: "データベース設計、Java演習、基本情報対策。",
     acceptContact: true,
   },
@@ -257,8 +251,6 @@ const seedAlumni: SeedAlumni[] = [
     portfolioUrl: "https://example.com/minato-ai",
     gakuchika:
       "購買データを想定した需要予測の検証に取り組み、精度だけでなく説明しやすい特徴量設計を意識しました。",
-    entryTrigger: "インターン経由",
-    interviewTip: "精度の数字だけでなく、なぜその手法を選んだかを聞かれました。",
     usefulCoursework: "Python演習、AIシステム開発、統計の基礎。",
     acceptContact: true,
   },
@@ -282,8 +274,6 @@ const seedAlumni: SeedAlumni[] = [
     skills: ["Unity", "C#", "チーム制作"],
     portfolioUrl: "https://example.com/haru-game",
     gakuchika: "4人チームで3Dアクションゲームを制作し、プレイヤー制御と敵AIを担当しました。",
-    entryTrigger: "就活サイト",
-    interviewTip: "遊びやすさをどう改善したか、テストプレイの結果をもとに話すと伝わりました。",
     usefulCoursework: "ゲーム制作実習、アルゴリズム、チーム制作演習。",
     acceptContact: true,
   },
@@ -305,8 +295,6 @@ const seedAlumni: SeedAlumni[] = [
     portfolioUrl: "https://example.com/yui-design",
     gakuchika:
       "学園祭の告知ビジュアルを制作し、ターゲットに合わせた情報整理と展開物の統一感を意識しました。",
-    entryTrigger: "ポートフォリオ経由",
-    interviewTip: "作品の狙いと、修正前後の比較を見せると反応が良かったです。",
     usefulCoursework: "グラフィック演習、映像表現、企画プレゼン。",
     acceptContact: true,
   },
@@ -325,8 +313,6 @@ const seedAlumni: SeedAlumni[] = [
     remarks: "資格勉強と面接対策の進め方を話せます。",
     skills: ["Linux", "ネットワーク", "基本情報"],
     gakuchika: "学内ネットワーク構成を題材に、障害切り分けの手順書を作り、チーム内で共有しました。",
-    entryTrigger: "学校求人",
-    interviewTip: "資格名だけでなく、勉強で理解したことを自分の言葉で説明しました。",
     usefulCoursework: "ネットワーク基礎、Linux、情報セキュリティ。",
     acceptContact: false,
   },
@@ -346,8 +332,6 @@ const seedAlumni: SeedAlumni[] = [
     remarks: "営業・事務系の就活も共有できます。",
     skills: ["簿記", "Excel", "プレゼン"],
     gakuchika: "授業内の販売企画で、売上管理シートと提案資料を作成し、改善案を発表しました。",
-    entryTrigger: "学校求人",
-    interviewTip: "人と関わる経験を、数字や行動で具体的に話す準備をしました。",
     usefulCoursework: "ビジネス実務、Excel演習、プレゼンテーション。",
     acceptContact: true,
   },
@@ -368,8 +352,6 @@ const seedAlumni: SeedAlumni[] = [
     portfolioUrl: "https://example.com/kaito-cg",
     gakuchika:
       "キャラクターモデリングと短尺映像制作に取り組み、質感調整とライティングを重点的に改善しました。",
-    entryTrigger: "作品応募",
-    interviewTip: "制作時間、参考資料、修正したポイントを具体的に聞かれました。",
     usefulCoursework: "3DCG演習、映像編集、デッサン。",
     acceptContact: true,
   },
@@ -391,8 +373,6 @@ const seedAlumni: SeedAlumni[] = [
     portfolioUrl: "https://example.com/nana-sound",
     gakuchika:
       "ゲーム作品向けにBGMと効果音を制作し、場面ごとの感情変化に合わせて音色を調整しました。",
-    entryTrigger: "学校紹介",
-    interviewTip: "音源を聞いてもらいながら、狙った感情やリファレンスを説明しました。",
     usefulCoursework: "サウンドデザイン、レコーディング演習、ゲーム制作連携。",
     acceptContact: true,
   },
@@ -411,8 +391,6 @@ const seedAlumni: SeedAlumni[] = [
     remarks: "イベント運営・コミュニティ運営系の相談歓迎です。",
     skills: ["イベント運営", "配信", "分析"],
     gakuchika: "学内大会の運営で、配信進行、参加者対応、トラブル時の連絡フロー整備を担当しました。",
-    entryTrigger: "イベント運営経験から応募",
-    interviewTip: "好きなゲームの話だけでなく、運営側として工夫したことを話しました。",
     usefulCoursework: "イベント企画、配信技術、コミュニケーション演習。",
     acceptContact: true,
   },
@@ -432,8 +410,6 @@ const seedAlumni: SeedAlumni[] = [
     skills: ["CAD", "要件整理", "プレゼン"],
     gakuchika:
       "建築課題で利用者動線を考えた設計を行い、ITの画面設計にも通じる考え方として面接で話しました。",
-    entryTrigger: "就活サイト",
-    interviewTip: "専攻が違っても、学んだ考え方をIT職にどう活かすかを話せれば大丈夫です。",
     usefulCoursework: "設計演習、CAD、プレゼンテーション。",
     acceptContact: true,
   },
@@ -453,8 +429,6 @@ const seedAlumni: SeedAlumni[] = [
     skills: ["発声", "企画", "SNS運用"],
     gakuchika:
       "学内イベントの告知動画でナレーションとSNS投稿を担当し、反応を見ながら投稿内容を改善しました。",
-    entryTrigger: "インターン経由",
-    interviewTip: "表現力を仕事でどう活かすかを、広報や企画の文脈で説明しました。",
     usefulCoursework: "発声、演技実習、動画制作。",
     acceptContact: false,
   },
@@ -509,8 +483,6 @@ async function main() {
               skills: alumni.skills,
               portfolioUrl: alumni.portfolioUrl,
               gakuchika: alumni.gakuchika,
-              entryTrigger: alumni.entryTrigger,
-              interviewTip: alumni.interviewTip,
               usefulCoursework: alumni.usefulCoursework,
               companies: {
                 create: alumni.companies.map((company) => ({

@@ -130,8 +130,6 @@ model AlumniProfile {
   skills           String[]  // タグ配列, 最大3つ
   portfolioUrl     String?
   gakuchika        String?   @db.Text
-  entryTrigger     String?   // 選択肢を文字列保存
-  interviewTip     String?   @db.Text
   usefulCoursework String?   @db.Text
 
   isPublic      Boolean @default(true)

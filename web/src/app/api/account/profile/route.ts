@@ -74,8 +74,6 @@ type Body = {
   skills?: string[];
   portfolioUrl?: string;
   gakuchika?: string;
-  entryTrigger?: string;
-  interviewTip?: string;
   usefulCoursework?: string;
 };
 
@@ -116,8 +114,6 @@ const updateAlumniProfileMutation = `
       skills
       portfolioUrl
       gakuchika
-      entryTrigger
-      interviewTip
       usefulCoursework
     }
   }
@@ -237,8 +233,6 @@ export async function POST(request: Request) {
           skills: body.skills,
           portfolioUrl: body.portfolioUrl,
           gakuchika: body.gakuchika,
-          entryTrigger: body.entryTrigger,
-          interviewTip: body.interviewTip,
           usefulCoursework: body.usefulCoursework,
         },
       },

@@ -14,8 +14,6 @@ export type AlumniProfileDraftInput = {
   skills?: string[];
   portfolioUrl?: string;
   gakuchika?: string;
-  entryTrigger?: string;
-  interviewTip?: string;
   usefulCoursework?: string;
 };
 
@@ -65,8 +63,6 @@ export type AlumniProfileDraftData = {
   skills: string[];
   portfolioUrl?: string;
   gakuchika?: string;
-  entryTrigger?: string;
-  interviewTip?: string;
   usefulCoursework?: string;
 };
 
@@ -96,8 +92,6 @@ export class AlumniProfileDraft {
       skills: SkillList.from(input.skills).toArray(),
       portfolioUrl: input.portfolioUrl !== undefined ? input.portfolioUrl.trim() : undefined,
       gakuchika: input.gakuchika !== undefined ? input.gakuchika.trim() : undefined,
-      entryTrigger: input.entryTrigger !== undefined ? input.entryTrigger.trim() : undefined,
-      interviewTip: input.interviewTip !== undefined ? input.interviewTip.trim() : undefined,
       usefulCoursework:
         input.usefulCoursework !== undefined ? input.usefulCoursework.trim() : undefined,
     });

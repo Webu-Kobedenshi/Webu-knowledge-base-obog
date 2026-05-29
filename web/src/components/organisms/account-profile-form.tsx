@@ -61,8 +61,6 @@ type AccountProfileFormState = {
   skills: string[];
   portfolioUrl: string;
   gakuchika: string;
-  entryTrigger: string;
-  interviewTip: string;
   usefulCoursework: string;
 };
 
@@ -114,8 +112,6 @@ const defaultState: AccountProfileFormState = {
   skills: [],
   portfolioUrl: "",
   gakuchika: "",
-  entryTrigger: "",
-  interviewTip: "",
   usefulCoursework: "",
 };
 
@@ -326,8 +322,6 @@ export function AccountProfileForm({
     skills: initialProfile?.alumniProfile?.skills ?? [],
     portfolioUrl: initialProfile?.alumniProfile?.portfolioUrl ?? "",
     gakuchika: initialProfile?.alumniProfile?.gakuchika ?? "",
-    entryTrigger: initialProfile?.alumniProfile?.entryTrigger ?? "",
-    interviewTip: initialProfile?.alumniProfile?.interviewTip ?? "",
     usefulCoursework: initialProfile?.alumniProfile?.usefulCoursework ?? "",
   });
   const [companyRowIds, setCompanyRowIds] = useState<string[]>(() =>
@@ -545,8 +539,6 @@ export function AccountProfileForm({
           skills: state.skills.map((s) => s.trim()).filter((s) => s.length > 0),
           portfolioUrl: state.portfolioUrl.trim(),
           gakuchika: state.gakuchika.trim(),
-          entryTrigger: state.entryTrigger,
-          interviewTip: state.interviewTip.trim(),
           usefulCoursework: state.usefulCoursework.trim(),
         }),
       });
@@ -1531,54 +1523,6 @@ export function AccountProfileForm({
                         onChange={(event) => setField("gakuchika", event.target.value)}
                         maxLength={200}
                         placeholder="例: We部のプロジェクトでReactを使ったサイト制作をリーダーとして行いました"
-                        disabled={!canEditAlumniProfile}
-                      />
-                    </div>
-
-                    {/* Entry Trigger */}
-                    <label htmlFor="profile-entry-trigger" className="block space-y-1.5">
-                      <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
-                        内定企業へのエントリーのきっかけ
-                      </span>
-                      <Select
-                        value={state.entryTrigger || "UNSELECTED"}
-                        onValueChange={(val) =>
-                          setField("entryTrigger", val === "UNSELECTED" ? "" : val)
-                        }
-                        disabled={!canEditAlumniProfile}
-                      >
-                        <SelectTrigger id="profile-entry-trigger">
-                          <SelectValue placeholder="選択してください" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="UNSELECTED">選択してください</SelectItem>
-                          <SelectItem value="学校求人">学校求人</SelectItem>
-                          <SelectItem value="逆求人・スカウト">逆求人・スカウト</SelectItem>
-                          <SelectItem value="就活サイト">就活サイト</SelectItem>
-                          <SelectItem value="インターン経由">インターン経由</SelectItem>
-                          <SelectItem value="OB/OG紹介">OB/OG紹介</SelectItem>
-                          <SelectItem value="その他">その他</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </label>
-
-                    {/* Interview Tip */}
-                    <div className="space-y-1.5">
-                      <div className="flex items-baseline justify-between">
-                        <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
-                          面接のワンポイント
-                        </span>
-                        <p
-                          className={`text-[10px] ${state.interviewTip.length >= 200 ? "text-rose-500" : "text-stone-400 dark:text-stone-500"}`}
-                        >
-                          {state.interviewTip.length}/200
-                        </p>
-                      </div>
-                      <Textarea
-                        value={state.interviewTip}
-                        onChange={(event) => setField("interviewTip", event.target.value)}
-                        maxLength={200}
-                        placeholder="例: ポートフォリオを持参して、実際に動くものを見せると話が弾みました"
                         disabled={!canEditAlumniProfile}
                       />
                     </div>

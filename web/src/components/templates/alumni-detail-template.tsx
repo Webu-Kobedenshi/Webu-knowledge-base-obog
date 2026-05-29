@@ -58,15 +58,6 @@ const departmentGradient: Partial<Record<AlumniProfile["department"], string>> =
   OTHERS: "from-gray-500 to-slate-500",
 };
 
-const entryTriggerLabel: Record<string, string> = {
-  学校求人: "🏫 学校求人",
-  "逆求人・スカウト": "📩 逆求人・スカウト",
-  就活サイト: "🌐 就活サイト",
-  インターン経由: "💼 インターン経由",
-  "OB/OG紹介": "🤝 OB/OG紹介",
-  その他: "📝 その他",
-};
-
 const selectionStepKindLabel: Record<string, string> = {
   DOCUMENT_SCREENING: "書類選考",
   WEB_TEST: "Webテスト",
@@ -111,12 +102,7 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
   ).length;
   const canContact = alumni.acceptContact && Boolean(alumni.contactEmail);
   const hasDeepDive =
-    alumni.skills.length > 0 ||
-    alumni.portfolioUrl ||
-    alumni.gakuchika ||
-    alumni.entryTrigger ||
-    alumni.interviewTip ||
-    alumni.usefulCoursework;
+    alumni.skills.length > 0 || alumni.portfolioUrl || alumni.gakuchika || alumni.usefulCoursework;
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-2xl px-4 py-6 md:px-6 md:py-10">
@@ -197,7 +183,8 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
                 {displayName}
               </h1>
               <p className="mt-0.5 text-[13px] text-stone-500 dark:text-stone-400">
-                {departmentLabel[alumni.department]} · {alumni.graduationYear}年卒
+                {departmentLabel[alumni.department]} · {alumni.graduationYear}
+                年卒
               </p>
             </div>
           </div>
@@ -447,38 +434,6 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
               <p className="mt-3 break-words whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
                 {alumni.gakuchika}
               </p>
-            </section>
-          ) : null}
-
-          {/* 就活の戦術 */}
-          {alumni.entryTrigger || alumni.interviewTip ? (
-            <section className="rounded-2xl border border-stone-200/90 bg-white p-5 shadow-[0_8px_24px_-18px_rgba(0,0,0,0.15)] dark:border-stone-800/80 dark:bg-stone-900/40">
-              <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-sm dark:bg-emerald-900/40">
-                  🎯
-                </span>
-                <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100">就活の戦術</h2>
-              </div>
-              {alumni.entryTrigger ? (
-                <div className="mt-3">
-                  <p className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
-                    内定企業へのエントリーのきっかけ
-                  </p>
-                  <p className="mt-1 inline-flex rounded-lg bg-emerald-50 px-3 py-1.5 text-[13px] font-semibold text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300">
-                    {entryTriggerLabel[alumni.entryTrigger] ?? alumni.entryTrigger}
-                  </p>
-                </div>
-              ) : null}
-              {alumni.interviewTip ? (
-                <div className="mt-4">
-                  <p className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
-                    面接のワンポイント
-                  </p>
-                  <p className="mt-1.5 break-words whitespace-pre-wrap rounded-xl border border-stone-100 bg-stone-50/60 p-3 text-[13px] leading-relaxed text-stone-700 dark:border-stone-800/60 dark:bg-stone-900/30 dark:text-stone-300">
-                    💡 {alumni.interviewTip}
-                  </p>
-                </div>
-              ) : null}
             </section>
           ) : null}
 

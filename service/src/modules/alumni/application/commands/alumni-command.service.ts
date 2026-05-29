@@ -78,8 +78,6 @@ export class AlumniCommandService {
       skills: normalized.skills,
       portfolioUrl: normalized.portfolioUrl,
       gakuchika: normalized.gakuchika,
-      entryTrigger: normalized.entryTrigger,
-      interviewTip: normalized.interviewTip,
       usefulCoursework: normalized.usefulCoursework,
     });
   }

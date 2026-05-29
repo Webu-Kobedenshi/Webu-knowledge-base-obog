@@ -222,8 +222,6 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
         {/* ── Detail Link ── */}
         {alumni.skills.length > 0 ||
         alumni.gakuchika ||
-        alumni.interviewTip ||
-        alumni.entryTrigger ||
         alumni.usefulCoursework ||
         alumni.portfolioUrl ||
         selectionExperienceCount > 0 ? (

@@ -78,8 +78,6 @@ export type AlumniProfile = {
   skills: string[];
   portfolioUrl: string | null;
   gakuchika: string | null;
-  entryTrigger: string | null;
-  interviewTip: string | null;
   usefulCoursework: string | null;
   isPublic: boolean;
   acceptContact: boolean;

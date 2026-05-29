@@ -101,8 +101,6 @@ describe("AlumniQueryService", () => {
         skills: [],
         portfolioUrl: null,
         gakuchika: null,
-        entryTrigger: null,
-        interviewTip: null,
         usefulCoursework: null,
         isPublic: true,
         acceptContact: true,

@@ -74,8 +74,6 @@ const getMyProfileQuery = `
         skills
         portfolioUrl
         gakuchika
-        entryTrigger
-        interviewTip
         usefulCoursework
         createdAt
         updatedAt
