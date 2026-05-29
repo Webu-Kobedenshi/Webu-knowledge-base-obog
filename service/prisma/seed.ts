@@ -44,6 +44,8 @@ type SeedAlumni = {
   gakuchika?: string;
   usefulCoursework?: string;
   acceptContact: boolean;
+  xUrl?: string;
+  instagramUrl?: string;
 };
 
 type SeedTrack = "engineering" | "game" | "creative" | "sound" | "construction" | "business";
@@ -781,6 +783,8 @@ function buildSeedAlumni() {
         gakuchika: buildGakuchika(plan.track, index, rng),
         usefulCoursework: buildCoursework(plan.track, index, rng),
         acceptContact: rng() > 0.28,
+        xUrl: `https://x.com/${emailLocal.replaceAll(".", "_")}`,
+        instagramUrl: `https://www.instagram.com/${emailLocal.replaceAll(".", "_")}/`,
       });
 
       globalIndex += 1;
@@ -836,6 +840,8 @@ async function main() {
               department: alumni.department,
               remarks: alumni.remarks,
               contactEmail: email,
+              xUrl: alumni.acceptContact ? alumni.xUrl : undefined,
+              instagramUrl: alumni.acceptContact ? alumni.instagramUrl : undefined,
               isPublic: true,
               acceptContact: alumni.acceptContact,
               skills: alumni.skills,

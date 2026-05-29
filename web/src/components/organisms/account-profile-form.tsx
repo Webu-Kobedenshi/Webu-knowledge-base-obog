@@ -57,6 +57,8 @@ type AccountProfileFormState = {
   selectionExperiences: SelectionExperienceFormState[];
   remarks: string;
   contactEmail: string;
+  xUrl: string;
+  instagramUrl: string;
   isPublic: boolean;
   acceptContact: boolean;
   skills: string[];
@@ -107,6 +109,8 @@ const defaultState: AccountProfileFormState = {
   selectionExperiences: [],
   remarks: "",
   contactEmail: "",
+  xUrl: "",
+  instagramUrl: "",
   isPublic: false,
   acceptContact: false,
   skills: [],
@@ -124,7 +128,6 @@ const selectionStepOptions: Array<{ value: SelectionStepKind; label: string }> =
   { value: "FIRST_INTERVIEW", label: "一次面接" },
   { value: "SECOND_INTERVIEW", label: "二次面接" },
   { value: "FINAL_INTERVIEW", label: "最終面接" },
-  { value: "OFFER", label: "内定" },
   { value: "OTHER", label: "その他" },
 ];
 
@@ -146,7 +149,6 @@ const defaultSelectionStepOrder: SelectionStepKind[] = [
   "FIRST_INTERVIEW",
   "SECOND_INTERVIEW",
   "FINAL_INTERVIEW",
-  "OFFER",
 ];
 
 const departmentOptions: Array<{ value: Department; label: string }> = [
@@ -275,14 +277,15 @@ export function AccountProfileForm({
     if (!experience) {
       return createBlankSelectionExperience();
     }
+    const editableSteps = experience.steps.filter((step) => step.stepKind !== "OFFER");
 
     return {
       enabled: true,
       entryTrigger: experience.entryTrigger ?? "",
       overallTip: experience.overallTip ?? "",
       steps:
-        experience.steps.length > 0
-          ? experience.steps.map((step) => ({
+        editableSteps.length > 0
+          ? editableSteps.map((step) => ({
               stepKind: step.stepKind,
               format: step.format,
               interviewerCount:
@@ -324,6 +327,8 @@ export function AccountProfileForm({
     selectionExperiences: initialSelectionExperiences,
     remarks: initialProfile?.alumniProfile?.remarks ?? "",
     contactEmail: initialProfile?.alumniProfile?.contactEmail ?? initialEmail ?? "",
+    xUrl: initialProfile?.alumniProfile?.xUrl ?? "",
+    instagramUrl: initialProfile?.alumniProfile?.instagramUrl ?? "",
     isPublic: initialIsPublic,
     acceptContact: initialProfile?.alumniProfile?.acceptContact ?? false,
     skills: initialProfile?.alumniProfile?.skills ?? [],
@@ -524,6 +529,18 @@ export function AccountProfileForm({
       return false;
     }
 
+    if (
+      showPublicProfileFields &&
+      isPublicToSave &&
+      state.acceptContact &&
+      !state.xUrl.trim() &&
+      !state.instagramUrl.trim()
+    ) {
+      const msg = "連絡を受け付ける場合はXまたはInstagramのリンクを入力してください。";
+      showErrorToast(msg);
+      return false;
+    }
+
     setIsSaving(true);
 
     try {
@@ -543,6 +560,8 @@ export function AccountProfileForm({
           companyExperiences: normalizedCompanyExperiences,
           remarks: state.remarks,
           contactEmail: normalizedContactEmail,
+          xUrl: state.xUrl.trim(),
+          instagramUrl: state.instagramUrl.trim(),
           isPublic: isPublicToSave,
           acceptContact: isPublicToSave ? state.acceptContact : false,
           skills: state.skills.map((s) => s.trim()).filter((s) => s.length > 0),
@@ -946,7 +965,7 @@ export function AccountProfileForm({
                 <hr className="border-stone-100 dark:border-stone-800/60" />
 
                 {/* Nickname & Contact */}
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
                   <label htmlFor="profile-nickname" className="space-y-1.5">
                     <span className="flex items-center justify-between text-[11px] font-semibold text-stone-500 dark:text-stone-400">
                       <span>
@@ -967,9 +986,9 @@ export function AccountProfileForm({
                     />
                   </label>
 
-                  <label htmlFor="profile-contact-email" className="space-y-1.5">
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between text-[11px] font-semibold text-stone-500 dark:text-stone-400">
-                      <span>連絡先メールアドレス</span>
+                      <span>SNSリンク</span>
 
                       {/* Contact Toggle Inline */}
                       <label className="flex cursor-pointer items-center gap-1.5">
@@ -988,15 +1007,29 @@ export function AccountProfileForm({
                       </label>
                     </div>
                     <Input
-                      id="profile-contact-email"
-                      value={state.contactEmail}
-                      onChange={(event) => setField("contactEmail", event.target.value)}
-                      placeholder="example@st.kobedenshi.ac.jp"
-                      type="email"
+                      id="profile-x-dm-url"
+                      value={state.xUrl}
+                      onChange={(event) => setField("xUrl", event.target.value)}
+                      placeholder="Xのリンク"
+                      type="url"
+                      aria-label="Xのリンク"
                       disabled={!canEditAlumniProfile || !state.acceptContact}
                       className={!state.acceptContact ? "opacity-50" : ""}
                     />
-                  </label>
+                    <Input
+                      id="profile-instagram-dm-url"
+                      value={state.instagramUrl}
+                      onChange={(event) => setField("instagramUrl", event.target.value)}
+                      placeholder="Instagramのリンク"
+                      type="url"
+                      aria-label="Instagramのリンク"
+                      disabled={!canEditAlumniProfile || !state.acceptContact}
+                      className={!state.acceptContact ? "opacity-50" : ""}
+                    />
+                    <p className="text-[10px] leading-relaxed text-stone-400 dark:text-stone-500">
+                      一覧・詳細の連絡ボタンから、設定したSNSリンクへ遷移します。
+                    </p>
+                  </div>
                 </div>
 
                 <hr className="border-stone-100 dark:border-stone-800/60" />

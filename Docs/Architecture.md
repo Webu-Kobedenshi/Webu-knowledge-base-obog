@@ -82,6 +82,7 @@
 - 学科ごとの色は `web/src/lib/department-theme.ts` に集約し、一覧カード・詳細ヒーロー・アバター代替表示で同一の色を使う
 - 学科カラーはプロフィール画像に左右されない固定背景として扱い、ヒーロー背景にアバター画像を混ぜない
 - 一覧カードは企業数や連絡可否の違いで主要CTAの位置が大きくずれないよう、カード本文を縦方向に揃える
+- 連絡CTAは公開プロフィールで設定されたX/Instagramリンクへ遷移し、メールアドレスを直接のユーザー導線にしない
 - 選考ステップは「選考種別」を見出しにし、同じ内容のバッジを重複表示しない
 - 入力フォームは自由記述を増やしすぎず、面接官人数など集計・比較しやすい項目は選択式にする
 
@@ -90,6 +91,9 @@
 ### 4.1 Layered Architecture, CQRS, and Light DDD
 
 レイヤードアーキテクチャ + CQRS を基本に、重要ユースケースから段階的に DDD を適用する（Light DDD）。
+
+- 公開プロフィール更新は Command として扱い、SNSリンクのURL正規化・許可ホスト判定は Domain の値オブジェクトで行う
+- 一覧・詳細取得は Query として扱い、Application は Repository Port から読み取りモデルを受け取る
 現時点の最優先ユースケースは `updateAlumniProfile`。
 
 **Presentation Layer**
@@ -135,6 +139,7 @@
 - `AlumniCompany` は任意で1つの `SelectionExperience` を持つ
 - `SelectionExperience` は複数の `SelectionStep` を `sortOrder` 順に持つ
 - `SelectionStep` は選考種別、実施形式、面接官人数、所要時間、質問、雰囲気、準備内容を持つ
+- `SelectionStep` は面接・試験・課題などの具体的な接点を表し、内定そのものは選択肢として扱わない
 - `SelectionStep` に補足名は持たせない。表示名は `stepKind` から導出し、後輩が読む本文情報へ入力負荷を寄せる
 
 ### 4.4 Storage Boundary

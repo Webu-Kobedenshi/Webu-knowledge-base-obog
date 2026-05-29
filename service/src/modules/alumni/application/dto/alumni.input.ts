@@ -16,6 +16,8 @@ export type UpdateAlumniProfileInput = {
   companyExperiences?: CompanyExperienceInput[];
   remarks?: string;
   contactEmail?: string;
+  xUrl?: string;
+  instagramUrl?: string;
   isPublic?: boolean;
   acceptContact?: boolean;
   skills?: string[];

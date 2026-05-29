@@ -1,6 +1,8 @@
 "use client";
 
+import { SocialContactIcon } from "@/components/atoms/social-contact-icon";
 import type { AlumniProfile } from "@/graphql/types";
+import { getAlumniContactClassName, getAlumniContactLinks } from "@/lib/alumni-contact";
 import { departmentGradient } from "@/lib/department-theme";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -73,10 +75,13 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
   const selectedCompany =
     companyExperiences.find((company) => company.id === selectedCompanyId) ?? companyExperiences[0];
   const selectedExperience = selectedCompany?.selectionExperience ?? null;
+  const visibleSelectionSteps =
+    selectedExperience?.steps.filter((step) => step.stepKind !== "OFFER") ?? [];
   const companiesWithExperienceCount = companyExperiences.filter(
     (company) => company.selectionExperience,
   ).length;
-  const canContact = alumni.acceptContact && Boolean(alumni.contactEmail);
+  const contactLinks = getAlumniContactLinks(alumni);
+  const canContact = alumni.acceptContact && contactLinks.length > 0;
   const hasDeepDive =
     alumni.skills.length > 0 || alumni.portfolioUrl || alumni.gakuchika || alumni.usefulCoursework;
 
@@ -244,10 +249,10 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
 
             {selectedExperience ? (
               <div className="mt-4 space-y-4">
-                {selectedExperience.steps.length > 0 ? (
+                {visibleSelectionSteps.length > 0 ? (
                   <div className="relative space-y-3">
                     <div className="absolute bottom-4 left-[15px] top-4 w-px bg-stone-200 dark:bg-stone-700" />
-                    {selectedExperience.steps.map((step, index) => (
+                    {visibleSelectionSteps.map((step, index) => (
                       <div
                         key={step.id}
                         className="relative grid grid-cols-[32px_minmax(0,1fr)] gap-3"
@@ -272,7 +277,7 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
                             ) : null}
                             {step.durationMinutes ? (
                               <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
-                                {step.durationMinutes}分
+                                面接時間 {step.durationMinutes}分
                               </span>
                             ) : null}
                           </div>
@@ -424,27 +429,30 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
       {/* ── Contact CTA ── */}
       <div className="mt-6">
         {canContact ? (
-          <a
-            href={`mailto:${alumni.contactEmail}`}
-            className="group/cta flex w-full items-center justify-center gap-2 rounded-2xl bg-stone-900 px-5 py-3.5 text-[14px] font-bold text-white transition-all duration-200 hover:bg-stone-800 hover:shadow-lg active:scale-[0.98] dark:bg-white dark:text-stone-900 dark:hover:bg-stone-100"
-          >
-            <span>この先輩に話を聞いてみる</span>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="transition-transform group-hover/cta:translate-x-0.5"
-            >
-              <title>送信</title>
-              <line x1="22" y1="2" x2="11" y2="13" />
-              <polygon points="22 2 15 22 11 13 2 9 22 2" />
-            </svg>
-          </a>
+          <div className="space-y-2">
+            <p className="text-[11px] font-bold text-stone-400 dark:text-stone-500">
+              SNSで連絡する
+            </p>
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(0,1fr))] gap-2">
+              {contactLinks.map((contactLink) => (
+                <a
+                  key={contactLink.label}
+                  href={contactLink.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`${contactLink.label}で連絡する`}
+                  title={`${contactLink.label}で連絡する`}
+                  className={`group/cta flex min-w-0 items-center justify-center rounded-2xl px-4 py-3.5 transition-all duration-200 hover:shadow-lg active:scale-[0.98] ${getAlumniContactClassName(contactLink.label)}`}
+                >
+                  <SocialContactIcon
+                    platform={contactLink.label}
+                    size={18}
+                    className="shrink-0 transition-transform group-hover/cta:scale-110"
+                  />
+                </a>
+              ))}
+            </div>
+          </div>
         ) : (
           <div className="flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-stone-200 px-5 py-3.5 text-[13px] text-stone-400 dark:border-stone-800 dark:text-stone-600">
             <span>現在は連絡を受け付けていません</span>

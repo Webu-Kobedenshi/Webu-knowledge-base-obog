@@ -80,6 +80,8 @@ type AlumniProfile {
   companyExperiences: [CompanyExperience!]!
   remarks: String
   contactEmail: String
+  xUrl: String
+  instagramUrl: String
   avatarUrl: String
   skills: [String!]!
   portfolioUrl: String
@@ -131,6 +133,8 @@ input UpdateAlumniProfileInput {
   companyExperiences: [CompanyExperienceInput!]
   remarks: String
   contactEmail: String
+  xUrl: String
+  instagramUrl: String
   isPublic: Boolean
   acceptContact: Boolean
   skills: [String!]

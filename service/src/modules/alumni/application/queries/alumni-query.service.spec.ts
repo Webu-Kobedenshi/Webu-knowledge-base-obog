@@ -97,6 +97,8 @@ describe("AlumniQueryService", () => {
         ],
         remarks: null,
         contactEmail: "user@example.com",
+        xUrl: null,
+        instagramUrl: null,
         avatarUrl: null,
         skills: [],
         portfolioUrl: null,

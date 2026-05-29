@@ -3,12 +3,15 @@ import { DomainValidationError } from "../errors/domain-validation.error";
 import { CompanyNameCollection } from "../value-objects/company-name";
 import { EmailAddress } from "../value-objects/email";
 import { SkillList } from "../value-objects/skill-list";
+import { SocialContactUrl } from "../value-objects/social-contact-url";
 
 export type AlumniProfileDraftInput = {
   nickname?: string;
   companyNames: string[];
   companyExperiences?: CompanyExperienceDraftInput[];
   contactEmail?: string;
+  xUrl?: string;
+  instagramUrl?: string;
   isPublic?: boolean;
   acceptContact?: boolean;
   skills?: string[];
@@ -57,6 +60,8 @@ export type AlumniProfileDraftData = {
   companyNames: string[];
   companyExperiences?: CompanyExperienceDraftInput[];
   contactEmail: string;
+  xUrl?: string;
+  instagramUrl?: string;
   isPublic: boolean;
   acceptContact: boolean;
   skills: string[];
@@ -86,6 +91,8 @@ export class AlumniProfileDraft {
       companyNames,
       companyExperiences,
       contactEmail: EmailAddress.resolve(input.contactEmail, fallbackEmail).toString(),
+      xUrl: SocialContactUrl.optional(input.xUrl, "x"),
+      instagramUrl: SocialContactUrl.optional(input.instagramUrl, "instagram"),
       isPublic,
       acceptContact: isPublic ? acceptContact : false,
       skills: SkillList.from(input.skills).toArray(),
@@ -130,6 +137,17 @@ export class AlumniProfileDraft {
 
     if (this.data.isPublic && !this.data.nickname) {
       throw new DomainValidationError("nickname is required when isPublic is true");
+    }
+
+    if (
+      this.data.isPublic &&
+      this.data.acceptContact &&
+      !this.data.xUrl &&
+      !this.data.instagramUrl
+    ) {
+      throw new DomainValidationError(
+        "xUrl or instagramUrl is required when acceptContact is true",
+      );
     }
   }
 }

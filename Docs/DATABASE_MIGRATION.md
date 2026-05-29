@@ -24,6 +24,7 @@
 model AlumniProfile {
   // ... 既存フィールド
   avatarUrl    String?   // ← 例: NULLable カラム追加
+  xUrl         String?   // ← 例: 既存プロフィールを壊さないSNSリンク追加
 }
 ```
 

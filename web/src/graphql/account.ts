@@ -67,6 +67,8 @@ const getMyProfileQuery = `
         }
         remarks
         contactEmail
+        xUrl
+        instagramUrl
         avatarUrl
         isPublic
         acceptContact

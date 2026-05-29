@@ -27,6 +27,8 @@ export type AlumniProfileDto = {
   companyExperiences: CompanyExperienceDto[];
   remarks: string | null;
   contactEmail: string | null;
+  xUrl: string | null;
+  instagramUrl: string | null;
   avatarUrl: string | null;
   skills: string[];
   portfolioUrl: string | null;

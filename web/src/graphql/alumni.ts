@@ -56,6 +56,8 @@ const alumniListQuery = `
         }
         remarks
         contactEmail
+        xUrl
+        instagramUrl
         isPublic
         acceptContact
         skills
@@ -178,6 +180,8 @@ const alumniDetailQuery = `
       }
       remarks
       contactEmail
+      xUrl
+      instagramUrl
       isPublic
       acceptContact
       skills

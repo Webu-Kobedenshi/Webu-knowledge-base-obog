@@ -68,6 +68,8 @@ type Body = {
   companyExperiences?: CompanyExperienceBody[];
   remarks?: string;
   contactEmail?: string;
+  xUrl?: string;
+  instagramUrl?: string;
   isPublic?: boolean;
   acceptContact?: boolean;
   skills?: string[];
@@ -110,6 +112,8 @@ const updateAlumniProfileMutation = `
       }
       isPublic
       acceptContact
+      xUrl
+      instagramUrl
       skills
       portfolioUrl
       gakuchika
@@ -201,6 +205,8 @@ export async function POST(request: Request) {
       .map((item) => item.trim())
       .filter((item) => item.length > 0);
     const contactEmail = body.contactEmail?.trim() || session.user?.email || undefined;
+    const xUrl = body.xUrl?.trim() || undefined;
+    const instagramUrl = body.instagramUrl?.trim() || undefined;
     const isPublic = body.isPublic ?? false;
 
     if (isPublic && companyNames.length === 0) {
@@ -227,6 +233,8 @@ export async function POST(request: Request) {
           companyExperiences: body.companyExperiences,
           remarks: body.remarks,
           contactEmail,
+          xUrl,
+          instagramUrl,
           isPublic,
           acceptContact: isPublic ? body.acceptContact : false,
           skills: body.skills,

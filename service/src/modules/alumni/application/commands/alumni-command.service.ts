@@ -73,6 +73,8 @@ export class AlumniCommandService {
       companyNames: normalized.companyNames,
       companyExperiences: normalized.companyExperiences,
       contactEmail: normalized.contactEmail,
+      xUrl: normalized.xUrl,
+      instagramUrl: normalized.instagramUrl,
       isPublic: normalized.isPublic,
       acceptContact: normalized.acceptContact,
       skills: normalized.skills,
@@ -125,7 +127,7 @@ export class AlumniCommandService {
       const key = this.storageService.extractKeyFromUrl(oldAvatarUrl);
       if (key) {
         this.storageService.deleteObject(key).catch((err: unknown) => {
-          console.error("[StorageService] Failed to delete old avatar:", key, err);
+          console.error("[StoragePort] Failed to delete old avatar:", key, err);
         });
       }
     }

@@ -94,7 +94,7 @@
   - **公開トグル**: ON にすると以下が入力・表示可能
   - プロフィール画像アップロード（MinIO/S3 署名付きURL方式）
   - 表示名（必須）
-  - 連絡先メールアドレス + 連絡受付トグル
+  - X / Instagram のリンク + 連絡受付トグル
   - 内定先・勤務先（複数登録可、公開時は1件以上必須）
   - 企業別の選考体験（任意）
   - 備考欄
@@ -142,7 +142,7 @@
 
 ### AlumniProfile
 - nickname, graduationYear, department, companyNames
-- remarks, contactEmail, avatarUrl
+- remarks, contactEmail（互換用）, xUrl, instagramUrl, avatarUrl
 - skills, portfolioUrl, gakuchika, usefulCoursework
 - isPublic, acceptContact
 - 1対多: AlumniCompany, AlumniImage
@@ -165,6 +165,7 @@
 - questions, atmosphere, preparation
 - sortOrder
 - 補足名は持たず、表示名は stepKind から導出する
+- 内定は選考ステップとして新規入力しない
 
 ---
 
@@ -188,6 +189,7 @@
 - **学科別カラー**: 学科ごとに固定したグラデーションカラーを一覧・詳細で一貫適用
 - **情報密度の調整**: 重複バッジを減らし、選考体験の本文情報を読みやすく配置
 - **安定したカードレイアウト**: 企業数や連絡可否が違っても主要CTAの位置が大きくずれない
+- **外部SNS連絡導線**: 連絡CTAは設定済みのX/Instagramリンクへ遷移し、未設定時は受付不可表示にする
 - **Progressive Disclosure**: 公開プロフィール設定は非公開時にブラー表示
 - **レスポンシブ対応**: モバイル〜デスクトップまで最適化されたレイアウト
 - **Atomic Design**: atoms → molecules → organisms → templates のコンポーネント階層

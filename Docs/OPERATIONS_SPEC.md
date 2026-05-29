@@ -44,6 +44,8 @@
 - `nickname`
 - `remarks`
 - `contactEmail`
+- `xUrl`
+- `instagramUrl`
 - `isPublic`
 - `acceptContact`
 - `skills`
@@ -53,9 +55,13 @@
 
 運用ルール:
 
+- `acceptContact=true` の公開プロフィールは、原則として `xUrl` または `instagramUrl` のどちらかを設定する
+- SNSリンクはX（`x.com` / `twitter.com`）またはInstagram（`instagram.com` / `ig.me`）のURLとしてDomain層で検証する
+
 - `isPublic=true` の場合、`companyNames` は1件以上必須
 - 選考体験は企業ごとに任意登録とし、全ての内定先に入力する必要はない
 - 選考ステップは `stepKind` を見出しとして扱い、補足名は保持しない
+- 内定は選考ステップとして新規入力せず、面接・試験・課題など後輩が準備に使える接点だけを登録する
 - 面接官人数は `1 / 2 / 3 / その他` の選択式で扱い、保存上は `4以上` を「その他 / 複数人」として表示する
 - 画像は `getUploadUrl` で署名付きURLを取得し、アップロード後 `updateAvatar` でURLを保存
 - 署名付きアップロードURLはブラウザから到達可能な `PUBLIC_ENDPOINT` で生成し、サーバー内部のS3操作は `ENDPOINT` を使う

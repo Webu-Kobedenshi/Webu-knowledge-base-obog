@@ -41,6 +41,8 @@ query GetAlumniList(
       }
       remarks
       contactEmail
+      xUrl
+      instagramUrl
       isPublic
       acceptContact
       avatarUrl

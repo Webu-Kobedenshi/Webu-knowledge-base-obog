@@ -1,4 +1,6 @@
+import { SocialContactIcon } from "@/components/atoms/social-contact-icon";
 import type { AlumniProfile } from "@/graphql/types";
+import { getAlumniContactClassName, getAlumniContactLinks } from "@/lib/alumni-contact";
 import { departmentGradient } from "@/lib/department-theme";
 import Link from "next/link";
 
@@ -39,13 +41,14 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
   const selectionExperienceCount = alumni.companyExperiences.filter(
     (company) => company.selectionExperience,
   ).length;
-  const canContact = alumni.acceptContact && Boolean(alumni.contactEmail);
+  const contactLinks = getAlumniContactLinks(alumni);
+  const canContact = alumni.acceptContact && contactLinks.length > 0;
   const displayName = alumni.nickname ?? "匿名";
 
   return (
     <article className="alumni-card group relative isolate overflow-hidden rounded-3xl border border-stone-200 bg-white transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_20px_60px_-12px_rgba(0,0,0,0.15)] dark:border-stone-800 dark:bg-stone-950 dark:hover:shadow-[0_20px_60px_-12px_rgba(0,0,0,0.5)]">
       {/* ── Hero zone ── */}
-      <div className="relative h-28 overflow-hidden">
+      <div className="relative h-24 overflow-hidden">
         {/* Gradient background — always present */}
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-90`} />
         {/* Decorative light effects */}
@@ -62,7 +65,7 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
           <span className="absolute left-[88%] top-[25%] h-1.5 w-1.5 rounded-full bg-white/40 blur-[0.5px]" />
         </div>
         {/* Celebration badge — floats in hero zone */}
-        <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold tracking-wide text-amber-700 shadow-sm backdrop-blur-md dark:bg-black/50 dark:text-amber-200">
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold tracking-wide text-amber-700 shadow-sm backdrop-blur-md dark:bg-black/50 dark:text-amber-200">
           🎉 内定おめでとう！
         </span>
         {/* Department tag */}
@@ -72,18 +75,18 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
       </div>
 
       {/* ── Avatar row (overlapping hero/body) ── */}
-      <div className="relative z-10 -mt-10 flex items-end justify-between px-4">
+      <div className="relative z-10 -mt-8 flex items-start justify-between gap-3 px-4">
         {/* Avatar */}
         <div className="relative inline-block">
           {alumni.avatarUrl ? (
             <img
               src={alumni.avatarUrl}
               alt={`${displayName}のプロフィール画像`}
-              className="h-20 w-20 rounded-2xl border-[3px] border-white object-cover shadow-lg transition-transform duration-300 group-hover:scale-105 dark:border-stone-900"
+              className="h-16 w-16 rounded-xl border-[3px] border-white object-cover shadow-lg transition-transform duration-300 group-hover:scale-105 dark:border-stone-900"
             />
           ) : (
             <div
-              className={`flex h-20 w-20 items-center justify-center rounded-2xl border-[3px] border-white bg-gradient-to-br ${gradient} text-2xl font-extrabold text-white shadow-lg dark:border-stone-900`}
+              className={`flex h-16 w-16 items-center justify-center rounded-xl border-[3px] border-white bg-gradient-to-br ${gradient} text-xl font-extrabold text-white shadow-lg dark:border-stone-900`}
             >
               {initial}
             </div>
@@ -107,19 +110,18 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
           ) : null}
         </div>
 
-        {/* Skill tags — right side of avatar row */}
         {alumni.skills.length > 0 ? (
-          <div className="ml-3 flex min-w-0 flex-1 flex-col justify-end pb-0.5">
-            <div className="ml-auto flex max-w-full flex-col items-start gap-0.5">
-              <span className="shrink-0 text-[10px] font-semibold text-stone-400 dark:text-stone-500">
-                ⚔️ 就活武器
+          <div className="flex min-w-0 flex-1 justify-end pt-10">
+            <div className="flex max-w-full flex-col items-start gap-1">
+              <span className="shrink-0 text-[10px] font-bold text-stone-400 dark:text-stone-500">
+                就活武器
               </span>
-              <div className="flex w-full min-w-0 flex-nowrap justify-start gap-1 overflow-hidden">
+              <div className="flex max-w-full flex-wrap justify-start gap-1">
                 {alumni.skills.slice(0, 3).map((skill) => (
                   <span
                     key={skill}
                     title={skill}
-                    className="min-w-0 shrink truncate rounded-md bg-violet-100/80 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700 dark:bg-violet-900/30 dark:text-violet-300"
+                    className="min-w-0 max-w-20 shrink truncate rounded-md bg-violet-100/80 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700 dark:bg-violet-900/30 dark:text-violet-300"
                   >
                     {skill}
                   </span>
@@ -131,7 +133,7 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
       </div>
 
       {/* ── Body ── */}
-      <div className="relative px-4 pb-4 pt-2.5">
+      <div className="relative px-4 pb-3 pt-2">
         {/* Name + year */}
         <div className="flex items-baseline gap-2">
           <h3 className="truncate text-[15px] font-bold text-stone-900 dark:text-stone-100">
@@ -143,12 +145,12 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
         </div>
 
         {/* ── Company — the centerpiece ── */}
-        <div className="mt-3">
-          <p className="text-[22px] font-extrabold leading-tight tracking-tight text-stone-900 dark:text-stone-100">
+        <div className="mt-2">
+          <p className="text-[20px] font-extrabold leading-tight tracking-tight text-stone-900 dark:text-stone-100">
             {primaryCompany}
           </p>
           {otherCompanies.length > 0 ? (
-            <div className="mt-2 flex flex-wrap gap-1.5">
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
               {otherCompanies.slice(0, 2).map((name) => (
                 <span
                   key={name}
@@ -162,7 +164,7 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
         </div>
 
         {/* ── Remarks as personal quote ── */}
-        <p className="mt-3 line-clamp-2 border-l-2 border-stone-200 pl-2.5 text-[12px] leading-relaxed text-stone-500 dark:border-stone-700 dark:text-stone-400">
+        <p className="mt-2 line-clamp-2 border-l-2 border-stone-200 pl-2.5 text-[12px] leading-relaxed text-stone-500 dark:border-stone-700 dark:text-stone-400">
           {alumni.remarks ? (
             alumni.remarks
           ) : (
@@ -178,7 +180,7 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
         selectionExperienceCount > 0 ? (
           <Link
             href={`/alumni/${alumni.id}`}
-            className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-violet-600 transition-colors hover:text-violet-800 dark:text-violet-400 dark:hover:text-violet-300"
+            className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-violet-600 transition-colors hover:text-violet-800 dark:text-violet-400 dark:hover:text-violet-300"
           >
             <span>詳しく見る</span>
             <svg
@@ -198,31 +200,34 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
         ) : null}
 
         {/* ── Contact CTA ── */}
-        <div className="mt-4">
+        <div className="mt-3">
           {canContact ? (
-            <a
-              href={`mailto:${alumni.contactEmail}`}
-              className="group/cta flex w-full items-center justify-center gap-2 rounded-xl bg-stone-900 px-4 py-2.5 text-[12px] font-semibold text-white transition-all duration-200 hover:bg-stone-800 hover:shadow-lg active:scale-[0.98] dark:bg-white dark:text-stone-900 dark:hover:bg-stone-100"
-            >
-              <span>この先輩に話を聞いてみる</span>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="transition-transform group-hover/cta:translate-x-0.5"
-              >
-                <title>送信</title>
-                <line x1="22" y1="2" x2="11" y2="13" />
-                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-              </svg>
-            </a>
+            <div className="space-y-1">
+              <p className="text-[10px] font-semibold text-stone-400 dark:text-stone-500">
+                SNSで連絡する
+              </p>
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(0,1fr))] gap-2">
+                {contactLinks.map((contactLink) => (
+                  <a
+                    key={contactLink.label}
+                    href={contactLink.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${contactLink.label}で連絡する`}
+                    title={`${contactLink.label}で連絡する`}
+                    className={`group/cta flex min-w-0 items-center justify-center rounded-xl px-3 py-2 transition-all duration-200 hover:shadow-lg active:scale-[0.98] ${getAlumniContactClassName(contactLink.label)}`}
+                  >
+                    <SocialContactIcon
+                      platform={contactLink.label}
+                      size={16}
+                      className="shrink-0 transition-transform group-hover/cta:scale-110"
+                    />
+                  </a>
+                ))}
+              </div>
+            </div>
           ) : (
-            <div className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-stone-200 px-4 py-2.5 text-[11px] text-stone-400 dark:border-stone-800 dark:text-stone-600">
+            <div className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-stone-200 px-4 py-2 text-[11px] text-stone-400 dark:border-stone-800 dark:text-stone-600">
               <span>現在は連絡を受け付けていません</span>
             </div>
           )}
