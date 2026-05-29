@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/atoms/button";
+import { Card } from "@/components/atoms/card";
 import { Input } from "@/components/atoms/input";
 import {
   Select,
@@ -813,7 +814,7 @@ export function AccountProfileForm({
       {showPublicProfileFields ? (
         <>
           {/* ─── Section 3: 公開プロフィール設定 (Progressive Disclosure) ─── */}
-          <section className="overflow-hidden rounded-2xl border border-stone-200/90 bg-white shadow-[0_8px_24px_-18px_rgba(0,0,0,0.25)] dark:border-stone-800/80 dark:bg-stone-900/40">
+          <Card className="gap-0 overflow-hidden border-stone-200/90 bg-white p-0 shadow-[0_8px_24px_-18px_rgba(0,0,0,0.25)] dark:border-stone-800/80 dark:bg-stone-900/40">
             {/* Header Area with Toggle */}
             <div className="flex flex-col gap-4 border-b border-stone-100 bg-stone-50/50 p-5 dark:border-stone-800/60 dark:bg-stone-900/20 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-3 sm:items-center">
@@ -943,14 +944,15 @@ export function AccountProfileForm({
                           写真を選択
                         </label>
 
-                        <button
+                        <Button
                           type="button"
                           onClick={handleAvatarUpload}
                           disabled={isUploadingAvatar || !selectedAvatarFile || !state.isPublic}
-                          className="inline-flex h-9 w-full items-center justify-center rounded-lg bg-stone-900 px-3 text-xs font-bold text-white transition-colors hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-stone-200"
+                          variant="secondary"
+                          className="h-9 w-full px-3 text-xs font-bold disabled:opacity-40"
                         >
                           {isUploadingAvatar ? "アップロード中…" : "アップロード"}
-                        </button>
+                        </Button>
                       </div>
 
                       {selectedAvatarFile ? (
@@ -1082,11 +1084,13 @@ export function AccountProfileForm({
                                   : ""
                               }
                             />
-                            <button
+                            <Button
                               type="button"
                               onClick={() => removeCompanyNameField(index)}
                               disabled={!canEditAlumniProfile}
-                              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-stone-400 transition-colors hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-rose-900/20 dark:hover:text-rose-400"
+                              variant="ghost"
+                              size="icon"
+                              className="h-9 w-9 shrink-0 text-stone-400 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-40 dark:hover:bg-rose-900/20 dark:hover:text-rose-400"
                               title="削除"
                             >
                               <svg
@@ -1104,7 +1108,7 @@ export function AccountProfileForm({
                                 <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
                                 <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
                               </svg>
-                            </button>
+                            </Button>
                           </div>
 
                           <label className="mt-3 flex cursor-pointer items-center justify-between gap-3 rounded-xl bg-stone-50 px-3 py-2 dark:bg-stone-900/60">
@@ -1158,14 +1162,16 @@ export function AccountProfileForm({
                                   <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
                                     選考フロー
                                   </span>
-                                  <button
+                                  <Button
                                     type="button"
                                     onClick={() => addSelectionStep(index)}
                                     disabled={!canEditAlumniProfile}
-                                    className="inline-flex h-8 items-center rounded-lg border border-emerald-200 bg-white px-3 text-[11px] font-bold text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-40 dark:border-emerald-800 dark:bg-stone-900 dark:text-emerald-300"
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 border-emerald-200 px-3 text-[11px] font-bold text-emerald-700 hover:bg-emerald-50 disabled:opacity-40 dark:border-emerald-800 dark:text-emerald-300"
                                   >
                                     ステップ追加
-                                  </button>
+                                  </Button>
                                 </div>
 
                                 {experience.steps.map((step, stepIndex) => {
@@ -1304,15 +1310,16 @@ export function AccountProfileForm({
                                       />
                                       <div className="flex items-center justify-end gap-2">
                                         {isDeletePending ? (
-                                          <button
+                                          <Button
                                             type="button"
                                             onClick={() => setPendingStepDeleteKey(null)}
-                                            className="text-[11px] font-semibold text-stone-400 transition hover:text-stone-600"
+                                            variant="link"
+                                            className="text-[11px] font-semibold text-stone-400 hover:text-stone-600"
                                           >
                                             やめる
-                                          </button>
+                                          </Button>
                                         ) : null}
-                                        <button
+                                        <Button
                                           type="button"
                                           onClick={() => {
                                             if (isDeletePending) {
@@ -1322,7 +1329,9 @@ export function AccountProfileForm({
                                             setPendingStepDeleteKey(deleteKey);
                                           }}
                                           disabled={!canEditAlumniProfile}
-                                          className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition disabled:opacity-40 ${
+                                          variant={isDeletePending ? "destructive" : "ghost"}
+                                          size="sm"
+                                          className={`h-auto px-2.5 py-1 text-[11px] font-semibold disabled:opacity-40 ${
                                             isDeletePending
                                               ? "bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/20 dark:text-rose-300"
                                               : "text-stone-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/20"
@@ -1331,7 +1340,7 @@ export function AccountProfileForm({
                                           {isDeletePending
                                             ? "もう一度押して削除"
                                             : "このステップを削除"}
-                                        </button>
+                                        </Button>
                                       </div>
                                     </div>
                                   );
@@ -1356,11 +1365,12 @@ export function AccountProfileForm({
                     })}
                   </div>
 
-                  <button
+                  <Button
                     type="button"
                     onClick={addCompanyNameField}
                     disabled={!canEditAlumniProfile}
-                    className="mt-2 inline-flex h-9 items-center gap-1.5 rounded-xl border border-dashed border-stone-300 px-4 text-xs font-semibold text-stone-600 transition-all hover:border-stone-400 hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-stone-600 dark:text-stone-400 dark:hover:border-stone-500 dark:hover:bg-stone-800"
+                    variant="outline"
+                    className="mt-2 h-9 gap-1.5 border-dashed border-stone-300 px-4 text-xs font-semibold text-stone-600 hover:border-stone-400 disabled:opacity-40 dark:border-stone-600 dark:text-stone-400 dark:hover:border-stone-500"
                   >
                     <svg
                       width="14"
@@ -1377,7 +1387,7 @@ export function AccountProfileForm({
                       <path d="M5 12h14" />
                     </svg>
                     内定先・勤務先を追加
-                  </button>
+                  </Button>
                 </div>
 
                 <hr className="border-stone-100 dark:border-stone-800/60" />
@@ -1408,10 +1418,11 @@ export function AccountProfileForm({
 
                 {/* ── 後輩へのアドバイス (Deep Dive) ── */}
                 <div className="space-y-5">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setDeepDiveOpen((prev) => !prev)}
-                    className="flex w-full items-center gap-2 text-left"
+                    variant="ghost"
+                    className="flex h-auto w-full items-center gap-2 p-0 text-left hover:bg-transparent dark:hover:bg-transparent"
                   >
                     <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-sm dark:bg-amber-900/40">
                       💡
@@ -1438,7 +1449,7 @@ export function AccountProfileForm({
                       <title>{deepDiveOpen ? "閉じる" : "開く"}</title>
                       <path d="m6 9 6 6 6-6" />
                     </svg>
-                  </button>
+                  </Button>
 
                   {/* Collapsible content */}
                   <div
@@ -1463,7 +1474,7 @@ export function AccountProfileForm({
                             className="inline-flex items-center gap-1 rounded-lg bg-violet-100/80 px-2 py-1 text-[12px] font-semibold text-violet-700 dark:bg-violet-900/30 dark:text-violet-300"
                           >
                             {skill}
-                            <button
+                            <Button
                               type="button"
                               onClick={() => {
                                 setState((prev) => ({
@@ -1472,10 +1483,11 @@ export function AccountProfileForm({
                                 }));
                               }}
                               disabled={!canEditAlumniProfile}
+                              variant="link"
                               className="ml-0.5 text-violet-400 hover:text-violet-700 dark:text-violet-500 dark:hover:text-violet-200"
                             >
                               ×
-                            </button>
+                            </Button>
                           </span>
                         ))}
                       </div>
@@ -1507,7 +1519,7 @@ export function AccountProfileForm({
                               }
                             }}
                           />
-                          <button
+                          <Button
                             type="button"
                             onClick={() => {
                               const value = skillInput.trim().slice(0, 15);
@@ -1524,10 +1536,11 @@ export function AccountProfileForm({
                               }
                             }}
                             disabled={!canEditAlumniProfile}
-                            className="shrink-0 rounded-lg border border-stone-300 px-3 text-xs font-semibold text-stone-600 transition-colors hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-stone-700 dark:text-stone-400 dark:hover:bg-stone-800"
+                            variant="outline"
+                            className="shrink-0 px-3 text-xs font-semibold disabled:opacity-40"
                           >
                             追加
-                          </button>
+                          </Button>
                         </div>
                       ) : null}
                     </div>
@@ -1592,15 +1605,16 @@ export function AccountProfileForm({
                 </div>
               </div>
             </div>
-          </section>
+          </Card>
         </>
       ) : null}
 
       <div className="sticky bottom-0 -mx-1 bg-gradient-to-t from-white via-white to-white/0 px-1 pb-2 pt-4 dark:from-stone-950 dark:via-stone-950 dark:to-stone-950/0">
-        <button
+        <Button
           type="submit"
           disabled={isSaving}
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-stone-900 text-sm font-bold tracking-wide text-white shadow-lg shadow-stone-900/20 transition-all hover:bg-stone-800 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50 dark:bg-stone-100 dark:text-stone-900 dark:shadow-stone-100/10 dark:hover:bg-stone-200"
+          variant="secondary"
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-stone-900 text-sm font-bold tracking-wide text-white shadow-lg shadow-stone-900/20 hover:bg-stone-800 hover:shadow-xl disabled:opacity-50 dark:bg-stone-100 dark:text-stone-900 dark:shadow-stone-100/10 dark:hover:bg-stone-200"
         >
           {isSaving ? (
             <>
@@ -1610,7 +1624,7 @@ export function AccountProfileForm({
           ) : (
             "プロフィールを保存する"
           )}
-        </button>
+        </Button>
       </div>
     </form>
   );

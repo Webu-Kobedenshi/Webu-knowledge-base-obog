@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/atoms/button";
 import { SocialContactIcon } from "@/components/atoms/social-contact-icon";
 import type { AlumniProfile } from "@/graphql/types";
 import { getAlumniContactClassName, getAlumniContactLinks } from "@/lib/alumni-contact";
@@ -208,14 +209,15 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
             {companyExperiences.map((company) => {
               const isSelected = company.id === selectedCompany?.id;
               return (
-                <button
+                <Button
                   key={company.id}
                   type="button"
                   onClick={() => setSelectedCompanyId(company.id)}
-                  className={`shrink-0 rounded-xl border px-3 py-2 text-left transition ${
+                  variant={isSelected ? "secondary" : "outline"}
+                  className={`h-auto shrink-0 px-3 py-2 text-left ${
                     isSelected
                       ? "border-stone-900 bg-stone-900 text-white dark:border-stone-100 dark:bg-stone-100 dark:text-stone-900"
-                      : "border-stone-200 bg-white text-stone-700 hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-300 dark:hover:bg-stone-800"
+                      : "border-stone-200 bg-white text-stone-700 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-300"
                   }`}
                 >
                   <span className="block max-w-40 truncate text-[12px] font-bold">
@@ -228,7 +230,7 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
                   >
                     {company.selectionExperience ? "選考体験あり" : "企業名のみ"}
                   </span>
-                </button>
+                </Button>
               );
             })}
           </div>

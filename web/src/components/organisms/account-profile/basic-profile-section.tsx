@@ -1,3 +1,4 @@
+import { Card } from "@/components/atoms/card";
 import { Input } from "@/components/atoms/input";
 import {
   Select,
@@ -39,7 +40,7 @@ export function BasicProfileSection({
   onDepartmentChange,
 }: BasicProfileSectionProps) {
   return (
-    <section className="rounded-2xl border border-stone-200/90 bg-white p-5 shadow-[0_8px_24px_-18px_rgba(0,0,0,0.25)] dark:border-stone-800/80 dark:bg-stone-900/40">
+    <Card className="gap-0 border-stone-200/90 bg-white shadow-[0_8px_24px_-18px_rgba(0,0,0,0.25)] dark:border-stone-800/80 dark:bg-stone-900/40">
       <div className="flex items-center gap-2">
         <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-100 text-sm dark:bg-violet-900/40">
           <svg
@@ -144,6 +145,6 @@ export function BasicProfileSection({
           </Select>
         </label>
       </div>
-    </section>
+    </Card>
   );
 }

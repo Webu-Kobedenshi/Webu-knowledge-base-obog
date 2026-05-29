@@ -98,12 +98,13 @@ export function SearchField({
             {activeFilterCount > 0 ? `(${activeFilterCount})` : ""}
           </span>
         </p>
-        <button
+        <Button
           type="button"
           onClick={() => setIsExpandedOnMobile((prev) => !prev)}
           aria-expanded={isExpandedOnMobile}
           aria-controls="search-filter-panel"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-stone-200 bg-white text-stone-500 transition-colors hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-900/60 dark:text-stone-300 dark:hover:bg-stone-800"
+          variant="outline"
+          size="icon-sm"
         >
           <svg
             width="18"
@@ -122,7 +123,7 @@ export function SearchField({
             <title>{isExpandedOnMobile ? "閉じる" : "開く"}</title>
             <path d="m6 9 6 6 6-6" />
           </svg>
-        </button>
+        </Button>
       </div>
 
       <div
@@ -223,7 +224,8 @@ export function SearchField({
             type="button"
             onClick={handleReset}
             disabled={!canReset}
-            className="w-full bg-stone-200 text-stone-800 hover:bg-stone-300 disabled:opacity-50 dark:bg-stone-700 dark:text-stone-100 dark:hover:bg-stone-600"
+            variant="secondary"
+            className="w-full disabled:opacity-50"
           >
             リセット
           </Button>

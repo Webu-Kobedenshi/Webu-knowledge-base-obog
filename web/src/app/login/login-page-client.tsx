@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/atoms/button";
 import { showErrorToast, showSuccessToast } from "@/components/atoms/toast";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
@@ -46,13 +47,13 @@ export function LoginPageClient() {
 
         <div className="mt-6 space-y-4">
           <div className="space-y-2">
-            <button
+            <Button
               type="button"
-              className="inline-flex h-10 w-full items-center justify-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+              className="w-full"
               onClick={() => signIn("google", { callbackUrl })}
             >
               在校生はこちら
-            </button>
+            </Button>
             <p className="text-center text-[11px] text-zinc-500 dark:text-zinc-400">
               @st.kobedenshi.ac.jp アカウントを使用推奨
             </p>
@@ -70,13 +71,14 @@ export function LoginPageClient() {
           </div>
 
           <div className="space-y-2">
-            <button
+            <Button
               type="button"
-              className="inline-flex h-10 w-full items-center justify-center rounded-md border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-50 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-900"
+              variant="outline"
+              className="w-full"
               onClick={() => signIn("google", { callbackUrl })}
             >
               卒業生はこちら
-            </button>
+            </Button>
             <p className="text-center text-[11px] text-zinc-500 dark:text-zinc-400">
               Gmailアカウントでログインしてください
             </p>

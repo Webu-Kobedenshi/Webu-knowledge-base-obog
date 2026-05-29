@@ -1,3 +1,5 @@
+import { Button } from "@/components/atoms/button";
+import { Card } from "@/components/atoms/card";
 import { Input } from "@/components/atoms/input";
 
 type LinkedGmailSectionProps = {
@@ -22,11 +24,12 @@ export function LinkedGmailSection({
   isLinkingGmail,
 }: LinkedGmailSectionProps) {
   return (
-    <section className="rounded-2xl border border-stone-200/90 bg-white p-5 shadow-[0_8px_24px_-18px_rgba(0,0,0,0.25)] dark:border-stone-800/80 dark:bg-stone-900/40">
-      <button
+    <Card className="gap-0 border-stone-200/90 bg-white shadow-[0_8px_24px_-18px_rgba(0,0,0,0.25)] dark:border-stone-800/80 dark:bg-stone-900/40">
+      <Button
         type="button"
         onClick={onToggleLoginInfoOpen}
-        className="flex w-full items-center justify-between"
+        variant="ghost"
+        className="flex h-auto w-full items-center justify-between p-0 hover:bg-transparent dark:hover:bg-transparent"
       >
         <div className="flex items-center gap-2">
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-sm dark:bg-emerald-900/40">
@@ -64,7 +67,7 @@ export function LinkedGmailSection({
           <title>{loginInfoOpen ? "閉じる" : "開く"}</title>
           <path d="m6 9 6 6 6-6" />
         </svg>
-      </button>
+      </Button>
 
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out ${
@@ -91,14 +94,16 @@ export function LinkedGmailSection({
                     {currentLinkedGmail}
                   </strong>
                 </div>
-                <button
+                <Button
                   type="button"
                   onClick={onUnlinkGmail}
                   disabled={isLinkingGmail}
-                  className="inline-flex h-8 items-center justify-center rounded-md border border-stone-200 bg-white px-3 text-[11px] font-medium text-stone-700 hover:bg-stone-50 disabled:opacity-50 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700/80"
+                  variant="outline"
+                  size="sm"
+                  className="h-8 px-3 text-[11px] disabled:opacity-50"
                 >
                   登録を解除する
-                </button>
+                </Button>
               </div>
             ) : (
               <div className="space-y-2">
@@ -118,20 +123,21 @@ export function LinkedGmailSection({
                     disabled={isLinkingGmail}
                     className="flex-1"
                   />
-                  <button
+                  <Button
                     type="button"
                     onClick={onLinkGmail}
                     disabled={isLinkingGmail || !linkedGmailInput}
-                    className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg bg-stone-900 px-4 text-xs font-bold text-white transition-colors hover:bg-stone-800 disabled:opacity-50 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-stone-200"
+                    variant="secondary"
+                    className="h-10 shrink-0 px-4 text-xs font-bold disabled:opacity-50"
                   >
                     {isLinkingGmail ? "登録中…" : "登録する"}
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
           </div>
         </div>
       </div>
-    </section>
+    </Card>
   );
 }

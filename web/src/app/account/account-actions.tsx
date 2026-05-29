@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/atoms/button";
+import { Card } from "@/components/atoms/card";
 import { showErrorToast } from "@/components/atoms/toast";
 import { LogoutButton } from "@/components/molecules/logout-button";
 import { signOut } from "next-auth/react";
@@ -33,7 +35,7 @@ export function AccountActions() {
   };
 
   return (
-    <section className="rounded-2xl border border-stone-200/90 bg-white p-5 shadow-[0_8px_24px_-18px_rgba(0,0,0,0.25)] dark:border-stone-800/80 dark:bg-stone-900/40">
+    <Card className="gap-0 border-stone-200/90 bg-white shadow-[0_8px_24px_-18px_rgba(0,0,0,0.25)] dark:border-stone-800/80 dark:bg-stone-900/40">
       <div className="flex items-center gap-2">
         <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-stone-200 text-sm dark:bg-stone-700">
           <svg
@@ -57,11 +59,12 @@ export function AccountActions() {
 
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <LogoutButton className="flex-1" />
-        <button
+        <Button
           type="button"
           onClick={handleDelete}
           disabled={isDeleting}
-          className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl border border-rose-200 text-sm font-semibold text-rose-600 transition-all hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-rose-800/50 dark:text-rose-400 dark:hover:bg-rose-900/20"
+          variant="destructive"
+          className="flex h-10 flex-1 items-center justify-center gap-2 disabled:opacity-50"
         >
           <svg
             width="15"
@@ -79,8 +82,8 @@ export function AccountActions() {
             <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
           </svg>
           {isDeleting ? "削除中…" : "アカウント削除"}
-        </button>
+        </Button>
       </div>
-    </section>
+    </Card>
   );
 }

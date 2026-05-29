@@ -1,3 +1,4 @@
+import { Button } from "@/components/atoms/button";
 import { Suspense } from "react";
 import { LoginPageClient } from "./login-page-client";
 
@@ -20,13 +21,9 @@ function LoginPageFallback() {
 
         <div className="mt-6 space-y-4">
           <div className="space-y-2">
-            <button
-              type="button"
-              className="inline-flex h-10 w-full items-center justify-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-              disabled
-            >
+            <Button type="button" className="w-full" disabled>
               在校生はこちら
-            </button>
+            </Button>
             <p className="text-center text-[11px] text-zinc-500 dark:text-zinc-400">
               @st.kobedenshi.ac.jp アカウントを使用推奨
             </p>
@@ -44,13 +41,9 @@ function LoginPageFallback() {
           </div>
 
           <div className="space-y-2">
-            <button
-              type="button"
-              className="inline-flex h-10 w-full items-center justify-center rounded-md border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-50 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-900"
-              disabled
-            >
+            <Button type="button" variant="outline" className="w-full" disabled>
               卒業生はこちら
-            </button>
+            </Button>
             <p className="text-center text-[11px] text-zinc-500 dark:text-zinc-400">
               Gmailアカウントでログインしてください
             </p>

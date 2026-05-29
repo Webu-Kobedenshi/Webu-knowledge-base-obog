@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/atoms/button";
 import { cn } from "@/lib/cn";
 import { signOut } from "next-auth/react";
 
@@ -10,13 +11,11 @@ type LogoutButtonProps = {
 
 export function LogoutButton({ className, variant = "default" }: LogoutButtonProps) {
   return (
-    <button
+    <Button
       type="button"
       onClick={() => signOut({ callbackUrl: "/login" })}
-      className={cn(
-        "flex h-10 items-center justify-center gap-2 rounded-xl border border-stone-200 text-sm font-semibold text-stone-700 transition-all hover:bg-stone-100 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800",
-        className,
-      )}
+      variant="outline"
+      className={cn("flex h-10 items-center justify-center gap-2", className)}
     >
       <svg
         width="15"
@@ -35,6 +34,6 @@ export function LogoutButton({ className, variant = "default" }: LogoutButtonPro
         <line x1="21" y1="12" x2="9" y2="12" />
       </svg>
       {variant === "default" && "ログアウト"}
-    </button>
+    </Button>
   );
 }
