@@ -40,6 +40,17 @@ model AlumniProfile {
 
 > **原則: 新規カラムは `?`（Optional）か `@default` 付きで追加すれば安全**
 
+### カラム削除のチェックリスト
+
+今回のように入力項目そのものを廃止する場合は、DBカラムだけでなくアプリの契約面も同時に確認します。
+
+1. フロントのフォーム状態・入力UI・表示UIから対象フィールドを削除
+2. `web/src/graphql` の取得フィールドと TypeScript 型から削除
+3. Web API Route の request body 型から削除
+4. Service の GraphQL schema / DTO / Domain input / Repository select・create data から削除
+5. `schema.prisma` から削除し、`DROP COLUMN IF EXISTS` の migration を追加
+6. `pnpm --filter web typecheck` と `pnpm --filter service typecheck` を実行
+
 ---
 
 ## ② マイグレーションファイルを作成する

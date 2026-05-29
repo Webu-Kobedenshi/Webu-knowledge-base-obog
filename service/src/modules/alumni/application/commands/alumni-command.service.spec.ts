@@ -1,7 +1,7 @@
 import { BadRequestException } from "@nestjs/common";
-import type { AlumniRepository } from "../../infrastructure/alumni.repository";
-import type { StorageService } from "../../infrastructure/storage.service";
 import type { InitialSettingsInput, UpdateAlumniProfileInput } from "../dto/alumni.input";
+import type { AlumniRepositoryPort } from "../ports/alumni-repository.port";
+import type { StoragePort } from "../ports/storage.port";
 import { AlumniCommandService } from "./alumni-command.service";
 
 describe("AlumniCommandService", () => {
@@ -12,9 +12,9 @@ describe("AlumniCommandService", () => {
       updateInitialSettings: jest.fn(),
       findUserByLinkedGmail: jest.fn(),
       updateLinkedGmail: jest.fn(),
-    } as unknown as AlumniRepository;
+    } as unknown as AlumniRepositoryPort;
 
-    const storage = {} as StorageService;
+    const storage = {} as StoragePort;
 
     const service = new AlumniCommandService(repo, storage);
     return { service, repo };

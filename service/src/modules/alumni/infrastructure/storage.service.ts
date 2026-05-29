@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Injectable } from "@nestjs/common";
+import type { StoragePort } from "../application/ports/storage.port";
 
 type UploadUrlResult = {
   uploadUrl: string;
@@ -10,13 +11,14 @@ type UploadUrlResult = {
 };
 
 @Injectable()
-export class StorageService {
+export class StorageService implements StoragePort {
   private readonly endpoint: string;
   private readonly publicEndpoint: string;
   private readonly accessKey: string;
   private readonly secretKey: string;
   private readonly bucketName: string;
   private readonly s3Client: S3Client;
+  private readonly publicS3Client: S3Client;
 
   constructor() {
     this.endpoint = process.env.ENDPOINT ?? "http://minio:9000";
@@ -32,6 +34,18 @@ export class StorageService {
     this.s3Client = new S3Client({
       region: "us-east-1",
       endpoint: this.endpoint,
+      forcePathStyle: true,
+      requestChecksumCalculation: "WHEN_REQUIRED",
+      responseChecksumValidation: "WHEN_REQUIRED",
+      credentials: {
+        accessKeyId: this.accessKey,
+        secretAccessKey: this.secretKey,
+      },
+    });
+
+    this.publicS3Client = new S3Client({
+      region: "us-east-1",
+      endpoint: this.publicEndpoint,
       forcePathStyle: true,
       requestChecksumCalculation: "WHEN_REQUIRED",
       responseChecksumValidation: "WHEN_REQUIRED",
@@ -94,7 +108,7 @@ export class StorageService {
       ContentType: params.contentType,
     });
 
-    const uploadUrl = await getSignedUrl(this.s3Client, command, {
+    const uploadUrl = await getSignedUrl(this.publicS3Client, command, {
       expiresIn: 300,
     });
 

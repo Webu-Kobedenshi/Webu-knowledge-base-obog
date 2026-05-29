@@ -184,7 +184,6 @@ model SelectionStep {
   selectionExperience   SelectionExperience @relation(fields: [selectionExperienceId], references: [id], onDelete: Cascade)
 
   stepKind         SelectionStepKind
-  stepTitle        String?
   format           SelectionFormat @default(UNKNOWN)
   interviewerCount Int?
   durationMinutes  Int?

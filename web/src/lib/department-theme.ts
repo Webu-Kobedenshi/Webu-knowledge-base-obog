@@ -1,0 +1,26 @@
+import type { Department } from "@/graphql/types";
+
+export const departmentGradient: Record<Department, string> = {
+  IT_EXPERT: "from-indigo-500 via-blue-500 to-cyan-400",
+  IT_SPECIALIST: "from-sky-500 via-cyan-500 to-teal-400",
+  INFORMATION_PROCESS: "from-blue-600 via-sky-500 to-cyan-300",
+  PROGRAMMING: "from-emerald-500 via-green-500 to-lime-400",
+  AI_SYSTEM: "from-violet-500 via-fuchsia-500 to-pink-400",
+  ADVANCED_STUDIES: "from-amber-500 via-orange-500 to-red-400",
+  INFO_BUSINESS: "from-cyan-500 via-teal-500 to-emerald-400",
+  INFO_ENGINEERING: "from-blue-600 via-indigo-500 to-violet-400",
+  GAME_RESEARCH: "from-rose-500 via-pink-500 to-fuchsia-400",
+  GAME_ENGINEER: "from-red-500 via-rose-500 to-orange-400",
+  GAME_SOFTWARE: "from-pink-500 via-rose-500 to-red-400",
+  ESPORTS: "from-lime-500 via-green-500 to-emerald-400",
+  CG_ANIMATION: "from-fuchsia-500 via-pink-500 to-orange-400",
+  DIGITAL_ANIME: "from-pink-500 via-rose-500 to-amber-400",
+  GRAPHIC_DESIGN: "from-orange-500 via-amber-500 to-yellow-400",
+  INDUSTRIAL_DESIGN: "from-teal-600 via-emerald-500 to-slate-400",
+  ARCHITECTURAL: "from-stone-500 via-zinc-500 to-neutral-400",
+  SOUND_CREATE: "from-yellow-500 via-amber-500 to-orange-400",
+  SOUND_TECHNIQUE: "from-amber-500 via-yellow-500 to-lime-400",
+  VOICE_ACTOR: "from-rose-400 via-pink-500 to-purple-400",
+  INTERNATIONAL_COMM: "from-blue-500 via-indigo-500 to-sky-400",
+  OTHERS: "from-slate-500 via-gray-500 to-zinc-400",
+};

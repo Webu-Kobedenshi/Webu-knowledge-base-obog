@@ -44,7 +44,6 @@ const alumniListQuery = `
             steps {
               id
               stepKind
-              stepTitle
               format
               interviewerCount
               durationMinutes
@@ -164,13 +163,12 @@ const alumniDetailQuery = `
           id
           entryTrigger
           overallTip
-          steps {
-            id
-            stepKind
-            stepTitle
-            format
-            interviewerCount
-            durationMinutes
+            steps {
+              id
+              stepKind
+              format
+              interviewerCount
+              durationMinutes
             questions
             atmosphere
             preparation

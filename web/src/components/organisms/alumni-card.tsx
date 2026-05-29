@@ -1,4 +1,5 @@
 import type { AlumniProfile } from "@/graphql/types";
+import { departmentGradient } from "@/lib/department-theme";
 import Link from "next/link";
 
 type AlumniCardProps = {
@@ -30,34 +31,9 @@ const departmentLabel: Record<AlumniProfile["department"], string> = {
   OTHERS: "その他",
 };
 
-const departmentGradient: Partial<Record<AlumniProfile["department"], string>> = {
-  IT_EXPERT: "from-violet-500 to-indigo-500",
-  IT_SPECIALIST: "from-blue-500 to-cyan-500",
-  INFORMATION_PROCESS: "from-sky-500 to-blue-500",
-  PROGRAMMING: "from-emerald-500 to-teal-500",
-  AI_SYSTEM: "from-purple-500 to-violet-500",
-  ADVANCED_STUDIES: "from-amber-500 to-orange-500",
-  INFO_BUSINESS: "from-cyan-500 to-blue-500",
-  INFO_ENGINEERING: "from-indigo-500 to-blue-500",
-  GAME_RESEARCH: "from-rose-500 to-pink-500",
-  GAME_ENGINEER: "from-red-500 to-rose-500",
-  GAME_SOFTWARE: "from-pink-500 to-fuchsia-500",
-  ESPORTS: "from-lime-500 to-green-500",
-  CG_ANIMATION: "from-fuchsia-500 to-purple-500",
-  DIGITAL_ANIME: "from-pink-500 to-rose-500",
-  GRAPHIC_DESIGN: "from-orange-500 to-amber-500",
-  INDUSTRIAL_DESIGN: "from-teal-500 to-emerald-500",
-  ARCHITECTURAL: "from-stone-500 to-zinc-500",
-  SOUND_CREATE: "from-yellow-500 to-amber-500",
-  SOUND_TECHNIQUE: "from-amber-500 to-yellow-500",
-  VOICE_ACTOR: "from-rose-400 to-pink-400",
-  INTERNATIONAL_COMM: "from-blue-500 to-indigo-500",
-  OTHERS: "from-gray-500 to-slate-500",
-};
-
 export function AlumniCard({ alumni }: AlumniCardProps) {
   const initial = (alumni.nickname ?? "匿")[0];
-  const gradient = departmentGradient[alumni.department] ?? "from-gray-500 to-slate-500";
+  const gradient = departmentGradient[alumni.department];
   const companyNames = alumni.companyNames.length > 0 ? alumni.companyNames : ["未設定"];
   const [primaryCompany, ...otherCompanies] = companyNames;
   const selectionExperienceCount = alumni.companyExperiences.filter(
@@ -72,15 +48,6 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
       <div className="relative h-28 overflow-hidden">
         {/* Gradient background — always present */}
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-90`} />
-        {/* Blurred avatar as hero backdrop */}
-        {alumni.avatarUrl ? (
-          <img
-            src={alumni.avatarUrl}
-            alt=""
-            aria-hidden
-            className="absolute inset-0 h-full w-full object-cover mix-blend-overlay opacity-40"
-          />
-        ) : null}
         {/* Decorative light effects */}
         <div
           aria-hidden

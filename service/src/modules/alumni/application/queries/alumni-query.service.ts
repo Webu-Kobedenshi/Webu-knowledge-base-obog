@@ -1,12 +1,12 @@
 import { Inject, Injectable } from "@nestjs/common";
 import type { Department } from "../../domain/types/department";
 import { resolveRoleAndStatus } from "../../domain/user-role-transition";
-import { AlumniRepository } from "../../infrastructure/alumni.repository";
 import type { AlumniConnectionDto, AlumniProfileDto, UserDto } from "../dto/alumni.dto";
+import { ALUMNI_REPOSITORY, type AlumniRepositoryPort } from "../ports/alumni-repository.port";
 
 @Injectable()
 export class AlumniQueryService {
-  constructor(@Inject(AlumniRepository) private readonly alumniRepository: AlumniRepository) {}
+  constructor(@Inject(ALUMNI_REPOSITORY) private readonly alumniRepository: AlumniRepositoryPort) {}
 
   getAlumniList(params: {
     department?: Department;

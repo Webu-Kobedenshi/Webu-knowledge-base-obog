@@ -29,7 +29,6 @@ query GetAlumniList(
           steps {
             id
             stepKind
-            stepTitle
             format
             interviewerCount
             durationMinutes

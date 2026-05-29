@@ -1,5 +1,5 @@
-import type { AlumniRepository } from "../../infrastructure/alumni.repository";
 import type { AlumniConnectionDto, AlumniProfileDto, UserDto } from "../dto/alumni.dto";
+import type { AlumniRepositoryPort } from "../ports/alumni-repository.port";
 import { AlumniQueryService } from "./alumni-query.service";
 
 function createUser(overrides?: Partial<UserDto>): UserDto {
@@ -37,7 +37,7 @@ describe("AlumniQueryService", () => {
       findPublicById: jest.fn(),
       findUserById: jest.fn(),
       findUserByLinkedGmail: jest.fn(),
-    } as unknown as AlumniRepository;
+    } as unknown as AlumniRepositoryPort;
 
     const service = new AlumniQueryService(repo);
     return { service, repo };

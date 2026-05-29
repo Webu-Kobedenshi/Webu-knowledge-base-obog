@@ -40,7 +40,6 @@ export type SelectionFormat = "ONLINE" | "IN_PERSON" | "UNKNOWN";
 
 export type SelectionStepInput = {
   stepKind: SelectionStepKind;
-  stepTitle?: string;
   format?: SelectionFormat;
   interviewerCount?: number;
   durationMinutes?: number;

@@ -55,7 +55,6 @@ const getMyProfileQuery = `
             steps {
               id
               stepKind
-              stepTitle
               format
               interviewerCount
               durationMinutes

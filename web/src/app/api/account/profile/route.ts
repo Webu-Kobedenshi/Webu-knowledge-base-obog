@@ -47,7 +47,6 @@ type CompanyExperienceBody = {
     overallTip?: string;
     steps?: Array<{
       stepKind: SelectionStepKind;
-      stepTitle?: string;
       format?: SelectionFormat;
       interviewerCount?: number;
       durationMinutes?: number;

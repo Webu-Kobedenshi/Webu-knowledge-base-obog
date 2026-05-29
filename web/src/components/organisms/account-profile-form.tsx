@@ -81,7 +81,6 @@ type SelectionFormat = "ONLINE" | "IN_PERSON" | "UNKNOWN";
 
 type SelectionStepFormState = {
   stepKind: SelectionStepKind;
-  stepTitle: string;
   format: SelectionFormat;
   interviewerCount: string;
   durationMinutes: string;
@@ -133,6 +132,13 @@ const selectionFormatOptions: Array<{ value: SelectionFormat; label: string }> =
   { value: "UNKNOWN", label: "不明" },
   { value: "ONLINE", label: "オンライン" },
   { value: "IN_PERSON", label: "対面" },
+];
+
+const interviewerCountOptions: Array<{ value: string; label: string }> = [
+  { value: "1", label: "1人" },
+  { value: "2", label: "2人" },
+  { value: "3", label: "3人" },
+  { value: "OTHER", label: "その他" },
 ];
 
 const defaultSelectionStepOrder: SelectionStepKind[] = [
@@ -195,7 +201,6 @@ function createRowId() {
 function createBlankSelectionStep(stepKind: SelectionStepKind = "DOCUMENT_SCREENING") {
   return {
     stepKind,
-    stepTitle: "",
     format: "UNKNOWN",
     interviewerCount: "",
     durationMinutes: "",
@@ -224,8 +229,7 @@ function createBlankSelectionExperience(): SelectionExperienceFormState {
 
 function hasSelectionStepContent(step: SelectionStepFormState) {
   return Boolean(
-    step.stepTitle.trim() ||
-      step.interviewerCount.trim() ||
+    step.interviewerCount.trim() ||
       step.durationMinutes.trim() ||
       step.questions.trim() ||
       step.atmosphere.trim() ||
@@ -280,11 +284,12 @@ export function AccountProfileForm({
         experience.steps.length > 0
           ? experience.steps.map((step) => ({
               stepKind: step.stepKind,
-              stepTitle: step.stepTitle ?? "",
               format: step.format,
               interviewerCount:
                 step.interviewerCount !== null && step.interviewerCount !== undefined
-                  ? String(step.interviewerCount)
+                  ? step.interviewerCount >= 4
+                    ? "OTHER"
+                    : String(step.interviewerCount)
                   : "",
               durationMinutes:
                 step.durationMinutes !== null && step.durationMinutes !== undefined
@@ -479,11 +484,13 @@ export function AccountProfileForm({
               overallTip: experience.overallTip.trim() || undefined,
               steps: experience.steps.filter(hasSelectionStepContent).map((step) => ({
                 stepKind: step.stepKind,
-                stepTitle: step.stepTitle.trim() || undefined,
                 format: step.format,
-                interviewerCount: step.interviewerCount.trim()
-                  ? Number(step.interviewerCount)
-                  : undefined,
+                interviewerCount:
+                  step.interviewerCount.trim() === "OTHER"
+                    ? 4
+                    : step.interviewerCount.trim()
+                      ? Number(step.interviewerCount)
+                      : undefined,
                 durationMinutes: step.durationMinutes.trim()
                   ? Number(step.durationMinutes)
                   : undefined,
@@ -1192,31 +1199,28 @@ export function AccountProfileForm({
                                         </div>
                                       </div>
 
-                                      <div className="grid gap-2 sm:grid-cols-3">
-                                        <Input
-                                          value={step.stepTitle}
-                                          onChange={(event) =>
-                                            updateSelectionStepAt(index, stepIndex, (prev) => ({
-                                              ...prev,
-                                              stepTitle: event.target.value,
-                                            }))
-                                          }
-                                          placeholder="補足名"
-                                          disabled={!canEditAlumniProfile}
-                                        />
-                                        <Input
+                                      <div className="grid gap-2 sm:grid-cols-2">
+                                        <Select
                                           value={step.interviewerCount}
-                                          onChange={(event) =>
+                                          onValueChange={(value) =>
                                             updateSelectionStepAt(index, stepIndex, (prev) => ({
                                               ...prev,
-                                              interviewerCount: event.target.value,
+                                              interviewerCount: value,
                                             }))
                                           }
-                                          type="number"
-                                          min={0}
-                                          placeholder="面接官人数"
                                           disabled={!canEditAlumniProfile}
-                                        />
+                                        >
+                                          <SelectTrigger>
+                                            <SelectValue placeholder="面接官人数" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            {interviewerCountOptions.map((option) => (
+                                              <SelectItem key={option.value} value={option.value}>
+                                                {option.label}
+                                              </SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
                                         <Input
                                           value={step.durationMinutes}
                                           onChange={(event) =>

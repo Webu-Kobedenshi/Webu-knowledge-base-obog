@@ -3,20 +3,20 @@ import { AlumniProfileDraft } from "../../domain/entities/alumni-profile.entity"
 import { InitialSettingsDraft } from "../../domain/entities/initial-settings.entity";
 import { DomainValidationError } from "../../domain/errors/domain-validation.error";
 import { GmailAddress } from "../../domain/value-objects/gmail-address";
-import { AlumniRepository } from "../../infrastructure/alumni.repository";
-import { StorageService } from "../../infrastructure/storage.service";
 import type { AlumniProfileDto, UserDto } from "../dto/alumni.dto";
 import type {
   InitialSettingsInput,
   UpdateAlumniProfileInput,
   UploadUrlResponse,
 } from "../dto/alumni.input";
+import { ALUMNI_REPOSITORY, type AlumniRepositoryPort } from "../ports/alumni-repository.port";
+import { STORAGE, type StoragePort } from "../ports/storage.port";
 
 @Injectable()
 export class AlumniCommandService {
   constructor(
-    @Inject(AlumniRepository) private readonly alumniRepository: AlumniRepository,
-    @Inject(StorageService) private readonly storageService: StorageService,
+    @Inject(ALUMNI_REPOSITORY) private readonly alumniRepository: AlumniRepositoryPort,
+    @Inject(STORAGE) private readonly storageService: StoragePort,
   ) {}
 
   updateInitialSettings(userId: string, input: InitialSettingsInput): Promise<UserDto> {

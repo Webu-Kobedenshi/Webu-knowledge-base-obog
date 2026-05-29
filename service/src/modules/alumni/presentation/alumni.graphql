@@ -108,7 +108,6 @@ type SelectionExperience {
 type SelectionStep {
   id: ID!
   stepKind: SelectionStepKind!
-  stepTitle: String
   format: SelectionFormat!
   interviewerCount: Int
   durationMinutes: Int
@@ -153,7 +152,6 @@ input SelectionExperienceInput {
 
 input SelectionStepInput {
   stepKind: SelectionStepKind!
-  stepTitle: String
   format: SelectionFormat
   interviewerCount: Int
   durationMinutes: Int

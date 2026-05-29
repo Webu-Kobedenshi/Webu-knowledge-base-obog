@@ -8,35 +8,15 @@ import type {
   UserStatus as PrismaUserStatus,
 } from "@prisma/client";
 import { PrismaService } from "../../../prisma.service";
-import type { AlumniProfileDto, UserDto } from "../application/dto/alumni.dto";
+import type {
+  AlumniRepositoryPort,
+  FindPublicAlumniListParams,
+  InitialSettingsPersistenceInput,
+  UpdateAlumniProfilePersistenceInput,
+} from "../application/ports/alumni-repository.port";
+import type { AlumniProfileDto, UserDto } from "../domain/read-models/alumni.read-model";
 import type { Department } from "../domain/types/department";
 import type { UserRole, UserStatus } from "../domain/types/user";
-
-type InitialSettingsInput = {
-  name: string;
-  studentId: string;
-  enrollmentYear: number;
-  durationYears: number;
-  department: Department;
-  role: UserRole;
-  status: UserStatus;
-};
-
-type UpdateAlumniProfileInput = {
-  nickname?: string;
-  graduationYear: number;
-  department: Department;
-  companyNames: string[];
-  companyExperiences?: CompanyExperienceInput[];
-  remarks?: string;
-  contactEmail?: string;
-  isPublic: boolean;
-  acceptContact: boolean;
-  skills?: string[];
-  portfolioUrl?: string;
-  gakuchika?: string;
-  usefulCoursework?: string;
-};
 
 type SelectionStepKind =
   | "DOCUMENT_SCREENING"
@@ -51,28 +31,6 @@ type SelectionStepKind =
   | "OTHER";
 
 type SelectionFormat = "ONLINE" | "IN_PERSON" | "UNKNOWN";
-
-type SelectionStepInput = {
-  stepKind: SelectionStepKind;
-  stepTitle?: string;
-  format?: SelectionFormat;
-  interviewerCount?: number;
-  durationMinutes?: number;
-  questions?: string;
-  atmosphere?: string;
-  preparation?: string;
-};
-
-type SelectionExperienceInput = {
-  entryTrigger?: string;
-  overallTip?: string;
-  steps?: SelectionStepInput[];
-};
-
-type CompanyExperienceInput = {
-  companyName: string;
-  selectionExperience?: SelectionExperienceInput | null;
-};
 
 type AlumniConnection = {
   items: AlumniProfileDto[];
@@ -114,7 +72,6 @@ const alumniProfileSelect = {
             select: {
               id: true,
               stepKind: true,
-              stepTitle: true,
               format: true,
               interviewerCount: true,
               durationMinutes: true,
@@ -161,7 +118,7 @@ type AlumniProfileRecord = Prisma.AlumniProfileGetPayload<{ select: typeof alumn
 type UserRecord = Prisma.UserGetPayload<{ select: typeof userSelect }>;
 
 @Injectable()
-export class AlumniRepository {
+export class AlumniRepository implements AlumniRepositoryPort {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   private toPrismaDepartment(value: Department): PrismaDepartment {
@@ -210,7 +167,6 @@ export class AlumniRepository {
               steps: item.selectionExperience.steps.map((step) => ({
                 id: step.id,
                 stepKind: step.stepKind as SelectionStepKind,
-                stepTitle: step.stepTitle,
                 format: step.format as SelectionFormat,
                 interviewerCount: step.interviewerCount,
                 durationMinutes: step.durationMinutes,
@@ -240,13 +196,7 @@ export class AlumniRepository {
     };
   }
 
-  async findPublicList(params: {
-    department?: Department;
-    company?: string;
-    graduationYear?: number;
-    limit: number;
-    offset: number;
-  }): Promise<AlumniConnection> {
+  async findPublicList(params: FindPublicAlumniListParams): Promise<AlumniConnection> {
     const { department, company, graduationYear, limit, offset } = params;
     const where: Prisma.AlumniProfileWhereInput = {
       isPublic: true,
@@ -305,7 +255,10 @@ export class AlumniRepository {
     return record ? this.toUserDto(record) : null;
   }
 
-  async updateInitialSettings(userId: string, input: InitialSettingsInput): Promise<UserDto> {
+  async updateInitialSettings(
+    userId: string,
+    input: InitialSettingsPersistenceInput,
+  ): Promise<UserDto> {
     try {
       const record = await this.prisma.user.update({
         where: { id: userId },
@@ -340,7 +293,7 @@ export class AlumniRepository {
 
   async upsertAlumniProfile(
     userId: string,
-    input: UpdateAlumniProfileInput,
+    input: UpdateAlumniProfilePersistenceInput,
   ): Promise<AlumniProfileDto> {
     const profileId = await this.prisma.$transaction(async (transaction) => {
       const profile = await transaction.alumniProfile.upsert({
@@ -429,7 +382,6 @@ export class AlumniRepository {
                   data: steps.map((step, index) => ({
                     selectionExperienceId: experience.id,
                     stepKind: this.toPrismaSelectionStepKind(step.stepKind),
-                    stepTitle: step.stepTitle,
                     format: this.toPrismaSelectionFormat(step.format),
                     interviewerCount: step.interviewerCount,
                     durationMinutes: step.durationMinutes,

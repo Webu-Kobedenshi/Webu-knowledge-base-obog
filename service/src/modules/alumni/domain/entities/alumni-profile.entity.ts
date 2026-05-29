@@ -33,7 +33,6 @@ export type SelectionFormat = "ONLINE" | "IN_PERSON" | "UNKNOWN";
 
 export type SelectionStepDraftInput = {
   stepKind: SelectionStepKind;
-  stepTitle?: string;
   format?: SelectionFormat;
   interviewerCount?: number;
   durationMinutes?: number;
@@ -202,25 +201,16 @@ function normalizeSelectionStep(input: SelectionStepDraftInput): SelectionStepDr
   const format = input.format && validFormats.has(input.format) ? input.format : "UNKNOWN";
   const interviewerCount = normalizePositiveInt(input.interviewerCount);
   const durationMinutes = normalizePositiveInt(input.durationMinutes);
-  const stepTitle = input.stepTitle?.trim();
   const questions = input.questions?.trim();
   const atmosphere = input.atmosphere?.trim();
   const preparation = input.preparation?.trim();
 
-  if (
-    !stepTitle &&
-    !questions &&
-    !atmosphere &&
-    !preparation &&
-    !interviewerCount &&
-    !durationMinutes
-  ) {
+  if (!questions && !atmosphere && !preparation && !interviewerCount && !durationMinutes) {
     return null;
   }
 
   return {
     stepKind: input.stepKind,
-    stepTitle: stepTitle || undefined,
     format,
     interviewerCount,
     durationMinutes,
