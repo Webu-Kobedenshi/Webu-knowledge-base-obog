@@ -59,6 +59,25 @@ enum Department {
   OTHERS
 }
 
+enum SelectionStepKind {
+  DOCUMENT_SCREENING
+  WEB_TEST
+  ASSIGNMENT
+  CODING_TEST
+  CASUAL_INTERVIEW
+  FIRST_INTERVIEW
+  SECOND_INTERVIEW
+  FINAL_INTERVIEW
+  OFFER
+  OTHER
+}
+
+enum SelectionFormat {
+  ONLINE
+  IN_PERSON
+  UNKNOWN
+}
+
 // ------------------------------------------------------
 // 3. User Models
 // ------------------------------------------------------
@@ -140,11 +159,46 @@ model AlumniCompany {
   alumniProfileId String
   alumniProfile   AlumniProfile @relation(fields: [alumniProfileId], references: [id], onDelete: Cascade)
   companyName     String
+  selectionExperience SelectionExperience?
   createdAt       DateTime     @default(now())
 
   @@unique([alumniProfileId, companyName])
   @@index([companyName])
   @@index([alumniProfileId, createdAt(sort: Desc)])
+}
+
+model SelectionExperience {
+  id              String        @id @default(cuid())
+  alumniCompanyId String        @unique
+  alumniCompany   AlumniCompany @relation(fields: [alumniCompanyId], references: [id], onDelete: Cascade)
+
+  entryTrigger String?
+  overallTip   String? @db.Text
+  steps        SelectionStep[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SelectionStep {
+  id                    String              @id @default(cuid())
+  selectionExperienceId String
+  selectionExperience   SelectionExperience @relation(fields: [selectionExperienceId], references: [id], onDelete: Cascade)
+
+  stepKind         SelectionStepKind
+  stepTitle        String?
+  format           SelectionFormat @default(UNKNOWN)
+  interviewerCount Int?
+  durationMinutes  Int?
+  questions        String? @db.Text
+  atmosphere       String? @db.Text
+  preparation      String? @db.Text
+  sortOrder        Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([selectionExperienceId, sortOrder])
 }
 
 // ------------------------------------------------------

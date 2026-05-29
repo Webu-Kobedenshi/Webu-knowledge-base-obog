@@ -11,6 +11,7 @@
     "lint": "pnpm -r lint",
     "format": "pnpm -r format",
     "typecheck": "pnpm -r typecheck",
+    "build": "pnpm -r build",
     "prisma:generate": "pnpm --filter service exec prisma generate",
     "prisma:migrate": "pnpm --filter service exec prisma migrate dev",
     "prisma:studio": "pnpm --filter service exec prisma studio",

@@ -60,6 +60,12 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
   const gradient = departmentGradient[alumni.department] ?? "from-gray-500 to-slate-500";
   const companyNames = alumni.companyNames.length > 0 ? alumni.companyNames : ["未設定"];
   const [primaryCompany, ...otherCompanies] = companyNames;
+  const selectionExperienceCount = alumni.companyExperiences.filter(
+    (company) => company.selectionExperience,
+  ).length;
+  const hasInterviewQuestions = alumni.companyExperiences.some((company) =>
+    company.selectionExperience?.steps.some((step) => Boolean(step.questions)),
+  );
   const canContact = alumni.acceptContact && Boolean(alumni.contactEmail);
   const displayName = alumni.nickname ?? "匿名";
 
@@ -200,13 +206,27 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
           )}
         </p>
 
+        {selectionExperienceCount > 0 ? (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            <span className="rounded-md bg-emerald-100 px-2 py-1 text-[10px] font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+              選考フローあり
+            </span>
+            {hasInterviewQuestions ? (
+              <span className="rounded-md bg-sky-100 px-2 py-1 text-[10px] font-bold text-sky-700 dark:bg-sky-900/30 dark:text-sky-300">
+                面接質問あり
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+
         {/* ── Detail Link ── */}
         {alumni.skills.length > 0 ||
         alumni.gakuchika ||
         alumni.interviewTip ||
         alumni.entryTrigger ||
         alumni.usefulCoursework ||
-        alumni.portfolioUrl ? (
+        alumni.portfolioUrl ||
+        selectionExperienceCount > 0 ? (
           <Link
             href={`/alumni/${alumni.id}`}
             className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-violet-600 transition-colors hover:text-violet-800 dark:text-violet-400 dark:hover:text-violet-300"

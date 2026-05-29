@@ -1,5 +1,8 @@
+"use client";
+
 import type { AlumniProfile } from "@/graphql/types";
 import Link from "next/link";
+import { useMemo, useState } from "react";
 
 type AlumniDetailTemplateProps = {
   alumni: AlumniProfile;
@@ -64,11 +67,48 @@ const entryTriggerLabel: Record<string, string> = {
   その他: "📝 その他",
 };
 
+const selectionStepKindLabel: Record<string, string> = {
+  DOCUMENT_SCREENING: "書類選考",
+  WEB_TEST: "Webテスト",
+  ASSIGNMENT: "課題",
+  CODING_TEST: "コーディング試験",
+  CASUAL_INTERVIEW: "カジュアル面談",
+  FIRST_INTERVIEW: "一次面接",
+  SECOND_INTERVIEW: "二次面接",
+  FINAL_INTERVIEW: "最終面接",
+  OFFER: "内定",
+  OTHER: "その他",
+};
+
+const selectionFormatLabel: Record<string, string> = {
+  ONLINE: "オンライン",
+  IN_PERSON: "対面",
+  UNKNOWN: "不明",
+};
+
 export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
   const gradient = departmentGradient[alumni.department] ?? "from-gray-500 to-slate-500";
   const displayName = alumni.nickname ?? "匿名";
   const initial = (displayName || "匿")[0];
   const companyNames = alumni.companyNames.length > 0 ? alumni.companyNames : ["未設定"];
+  const companyExperiences = useMemo(() => {
+    if (alumni.companyExperiences.length > 0) {
+      return alumni.companyExperiences;
+    }
+
+    return companyNames.map((companyName, index) => ({
+      id: `${companyName}-${index}`,
+      companyName,
+      selectionExperience: null,
+    }));
+  }, [alumni.companyExperiences, companyNames]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState(companyExperiences[0]?.id ?? "");
+  const selectedCompany =
+    companyExperiences.find((company) => company.id === selectedCompanyId) ?? companyExperiences[0];
+  const selectedExperience = selectedCompany?.selectionExperience ?? null;
+  const companiesWithExperienceCount = companyExperiences.filter(
+    (company) => company.selectionExperience,
+  ).length;
   const canContact = alumni.acceptContact && Boolean(alumni.contactEmail);
   const hasDeepDive =
     alumni.skills.length > 0 ||
@@ -181,6 +221,160 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
             </p>
           ) : null}
         </div>
+      </section>
+
+      {/* ── Company Selection Experience ── */}
+      <section className="mt-4 rounded-2xl border border-stone-200/90 bg-white p-5 shadow-[0_8px_24px_-18px_rgba(0,0,0,0.15)] dark:border-stone-800/80 dark:bg-stone-900/40">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+              企業別の選考体験
+            </h2>
+            <p className="mt-1 text-[11px] text-stone-500 dark:text-stone-400">
+              {companiesWithExperienceCount > 0
+                ? `${companiesWithExperienceCount}社の選考フローが公開されています`
+                : "この先輩は企業名のみ公開しています"}
+            </p>
+          </div>
+          {selectedExperience ? (
+            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+              選考フローあり
+            </span>
+          ) : null}
+        </div>
+
+        {companyExperiences.length > 1 ? (
+          <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+            {companyExperiences.map((company) => {
+              const isSelected = company.id === selectedCompany?.id;
+              return (
+                <button
+                  key={company.id}
+                  type="button"
+                  onClick={() => setSelectedCompanyId(company.id)}
+                  className={`shrink-0 rounded-xl border px-3 py-2 text-left transition ${
+                    isSelected
+                      ? "border-stone-900 bg-stone-900 text-white dark:border-stone-100 dark:bg-stone-100 dark:text-stone-900"
+                      : "border-stone-200 bg-white text-stone-700 hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-300 dark:hover:bg-stone-800"
+                  }`}
+                >
+                  <span className="block max-w-40 truncate text-[12px] font-bold">
+                    {company.companyName}
+                  </span>
+                  <span
+                    className={`mt-0.5 block text-[10px] ${
+                      isSelected ? "text-white/70 dark:text-stone-600" : "text-stone-400"
+                    }`}
+                  >
+                    {company.selectionExperience ? "選考体験あり" : "企業名のみ"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+
+        {selectedCompany ? (
+          <div className="mt-4">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="break-words text-lg font-extrabold text-stone-900 dark:text-stone-100">
+                {selectedCompany.companyName}
+              </h3>
+              {selectedExperience?.entryTrigger ? (
+                <span className="shrink-0 rounded-lg bg-stone-100 px-2 py-1 text-[10px] font-semibold text-stone-600 dark:bg-stone-800 dark:text-stone-300">
+                  {selectedExperience.entryTrigger}
+                </span>
+              ) : null}
+            </div>
+
+            {selectedExperience ? (
+              <div className="mt-4 space-y-4">
+                {selectedExperience.steps.length > 0 ? (
+                  <div className="relative space-y-3">
+                    <div className="absolute bottom-4 left-[15px] top-4 w-px bg-stone-200 dark:bg-stone-700" />
+                    {selectedExperience.steps.map((step, index) => (
+                      <div
+                        key={step.id}
+                        className="relative grid grid-cols-[32px_minmax(0,1fr)] gap-3"
+                      >
+                        <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full bg-stone-900 text-[11px] font-bold text-white dark:bg-stone-100 dark:text-stone-900">
+                          {index + 1}
+                        </div>
+                        <article className="rounded-xl border border-stone-200 bg-stone-50/70 p-4 dark:border-stone-800 dark:bg-stone-950/60">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h4 className="text-sm font-extrabold text-stone-900 dark:text-stone-100">
+                              {step.stepTitle ||
+                                selectionStepKindLabel[step.stepKind] ||
+                                "選考ステップ"}
+                            </h4>
+                            <span className="rounded-md bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 dark:bg-stone-900 dark:text-stone-400">
+                              {selectionStepKindLabel[step.stepKind] ?? step.stepKind}
+                            </span>
+                            <span className="rounded-md bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 dark:bg-stone-900 dark:text-stone-400">
+                              {selectionFormatLabel[step.format] ?? step.format}
+                            </span>
+                            {step.interviewerCount ? (
+                              <span className="rounded-md bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 dark:bg-stone-900 dark:text-stone-400">
+                                面接官 {step.interviewerCount}人
+                              </span>
+                            ) : null}
+                            {step.durationMinutes ? (
+                              <span className="rounded-md bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 dark:bg-stone-900 dark:text-stone-400">
+                                {step.durationMinutes}分
+                              </span>
+                            ) : null}
+                          </div>
+
+                          {step.questions ? (
+                            <div className="mt-3">
+                              <p className="text-[10px] font-bold text-stone-400">聞かれた質問</p>
+                              <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
+                                {step.questions}
+                              </p>
+                            </div>
+                          ) : null}
+                          {step.atmosphere ? (
+                            <div className="mt-3">
+                              <p className="text-[10px] font-bold text-stone-400">雰囲気</p>
+                              <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
+                                {step.atmosphere}
+                              </p>
+                            </div>
+                          ) : null}
+                          {step.preparation ? (
+                            <div className="mt-3">
+                              <p className="text-[10px] font-bold text-stone-400">
+                                準備してよかったこと
+                              </p>
+                              <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
+                                {step.preparation}
+                              </p>
+                            </div>
+                          ) : null}
+                        </article>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+
+                {selectedExperience.overallTip ? (
+                  <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+                    <p className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+                      この企業を受ける後輩へ
+                    </p>
+                    <p className="mt-2 whitespace-pre-wrap text-[13px] leading-relaxed text-emerald-900 dark:text-emerald-100">
+                      {selectedExperience.overallTip}
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <div className="mt-4 rounded-xl border border-dashed border-stone-200 p-4 text-[12px] text-stone-500 dark:border-stone-800 dark:text-stone-400">
+                この企業は内定先として公開されています。選考フローや面接質問はまだ登録されていません。
+              </div>
+            )}
+          </div>
+        ) : null}
       </section>
 
       {/* ── Deep Dive Sections ── */}

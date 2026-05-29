@@ -88,6 +88,13 @@ describe("AlumniQueryService", () => {
         graduationYear: 2027,
         department: "IT_EXPERT",
         companyNames: ["ACME"],
+        companyExperiences: [
+          {
+            id: "c1",
+            companyName: "ACME",
+            selectionExperience: null,
+          },
+        ],
         remarks: null,
         contactEmail: "user@example.com",
         avatarUrl: null,

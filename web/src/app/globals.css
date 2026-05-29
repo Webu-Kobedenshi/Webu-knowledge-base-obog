@@ -119,9 +119,8 @@ body {
   position: relative;
   isolation: isolate;
   min-height: 100vh;
-  font-family:
-    var(--font-geist-sans), "Hiragino Kaku Gothic ProN", "Hiragino Sans",
-    Meiryo, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-geist-sans), "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo,
+    "Helvetica Neue", Arial, sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -134,22 +133,9 @@ body::before {
   inset: 0;
   pointer-events: none;
   z-index: -1;
-  background:
-    radial-gradient(
-      900px ellipse at 0% -10%,
-      rgba(139, 92, 246, 0.045),
-      transparent 50%
-    ),
-    radial-gradient(
-      700px ellipse at 100% 0%,
-      rgba(251, 191, 36, 0.03),
-      transparent 45%
-    ),
-    radial-gradient(
-      800px ellipse at 40% 110%,
-      rgba(244, 114, 182, 0.025),
-      transparent 50%
-    );
+  background: radial-gradient(900px ellipse at 0% -10%, rgba(139, 92, 246, 0.045), transparent 50%),
+    radial-gradient(700px ellipse at 100% 0%, rgba(251, 191, 36, 0.03), transparent 45%),
+    radial-gradient(800px ellipse at 40% 110%, rgba(244, 114, 182, 0.025), transparent 50%);
 }
 
 ::selection {
@@ -161,10 +147,8 @@ body::before {
   background: var(--glass-bg);
   backdrop-filter: blur(20px) saturate(140%);
   -webkit-backdrop-filter: blur(20px) saturate(140%);
-  box-shadow:
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.5),
-    0 1px 2px rgba(0, 0, 0, 0.03),
-    0 8px 24px -8px rgba(0, 0, 0, 0.06);
+  box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.5), 0 1px 2px rgba(0, 0, 0, 0.03), 0 8px 24px
+    -8px rgba(0, 0, 0, 0.06);
 }
 
 .liquid-glass-strong {
@@ -172,10 +156,8 @@ body::before {
   background: var(--glass-bg-strong);
   backdrop-filter: blur(28px) saturate(150%);
   -webkit-backdrop-filter: blur(28px) saturate(150%);
-  box-shadow:
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.6),
-    0 1px 3px rgba(0, 0, 0, 0.04),
-    0 12px 32px -10px rgba(0, 0, 0, 0.08);
+  box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.6), 0 1px 3px rgba(0, 0, 0, 0.04), 0 12px 32px
+    -10px rgba(0, 0, 0, 0.08);
 }
 
 select option {

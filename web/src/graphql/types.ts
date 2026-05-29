@@ -24,6 +24,46 @@ export type Department =
 
 export type UserStatus = "ENROLLED" | "GRADUATED" | "WITHDRAWN";
 
+export type SelectionStepKind =
+  | "DOCUMENT_SCREENING"
+  | "WEB_TEST"
+  | "ASSIGNMENT"
+  | "CODING_TEST"
+  | "CASUAL_INTERVIEW"
+  | "FIRST_INTERVIEW"
+  | "SECOND_INTERVIEW"
+  | "FINAL_INTERVIEW"
+  | "OFFER"
+  | "OTHER";
+
+export type SelectionFormat = "ONLINE" | "IN_PERSON" | "UNKNOWN";
+
+export type SelectionStep = {
+  id: string;
+  stepKind: SelectionStepKind;
+  stepTitle: string | null;
+  format: SelectionFormat;
+  interviewerCount: number | null;
+  durationMinutes: number | null;
+  questions: string | null;
+  atmosphere: string | null;
+  preparation: string | null;
+  sortOrder: number;
+};
+
+export type SelectionExperience = {
+  id: string;
+  entryTrigger: string | null;
+  overallTip: string | null;
+  steps: SelectionStep[];
+};
+
+export type CompanyExperience = {
+  id: string;
+  companyName: string;
+  selectionExperience: SelectionExperience | null;
+};
+
 export type AlumniProfile = {
   id: string;
   userId: string;
@@ -31,6 +71,7 @@ export type AlumniProfile = {
   graduationYear: number;
   department: Department;
   companyNames: string[];
+  companyExperiences: CompanyExperience[];
   remarks: string | null;
   contactEmail: string | null;
   avatarUrl: string | null;

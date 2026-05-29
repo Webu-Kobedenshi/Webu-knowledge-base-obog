@@ -26,6 +26,38 @@ type Department =
   | "INTERNATIONAL_COMM"
   | "OTHERS";
 
+type SelectionStepKind =
+  | "DOCUMENT_SCREENING"
+  | "WEB_TEST"
+  | "ASSIGNMENT"
+  | "CODING_TEST"
+  | "CASUAL_INTERVIEW"
+  | "FIRST_INTERVIEW"
+  | "SECOND_INTERVIEW"
+  | "FINAL_INTERVIEW"
+  | "OFFER"
+  | "OTHER";
+
+type SelectionFormat = "ONLINE" | "IN_PERSON" | "UNKNOWN";
+
+type CompanyExperienceBody = {
+  companyName: string;
+  selectionExperience?: {
+    entryTrigger?: string;
+    overallTip?: string;
+    steps?: Array<{
+      stepKind: SelectionStepKind;
+      stepTitle?: string;
+      format?: SelectionFormat;
+      interviewerCount?: number;
+      durationMinutes?: number;
+      questions?: string;
+      atmosphere?: string;
+      preparation?: string;
+    }>;
+  } | null;
+};
+
 type Body = {
   name: string;
   studentId: string;
@@ -34,6 +66,7 @@ type Body = {
   department: Department;
   nickname?: string;
   companyNames?: string[];
+  companyExperiences?: CompanyExperienceBody[];
   remarks?: string;
   contactEmail?: string;
   isPublic?: boolean;
@@ -71,6 +104,13 @@ const updateAlumniProfileMutation = `
     updateAlumniProfile(input: $input) {
       id
       companyNames
+      companyExperiences {
+        id
+        companyName
+        selectionExperience {
+          id
+        }
+      }
       isPublic
       acceptContact
       skills
@@ -158,7 +198,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const companyNames = (body.companyNames ?? [])
+    const companyNames = (
+      body.companyExperiences?.map((item) => item.companyName) ??
+      body.companyNames ??
+      []
+    )
       .map((item) => item.trim())
       .filter((item) => item.length > 0);
     const contactEmail = body.contactEmail?.trim() || session.user?.email || undefined;
@@ -185,6 +229,7 @@ export async function POST(request: Request) {
           graduationYear,
           department: body.department,
           companyNames,
+          companyExperiences: body.companyExperiences,
           remarks: body.remarks,
           contactEmail,
           isPublic,

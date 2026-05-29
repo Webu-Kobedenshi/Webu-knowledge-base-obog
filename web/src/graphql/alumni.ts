@@ -34,6 +34,27 @@ const alumniListQuery = `
         graduationYear
         department
         companyNames
+        companyExperiences {
+          id
+          companyName
+          selectionExperience {
+            id
+            entryTrigger
+            overallTip
+            steps {
+              id
+              stepKind
+              stepTitle
+              format
+              interviewerCount
+              durationMinutes
+              questions
+              atmosphere
+              preparation
+              sortOrder
+            }
+          }
+        }
         remarks
         contactEmail
         isPublic
@@ -138,6 +159,27 @@ const alumniDetailQuery = `
       graduationYear
       department
       companyNames
+      companyExperiences {
+        id
+        companyName
+        selectionExperience {
+          id
+          entryTrigger
+          overallTip
+          steps {
+            id
+            stepKind
+            stepTitle
+            format
+            interviewerCount
+            durationMinutes
+            questions
+            atmosphere
+            preparation
+            sortOrder
+          }
+        }
+      }
       remarks
       contactEmail
       isPublic

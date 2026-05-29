@@ -1,0 +1,1 @@
+ALTER TABLE "SelectionStep" DROP COLUMN IF EXISTS "tip";

@@ -71,6 +71,7 @@ export class AlumniCommandService {
       ...input,
       nickname: normalized.nickname,
       companyNames: normalized.companyNames,
+      companyExperiences: normalized.companyExperiences,
       contactEmail: normalized.contactEmail,
       isPublic: normalized.isPublic,
       acceptContact: normalized.acceptContact,

@@ -3,6 +3,8 @@ import type {
   Prisma,
   Department as PrismaDepartment,
   Role as PrismaRole,
+  SelectionFormat as PrismaSelectionFormat,
+  SelectionStepKind as PrismaSelectionStepKind,
   UserStatus as PrismaUserStatus,
 } from "@prisma/client";
 import { PrismaService } from "../../../prisma.service";
@@ -25,6 +27,7 @@ type UpdateAlumniProfileInput = {
   graduationYear: number;
   department: Department;
   companyNames: string[];
+  companyExperiences?: CompanyExperienceInput[];
   remarks?: string;
   contactEmail?: string;
   isPublic: boolean;
@@ -35,6 +38,42 @@ type UpdateAlumniProfileInput = {
   entryTrigger?: string;
   interviewTip?: string;
   usefulCoursework?: string;
+};
+
+type SelectionStepKind =
+  | "DOCUMENT_SCREENING"
+  | "WEB_TEST"
+  | "ASSIGNMENT"
+  | "CODING_TEST"
+  | "CASUAL_INTERVIEW"
+  | "FIRST_INTERVIEW"
+  | "SECOND_INTERVIEW"
+  | "FINAL_INTERVIEW"
+  | "OFFER"
+  | "OTHER";
+
+type SelectionFormat = "ONLINE" | "IN_PERSON" | "UNKNOWN";
+
+type SelectionStepInput = {
+  stepKind: SelectionStepKind;
+  stepTitle?: string;
+  format?: SelectionFormat;
+  interviewerCount?: number;
+  durationMinutes?: number;
+  questions?: string;
+  atmosphere?: string;
+  preparation?: string;
+};
+
+type SelectionExperienceInput = {
+  entryTrigger?: string;
+  overallTip?: string;
+  steps?: SelectionStepInput[];
+};
+
+type CompanyExperienceInput = {
+  companyName: string;
+  selectionExperience?: SelectionExperienceInput | null;
 };
 
 type AlumniConnection = {
@@ -66,7 +105,32 @@ const alumniProfileSelect = {
   department: true,
   companies: {
     select: {
+      id: true,
       companyName: true,
+      selectionExperience: {
+        select: {
+          id: true,
+          entryTrigger: true,
+          overallTip: true,
+          steps: {
+            select: {
+              id: true,
+              stepKind: true,
+              stepTitle: true,
+              format: true,
+              interviewerCount: true,
+              durationMinutes: true,
+              questions: true,
+              atmosphere: true,
+              preparation: true,
+              sortOrder: true,
+            },
+            orderBy: {
+              sortOrder: "asc",
+            },
+          },
+        },
+      },
     },
     orderBy: {
       createdAt: "asc",
@@ -88,7 +152,7 @@ const alumniProfileSelect = {
   user: {
     select: userBaseSelect,
   },
-} as Prisma.AlumniProfileSelect;
+} satisfies Prisma.AlumniProfileSelect;
 
 const userSelect = {
   ...userBaseSelect,
@@ -116,6 +180,14 @@ export class AlumniRepository {
     return value as PrismaUserStatus;
   }
 
+  private toPrismaSelectionStepKind(value: SelectionStepKind): PrismaSelectionStepKind {
+    return value as PrismaSelectionStepKind;
+  }
+
+  private toPrismaSelectionFormat(value: SelectionFormat | undefined): PrismaSelectionFormat {
+    return (value ?? "UNKNOWN") as PrismaSelectionFormat;
+  }
+
   private toUserDto(record: UserRecord): UserDto {
     return {
       ...record,
@@ -131,6 +203,29 @@ export class AlumniRepository {
       graduationYear: record.graduationYear,
       department: record.department as Department,
       companyNames: record.companies.map((item) => item.companyName),
+      companyExperiences: record.companies.map((item) => ({
+        id: item.id,
+        companyName: item.companyName,
+        selectionExperience: item.selectionExperience
+          ? {
+              id: item.selectionExperience.id,
+              entryTrigger: item.selectionExperience.entryTrigger,
+              overallTip: item.selectionExperience.overallTip,
+              steps: item.selectionExperience.steps.map((step) => ({
+                id: step.id,
+                stepKind: step.stepKind as SelectionStepKind,
+                stepTitle: step.stepTitle,
+                format: step.format as SelectionFormat,
+                interviewerCount: step.interviewerCount,
+                durationMinutes: step.durationMinutes,
+                questions: step.questions,
+                atmosphere: step.atmosphere,
+                preparation: step.preparation,
+                sortOrder: step.sortOrder,
+              })),
+            }
+          : null,
+      })),
       remarks: record.remarks,
       contactEmail: record.contactEmail,
       avatarUrl: (record as { avatarUrl?: string | null }).avatarUrl ?? null,
@@ -302,13 +397,74 @@ export class AlumniRepository {
       });
 
       if (input.companyNames.length > 0) {
-        await transaction.alumniCompany.createMany({
-          data: input.companyNames.map((companyName) => ({
-            alumniProfileId: profile.id,
-            companyName,
-          })),
-          skipDuplicates: true,
-        });
+        if (input.companyExperiences) {
+          for (const company of input.companyExperiences) {
+            const record = await transaction.alumniCompany.upsert({
+              where: {
+                alumniProfileId_companyName: {
+                  alumniProfileId: profile.id,
+                  companyName: company.companyName,
+                },
+              },
+              create: {
+                alumniProfileId: profile.id,
+                companyName: company.companyName,
+              },
+              update: {},
+              select: { id: true },
+            });
+
+            if (company.selectionExperience) {
+              const experience = await transaction.selectionExperience.upsert({
+                where: { alumniCompanyId: record.id },
+                create: {
+                  alumniCompanyId: record.id,
+                  entryTrigger: company.selectionExperience.entryTrigger,
+                  overallTip: company.selectionExperience.overallTip,
+                },
+                update: {
+                  entryTrigger: company.selectionExperience.entryTrigger,
+                  overallTip: company.selectionExperience.overallTip,
+                },
+                select: { id: true },
+              });
+
+              await transaction.selectionStep.deleteMany({
+                where: { selectionExperienceId: experience.id },
+              });
+
+              const steps = company.selectionExperience.steps ?? [];
+              if (steps.length > 0) {
+                await transaction.selectionStep.createMany({
+                  data: steps.map((step, index) => ({
+                    selectionExperienceId: experience.id,
+                    stepKind: this.toPrismaSelectionStepKind(step.stepKind),
+                    stepTitle: step.stepTitle,
+                    format: this.toPrismaSelectionFormat(step.format),
+                    interviewerCount: step.interviewerCount,
+                    durationMinutes: step.durationMinutes,
+                    questions: step.questions,
+                    atmosphere: step.atmosphere,
+                    preparation: step.preparation,
+                    sortOrder: index,
+                  })),
+                });
+              }
+            } else {
+              await transaction.selectionExperience.deleteMany({
+                where: { alumniCompanyId: record.id },
+              });
+            }
+          }
+        } else {
+          await transaction.alumniCompany.createMany({
+            data: input.companyNames.map((companyName) => ({
+              alumniProfileId: profile.id,
+              companyName,
+            })),
+            skipDuplicates: true,
+          });
+        }
       }
 
       return profile.id;

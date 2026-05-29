@@ -35,6 +35,25 @@ enum UserStatus {
   WITHDRAWN
 }
 
+enum SelectionStepKind {
+  DOCUMENT_SCREENING
+  WEB_TEST
+  ASSIGNMENT
+  CODING_TEST
+  CASUAL_INTERVIEW
+  FIRST_INTERVIEW
+  SECOND_INTERVIEW
+  FINAL_INTERVIEW
+  OFFER
+  OTHER
+}
+
+enum SelectionFormat {
+  ONLINE
+  IN_PERSON
+  UNKNOWN
+}
+
 type User {
   id: ID!
   email: String!
@@ -58,6 +77,7 @@ type AlumniProfile {
   graduationYear: Int!
   department: Department!
   companyNames: [String!]!
+  companyExperiences: [CompanyExperience!]!
   remarks: String
   contactEmail: String
   avatarUrl: String
@@ -74,6 +94,32 @@ type AlumniProfile {
   updatedAt: String!
 }
 
+type CompanyExperience {
+  id: ID!
+  companyName: String!
+  selectionExperience: SelectionExperience
+}
+
+type SelectionExperience {
+  id: ID!
+  entryTrigger: String
+  overallTip: String
+  steps: [SelectionStep!]!
+}
+
+type SelectionStep {
+  id: ID!
+  stepKind: SelectionStepKind!
+  stepTitle: String
+  format: SelectionFormat!
+  interviewerCount: Int
+  durationMinutes: Int
+  questions: String
+  atmosphere: String
+  preparation: String
+  sortOrder: Int!
+}
+
 type AlumniConnection {
   items: [AlumniProfile!]!
   totalCount: Int!
@@ -85,6 +131,7 @@ input UpdateAlumniProfileInput {
   graduationYear: Int!
   department: Department!
   companyNames: [String!]!
+  companyExperiences: [CompanyExperienceInput!]
   remarks: String
   contactEmail: String
   isPublic: Boolean
@@ -95,6 +142,28 @@ input UpdateAlumniProfileInput {
   entryTrigger: String
   interviewTip: String
   usefulCoursework: String
+}
+
+input CompanyExperienceInput {
+  companyName: String!
+  selectionExperience: SelectionExperienceInput
+}
+
+input SelectionExperienceInput {
+  entryTrigger: String
+  overallTip: String
+  steps: [SelectionStepInput!]
+}
+
+input SelectionStepInput {
+  stepKind: SelectionStepKind!
+  stepTitle: String
+  format: SelectionFormat
+  interviewerCount: Int
+  durationMinutes: Int
+  questions: String
+  atmosphere: String
+  preparation: String
 }
 
 input InitialSettingsInput {

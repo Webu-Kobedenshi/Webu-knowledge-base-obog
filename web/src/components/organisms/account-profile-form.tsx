@@ -53,6 +53,7 @@ type AccountProfileFormState = {
   department: Department | "";
   nickname: string;
   companyNames: string[];
+  selectionExperiences: SelectionExperienceFormState[];
   remarks: string;
   contactEmail: string;
   isPublic: boolean;
@@ -65,6 +66,38 @@ type AccountProfileFormState = {
   usefulCoursework: string;
 };
 
+type SelectionStepKind =
+  | "DOCUMENT_SCREENING"
+  | "WEB_TEST"
+  | "ASSIGNMENT"
+  | "CODING_TEST"
+  | "CASUAL_INTERVIEW"
+  | "FIRST_INTERVIEW"
+  | "SECOND_INTERVIEW"
+  | "FINAL_INTERVIEW"
+  | "OFFER"
+  | "OTHER";
+
+type SelectionFormat = "ONLINE" | "IN_PERSON" | "UNKNOWN";
+
+type SelectionStepFormState = {
+  stepKind: SelectionStepKind;
+  stepTitle: string;
+  format: SelectionFormat;
+  interviewerCount: string;
+  durationMinutes: string;
+  questions: string;
+  atmosphere: string;
+  preparation: string;
+};
+
+type SelectionExperienceFormState = {
+  enabled: boolean;
+  entryTrigger: string;
+  overallTip: string;
+  steps: SelectionStepFormState[];
+};
+
 const defaultState: AccountProfileFormState = {
   name: "",
   studentId: "",
@@ -73,6 +106,7 @@ const defaultState: AccountProfileFormState = {
   department: "",
   nickname: "",
   companyNames: [],
+  selectionExperiences: [],
   remarks: "",
   contactEmail: "",
   isPublic: false,
@@ -84,6 +118,33 @@ const defaultState: AccountProfileFormState = {
   interviewTip: "",
   usefulCoursework: "",
 };
+
+const selectionStepOptions: Array<{ value: SelectionStepKind; label: string }> = [
+  { value: "DOCUMENT_SCREENING", label: "書類選考" },
+  { value: "WEB_TEST", label: "Webテスト" },
+  { value: "ASSIGNMENT", label: "課題" },
+  { value: "CODING_TEST", label: "コーディング試験" },
+  { value: "CASUAL_INTERVIEW", label: "カジュアル面談" },
+  { value: "FIRST_INTERVIEW", label: "一次面接" },
+  { value: "SECOND_INTERVIEW", label: "二次面接" },
+  { value: "FINAL_INTERVIEW", label: "最終面接" },
+  { value: "OFFER", label: "内定" },
+  { value: "OTHER", label: "その他" },
+];
+
+const selectionFormatOptions: Array<{ value: SelectionFormat; label: string }> = [
+  { value: "UNKNOWN", label: "不明" },
+  { value: "ONLINE", label: "オンライン" },
+  { value: "IN_PERSON", label: "対面" },
+];
+
+const defaultSelectionStepOrder: SelectionStepKind[] = [
+  "DOCUMENT_SCREENING",
+  "FIRST_INTERVIEW",
+  "SECOND_INTERVIEW",
+  "FINAL_INTERVIEW",
+  "OFFER",
+];
 
 const departmentOptions: Array<{ value: Department; label: string }> = [
   { value: "IT_EXPERT", label: "ITエキスパート（4年制）" },
@@ -134,6 +195,59 @@ function createRowId() {
   return Math.random().toString(36).slice(2);
 }
 
+function createBlankSelectionStep(stepKind: SelectionStepKind = "DOCUMENT_SCREENING") {
+  return {
+    stepKind,
+    stepTitle: "",
+    format: "UNKNOWN",
+    interviewerCount: "",
+    durationMinutes: "",
+    questions: "",
+    atmosphere: "",
+    preparation: "",
+  } satisfies SelectionStepFormState;
+}
+
+function getNextSelectionStepKind(steps: SelectionStepFormState[]): SelectionStepKind {
+  return (
+    defaultSelectionStepOrder.find(
+      (stepKind) => !steps.some((step) => step.stepKind === stepKind),
+    ) ?? "OTHER"
+  );
+}
+
+function createBlankSelectionExperience(): SelectionExperienceFormState {
+  return {
+    enabled: false,
+    entryTrigger: "",
+    overallTip: "",
+    steps: [createBlankSelectionStep()],
+  };
+}
+
+function hasSelectionStepContent(step: SelectionStepFormState) {
+  return Boolean(
+    step.stepTitle.trim() ||
+      step.interviewerCount.trim() ||
+      step.durationMinutes.trim() ||
+      step.questions.trim() ||
+      step.atmosphere.trim() ||
+      step.preparation.trim(),
+  );
+}
+
+function hasSelectionExperienceContent(experience: SelectionExperienceFormState) {
+  return Boolean(
+    experience.entryTrigger.trim() ||
+      experience.overallTip.trim() ||
+      experience.steps.some(hasSelectionStepContent),
+  );
+}
+
+function getStepDeleteKey(companyIndex: number, stepIndex: number) {
+  return `${companyIndex}:${stepIndex}`;
+}
+
 export function AccountProfileForm({
   initialProfile,
   initialName,
@@ -146,9 +260,45 @@ export function AccountProfileForm({
   redirectOnSuccess,
 }: AccountProfileFormProps) {
   const router = useRouter();
-  const initialCompanyNames = initialProfile?.alumniProfile?.companyNames?.length
-    ? [...initialProfile.alumniProfile.companyNames]
-    : [];
+  const initialCompanyExperiences = initialProfile?.alumniProfile?.companyExperiences?.length
+    ? initialProfile.alumniProfile.companyExperiences
+    : (initialProfile?.alumniProfile?.companyNames ?? []).map((companyName) => ({
+        id: companyName,
+        companyName,
+        selectionExperience: null,
+      }));
+  const initialCompanyNames = initialCompanyExperiences.map((item) => item.companyName);
+  const initialSelectionExperiences = initialCompanyExperiences.map((item) => {
+    const experience = item.selectionExperience;
+    if (!experience) {
+      return createBlankSelectionExperience();
+    }
+
+    return {
+      enabled: true,
+      entryTrigger: experience.entryTrigger ?? "",
+      overallTip: experience.overallTip ?? "",
+      steps:
+        experience.steps.length > 0
+          ? experience.steps.map((step) => ({
+              stepKind: step.stepKind,
+              stepTitle: step.stepTitle ?? "",
+              format: step.format,
+              interviewerCount:
+                step.interviewerCount !== null && step.interviewerCount !== undefined
+                  ? String(step.interviewerCount)
+                  : "",
+              durationMinutes:
+                step.durationMinutes !== null && step.durationMinutes !== undefined
+                  ? String(step.durationMinutes)
+                  : "",
+              questions: step.questions ?? "",
+              atmosphere: step.atmosphere ?? "",
+              preparation: step.preparation ?? "",
+            }))
+          : [createBlankSelectionStep()],
+    } satisfies SelectionExperienceFormState;
+  });
   const initialAvatarUrl = initialProfile?.alumniProfile?.avatarUrl ?? null;
   const initialIsPublic =
     (initialProfile?.alumniProfile?.isPublic ?? false) && initialCompanyNames.length > 0;
@@ -168,6 +318,7 @@ export function AccountProfileForm({
     department: initialProfile?.department ?? "",
     nickname: initialProfile?.alumniProfile?.nickname ?? initialName ?? "",
     companyNames: initialCompanyNames,
+    selectionExperiences: initialSelectionExperiences,
     remarks: initialProfile?.alumniProfile?.remarks ?? "",
     contactEmail: initialProfile?.alumniProfile?.contactEmail ?? initialEmail ?? "",
     isPublic: initialIsPublic,
@@ -197,6 +348,7 @@ export function AccountProfileForm({
   const [deepDiveOpen, setDeepDiveOpen] = useState(false);
   const [loginInfoOpen, setLoginInfoOpen] = useState(false);
   const [skillInput, setSkillInput] = useState("");
+  const [pendingStepDeleteKey, setPendingStepDeleteKey] = useState<string | null>(null);
 
   const canSubmitInitial = useMemo(() => {
     const enrollmentYear = Number(state.enrollmentYear);
@@ -233,6 +385,7 @@ export function AccountProfileForm({
     setState((prev) => ({
       ...prev,
       companyNames: [...prev.companyNames, ""],
+      selectionExperiences: [...prev.selectionExperiences, createBlankSelectionExperience()],
     }));
   };
 
@@ -242,6 +395,7 @@ export function AccountProfileForm({
     setState((prev) => ({
       ...prev,
       companyNames: prev.companyNames.filter((_, itemIndex) => itemIndex !== index),
+      selectionExperiences: prev.selectionExperiences.filter((_, itemIndex) => itemIndex !== index),
       isPublic:
         prev.companyNames.filter((_, itemIndex) => itemIndex !== index).length > 0
           ? prev.isPublic
@@ -250,6 +404,53 @@ export function AccountProfileForm({
         prev.companyNames.filter((_, itemIndex) => itemIndex !== index).length > 0
           ? prev.acceptContact
           : false,
+    }));
+  };
+
+  const updateSelectionExperienceAt = (
+    companyIndex: number,
+    updater: (value: SelectionExperienceFormState) => SelectionExperienceFormState,
+  ) => {
+    setState((prev) => ({
+      ...prev,
+      selectionExperiences: prev.selectionExperiences.map((item, index) =>
+        index === companyIndex ? updater(item) : item,
+      ),
+    }));
+  };
+
+  const updateSelectionStepAt = (
+    companyIndex: number,
+    stepIndex: number,
+    updater: (value: SelectionStepFormState) => SelectionStepFormState,
+  ) => {
+    setPendingStepDeleteKey(null);
+    updateSelectionExperienceAt(companyIndex, (experience) => ({
+      ...experience,
+      steps: experience.steps.map((step, index) => (index === stepIndex ? updater(step) : step)),
+    }));
+  };
+
+  const addSelectionStep = (companyIndex: number) => {
+    setPendingStepDeleteKey(null);
+    updateSelectionExperienceAt(companyIndex, (experience) => ({
+      ...experience,
+      enabled: true,
+      steps: [
+        ...experience.steps,
+        createBlankSelectionStep(getNextSelectionStepKind(experience.steps)),
+      ],
+    }));
+  };
+
+  const removeSelectionStep = (companyIndex: number, stepIndex: number) => {
+    setPendingStepDeleteKey(null);
+    updateSelectionExperienceAt(companyIndex, (experience) => ({
+      ...experience,
+      steps:
+        experience.steps.length > 1
+          ? experience.steps.filter((_, index) => index !== stepIndex)
+          : [createBlankSelectionStep()],
     }));
   };
 
@@ -266,9 +467,45 @@ export function AccountProfileForm({
       return false;
     }
 
-    const normalizedCompanyNames = Array.from(
-      new Set(state.companyNames.map((item) => item.trim()).filter((item) => item.length > 0)),
-    );
+    const seenCompanyNames = new Set<string>();
+    const normalizedCompanyExperiences = state.companyNames.flatMap((companyName, index) => {
+      const normalizedCompanyName = companyName.trim();
+      if (!normalizedCompanyName || seenCompanyNames.has(normalizedCompanyName)) {
+        return [];
+      }
+      seenCompanyNames.add(normalizedCompanyName);
+
+      const experience = state.selectionExperiences[index] ?? createBlankSelectionExperience();
+      const selectionExperience =
+        experience.enabled && hasSelectionExperienceContent(experience)
+          ? {
+              entryTrigger: experience.entryTrigger.trim() || undefined,
+              overallTip: experience.overallTip.trim() || undefined,
+              steps: experience.steps.filter(hasSelectionStepContent).map((step) => ({
+                stepKind: step.stepKind,
+                stepTitle: step.stepTitle.trim() || undefined,
+                format: step.format,
+                interviewerCount: step.interviewerCount.trim()
+                  ? Number(step.interviewerCount)
+                  : undefined,
+                durationMinutes: step.durationMinutes.trim()
+                  ? Number(step.durationMinutes)
+                  : undefined,
+                questions: step.questions.trim() || undefined,
+                atmosphere: step.atmosphere.trim() || undefined,
+                preparation: step.preparation.trim() || undefined,
+              })),
+            }
+          : null;
+
+      return [
+        {
+          companyName: normalizedCompanyName,
+          selectionExperience,
+        },
+      ];
+    });
+    const normalizedCompanyNames = normalizedCompanyExperiences.map((item) => item.companyName);
     const normalizedContactEmail = state.contactEmail.trim() || (initialEmail?.trim() ?? "");
     const isPublicToSave = forcePrivate ? false : state.isPublic;
 
@@ -300,6 +537,7 @@ export function AccountProfileForm({
           department: state.department,
           nickname: state.nickname,
           companyNames: normalizedCompanyNames,
+          companyExperiences: normalizedCompanyExperiences,
           remarks: state.remarks,
           contactEmail: normalizedContactEmail,
           isPublic: isPublicToSave,
@@ -783,48 +1021,306 @@ export function AccountProfileForm({
                     </div>
                   ) : null}
 
-                  <div className="space-y-2">
-                    {state.companyNames.map((companyName, index) => (
-                      <div key={companyRowIds[index]} className="flex items-center gap-2">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100/80 text-[11px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
-                          {index + 1}
-                        </div>
-                        <Input
-                          value={companyName}
-                          onChange={(event) => setCompanyNameAt(index, event.target.value)}
-                          placeholder="例: 株式会社○○"
-                          disabled={!canEditAlumniProfile}
-                          className={
-                            !companyName.trim() && state.isPublic
-                              ? "border-rose-300 focus-visible:ring-rose-400"
-                              : ""
-                          }
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeCompanyNameField(index)}
-                          disabled={!canEditAlumniProfile}
-                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-stone-400 transition-colors hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-rose-900/20 dark:hover:text-rose-400"
-                          title="削除"
+                  <div className="space-y-3">
+                    {state.companyNames.map((companyName, index) => {
+                      const experience =
+                        state.selectionExperiences[index] ?? createBlankSelectionExperience();
+
+                      return (
+                        <div
+                          key={companyRowIds[index]}
+                          className="rounded-2xl border border-stone-200/80 p-3 dark:border-stone-800/80"
                         >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <title>削除</title>
-                            <path d="M3 6h18" />
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                          </svg>
-                        </button>
-                      </div>
-                    ))}
+                          <div className="flex items-center gap-2">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100/80 text-[11px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                              {index + 1}
+                            </div>
+                            <Input
+                              value={companyName}
+                              onChange={(event) => setCompanyNameAt(index, event.target.value)}
+                              placeholder="例: 株式会社○○"
+                              disabled={!canEditAlumniProfile}
+                              className={
+                                !companyName.trim() && state.isPublic
+                                  ? "border-rose-300 focus-visible:ring-rose-400"
+                                  : ""
+                              }
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeCompanyNameField(index)}
+                              disabled={!canEditAlumniProfile}
+                              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-stone-400 transition-colors hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-rose-900/20 dark:hover:text-rose-400"
+                              title="削除"
+                            >
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <title>削除</title>
+                                <path d="M3 6h18" />
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                              </svg>
+                            </button>
+                          </div>
+
+                          <label className="mt-3 flex cursor-pointer items-center justify-between gap-3 rounded-xl bg-stone-50 px-3 py-2 dark:bg-stone-900/60">
+                            <span>
+                              <span className="block text-[12px] font-bold text-stone-800 dark:text-stone-100">
+                                この企業の選考体験を書く
+                              </span>
+                              <span className="block text-[10px] text-stone-500 dark:text-stone-400">
+                                任意。全ての内定先に書く必要はありません
+                              </span>
+                            </span>
+                            <span className="relative inline-flex">
+                              <input
+                                type="checkbox"
+                                checked={experience.enabled}
+                                onChange={(event) =>
+                                  updateSelectionExperienceAt(index, (prev) => ({
+                                    ...prev,
+                                    enabled: event.target.checked,
+                                  }))
+                                }
+                                disabled={!canEditAlumniProfile}
+                                className="peer sr-only"
+                              />
+                              <span className="block h-6 w-10.5 rounded-full bg-stone-200 transition-colors peer-checked:bg-emerald-500 dark:bg-stone-700" />
+                              <span className="absolute left-[3px] top-[3px] h-4.5 w-4.5 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-[18px]" />
+                            </span>
+                          </label>
+
+                          {experience.enabled ? (
+                            <div className="mt-3 space-y-3 rounded-xl border border-emerald-100 bg-emerald-50/40 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/10">
+                              <div className="block space-y-1.5">
+                                <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
+                                  エントリーのきっかけ
+                                </span>
+                                <Input
+                                  value={experience.entryTrigger}
+                                  onChange={(event) =>
+                                    updateSelectionExperienceAt(index, (prev) => ({
+                                      ...prev,
+                                      entryTrigger: event.target.value,
+                                    }))
+                                  }
+                                  placeholder="例: 学校求人、逆求人、インターン経由"
+                                  disabled={!canEditAlumniProfile}
+                                />
+                              </div>
+
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
+                                    選考フロー
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => addSelectionStep(index)}
+                                    disabled={!canEditAlumniProfile}
+                                    className="inline-flex h-8 items-center rounded-lg border border-emerald-200 bg-white px-3 text-[11px] font-bold text-emerald-700 transition hover:bg-emerald-50 disabled:opacity-40 dark:border-emerald-800 dark:bg-stone-900 dark:text-emerald-300"
+                                  >
+                                    ステップ追加
+                                  </button>
+                                </div>
+
+                                {experience.steps.map((step, stepIndex) => {
+                                  const deleteKey = getStepDeleteKey(index, stepIndex);
+                                  const isDeletePending = pendingStepDeleteKey === deleteKey;
+
+                                  return (
+                                    <div
+                                      key={`${companyRowIds[index]}-${stepIndex}`}
+                                      className="space-y-3 rounded-xl border border-stone-200 bg-white p-3 dark:border-stone-800 dark:bg-stone-950/60"
+                                    >
+                                      <div className="grid gap-2 sm:grid-cols-2">
+                                        <div className="space-y-1.5">
+                                          <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-400">
+                                            選考種別
+                                          </span>
+                                          <Select
+                                            value={step.stepKind}
+                                            onValueChange={(value) =>
+                                              updateSelectionStepAt(index, stepIndex, (prev) => ({
+                                                ...prev,
+                                                stepKind: value as SelectionStepKind,
+                                              }))
+                                            }
+                                            disabled={!canEditAlumniProfile}
+                                          >
+                                            <SelectTrigger>
+                                              <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              {selectionStepOptions.map((option) => (
+                                                <SelectItem key={option.value} value={option.value}>
+                                                  {option.label}
+                                                </SelectItem>
+                                              ))}
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                          <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-400">
+                                            実施形式
+                                          </span>
+                                          <Select
+                                            value={step.format}
+                                            onValueChange={(value) =>
+                                              updateSelectionStepAt(index, stepIndex, (prev) => ({
+                                                ...prev,
+                                                format: value as SelectionFormat,
+                                              }))
+                                            }
+                                            disabled={!canEditAlumniProfile}
+                                          >
+                                            <SelectTrigger>
+                                              <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              {selectionFormatOptions.map((option) => (
+                                                <SelectItem key={option.value} value={option.value}>
+                                                  {option.label}
+                                                </SelectItem>
+                                              ))}
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
+                                      </div>
+
+                                      <div className="grid gap-2 sm:grid-cols-3">
+                                        <Input
+                                          value={step.stepTitle}
+                                          onChange={(event) =>
+                                            updateSelectionStepAt(index, stepIndex, (prev) => ({
+                                              ...prev,
+                                              stepTitle: event.target.value,
+                                            }))
+                                          }
+                                          placeholder="補足名"
+                                          disabled={!canEditAlumniProfile}
+                                        />
+                                        <Input
+                                          value={step.interviewerCount}
+                                          onChange={(event) =>
+                                            updateSelectionStepAt(index, stepIndex, (prev) => ({
+                                              ...prev,
+                                              interviewerCount: event.target.value,
+                                            }))
+                                          }
+                                          type="number"
+                                          min={0}
+                                          placeholder="面接官人数"
+                                          disabled={!canEditAlumniProfile}
+                                        />
+                                        <Input
+                                          value={step.durationMinutes}
+                                          onChange={(event) =>
+                                            updateSelectionStepAt(index, stepIndex, (prev) => ({
+                                              ...prev,
+                                              durationMinutes: event.target.value,
+                                            }))
+                                          }
+                                          type="number"
+                                          min={0}
+                                          placeholder="所要時間(分)"
+                                          disabled={!canEditAlumniProfile}
+                                        />
+                                      </div>
+
+                                      <Textarea
+                                        value={step.questions}
+                                        onChange={(event) =>
+                                          updateSelectionStepAt(index, stepIndex, (prev) => ({
+                                            ...prev,
+                                            questions: event.target.value,
+                                          }))
+                                        }
+                                        placeholder="聞かれた質問"
+                                        disabled={!canEditAlumniProfile}
+                                      />
+                                      <Textarea
+                                        value={step.atmosphere}
+                                        onChange={(event) =>
+                                          updateSelectionStepAt(index, stepIndex, (prev) => ({
+                                            ...prev,
+                                            atmosphere: event.target.value,
+                                          }))
+                                        }
+                                        placeholder="面接の雰囲気"
+                                        disabled={!canEditAlumniProfile}
+                                      />
+                                      <Textarea
+                                        value={step.preparation}
+                                        onChange={(event) =>
+                                          updateSelectionStepAt(index, stepIndex, (prev) => ({
+                                            ...prev,
+                                            preparation: event.target.value,
+                                          }))
+                                        }
+                                        placeholder="準備してよかったこと"
+                                        disabled={!canEditAlumniProfile}
+                                      />
+                                      <div className="flex items-center justify-end gap-2">
+                                        {isDeletePending ? (
+                                          <button
+                                            type="button"
+                                            onClick={() => setPendingStepDeleteKey(null)}
+                                            className="text-[11px] font-semibold text-stone-400 transition hover:text-stone-600"
+                                          >
+                                            やめる
+                                          </button>
+                                        ) : null}
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            if (isDeletePending) {
+                                              removeSelectionStep(index, stepIndex);
+                                              return;
+                                            }
+                                            setPendingStepDeleteKey(deleteKey);
+                                          }}
+                                          disabled={!canEditAlumniProfile}
+                                          className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition disabled:opacity-40 ${
+                                            isDeletePending
+                                              ? "bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/20 dark:text-rose-300"
+                                              : "text-stone-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/20"
+                                          }`}
+                                        >
+                                          {isDeletePending
+                                            ? "もう一度押して削除"
+                                            : "このステップを削除"}
+                                        </button>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+
+                              <Textarea
+                                value={experience.overallTip}
+                                onChange={(event) =>
+                                  updateSelectionExperienceAt(index, (prev) => ({
+                                    ...prev,
+                                    overallTip: event.target.value,
+                                  }))
+                                }
+                                placeholder="この企業を受ける後輩に伝えたい全体Tips"
+                                disabled={!canEditAlumniProfile}
+                              />
+                            </div>
+                          ) : null}
+                        </div>
+                      );
+                    })}
                   </div>
 
                   <button

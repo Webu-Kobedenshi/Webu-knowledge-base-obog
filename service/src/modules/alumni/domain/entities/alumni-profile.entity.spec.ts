@@ -22,6 +22,7 @@ describe("AlumniProfileDraft", () => {
     expect(draft.toData()).toEqual({
       nickname: "taro",
       companyNames: ["ACME", "Beta"],
+      companyExperiences: undefined,
       contactEmail: "user@example.com",
       isPublic: true,
       acceptContact: true,
@@ -31,6 +32,57 @@ describe("AlumniProfileDraft", () => {
       entryTrigger: "学校求人",
       interviewTip: "tip",
       usefulCoursework: "coursework",
+    });
+  });
+
+  it("normalizes optional company selection experiences", () => {
+    const draft = AlumniProfileDraft.create(
+      {
+        nickname: "taro",
+        companyNames: [],
+        companyExperiences: [
+          {
+            companyName: " ACME ",
+            selectionExperience: {
+              entryTrigger: " 学校求人 ",
+              overallTip: " 落ち着いて話す ",
+              steps: [
+                {
+                  stepKind: "FIRST_INTERVIEW",
+                  format: "ONLINE",
+                  interviewerCount: 2,
+                  durationMinutes: 30,
+                  questions: " 志望動機 ",
+                },
+              ],
+            },
+          },
+        ],
+        isPublic: true,
+      },
+      "fallback@example.com",
+    );
+
+    expect(draft.toData()).toMatchObject({
+      companyNames: ["ACME"],
+      companyExperiences: [
+        {
+          companyName: "ACME",
+          selectionExperience: {
+            entryTrigger: "学校求人",
+            overallTip: "落ち着いて話す",
+            steps: [
+              {
+                stepKind: "FIRST_INTERVIEW",
+                format: "ONLINE",
+                interviewerCount: 2,
+                durationMinutes: 30,
+                questions: "志望動機",
+              },
+            ],
+          },
+        },
+      ],
     });
   });
 
