@@ -147,9 +147,9 @@
 アバター画像は S3 互換ストレージへ直接アップロードする。
 
 - サーバー内通信・削除処理は `ENDPOINT` を使う
-- ブラウザが直接 `PUT` する署名付きURLは `PUBLIC_ENDPOINT` を使って生成する
-- 保存する公開URLも `PUBLIC_ENDPOINT` から組み立てる
-- ローカル MinIO では `ENDPOINT=http://minio:9000`、`PUBLIC_ENDPOINT=http://localhost:9000` のように内部向けとブラウザ向けを分ける
+- ブラウザが直接 `PUT` する署名付きURLは `PUBLIC_UPLOAD_ENDPOINT` を使って生成する
+- 保存する公開URLは `PUBLIC_ENDPOINT` から組み立てる
+- ローカル MinIO では `ENDPOINT=http://minio:9000`、`PUBLIC_UPLOAD_ENDPOINT=http://localhost:9000`、`PUBLIC_ENDPOINT=http://localhost:9000` のように内部向け・アップロード向け・配信用を分ける
 
 ## 5. Directory Structure
 
@@ -244,5 +244,5 @@
   - ヒーロー背景からアバター画像オーバーレイを外し、学科カラーを一貫表示
   - 一覧カードのバッジを削減し、主要CTAの位置が揃うように調整
 - ストレージ境界を更新
-  - ブラウザ用の署名付きアップロードURLは `PUBLIC_ENDPOINT` で生成
+  - ブラウザ用の署名付きアップロードURLは `PUBLIC_UPLOAD_ENDPOINT` で生成
   - サーバー内部のS3操作は `ENDPOINT` を使い続ける

@@ -63,6 +63,7 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/webu_portal?schema=public
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-change-this-in-env}
       ENDPOINT: ${ENDPOINT:-http://minio:9000}
+      PUBLIC_UPLOAD_ENDPOINT: ${PUBLIC_UPLOAD_ENDPOINT:-http://localhost:9000}
       PUBLIC_ENDPOINT: ${PUBLIC_ENDPOINT:-http://localhost:9000}
       ACCESS_KEY: ${ACCESS_KEY:-minioadmin}
       SECRET_KEY: ${SECRET_KEY:-minioadmin}
@@ -96,6 +97,7 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       ENDPOINT: ${ENDPOINT:-http://minio:9000}
+      PUBLIC_UPLOAD_ENDPOINT: ${PUBLIC_UPLOAD_ENDPOINT:-http://localhost:9000}
       PUBLIC_ENDPOINT: ${PUBLIC_ENDPOINT:-http://localhost:9000}
       ACCESS_KEY: ${ACCESS_KEY:-minioadmin}
       SECRET_KEY: ${SECRET_KEY:-minioadmin}

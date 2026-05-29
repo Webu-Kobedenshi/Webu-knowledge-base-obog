@@ -64,7 +64,7 @@
 - 内定は選考ステップとして新規入力せず、面接・試験・課題など後輩が準備に使える接点だけを登録する
 - 面接官人数は `1 / 2 / 3 / その他` の選択式で扱い、保存上は `4以上` を「その他 / 複数人」として表示する
 - 画像は `getUploadUrl` で署名付きURLを取得し、アップロード後 `updateAvatar` でURLを保存
-- 署名付きアップロードURLはブラウザから到達可能な `PUBLIC_ENDPOINT` で生成し、サーバー内部のS3操作は `ENDPOINT` を使う
+- 署名付きアップロードURLはブラウザから到達可能な `PUBLIC_UPLOAD_ENDPOINT` で生成し、サーバー内部のS3操作は `ENDPOINT`、保存する公開URLは `PUBLIC_ENDPOINT` を使う
 - ※要件上の「ALUMNI限定編集」は今後の厳格化対象（現実装は本人トークン前提の更新）
 
 ---
@@ -105,7 +105,7 @@
 ### 4.4 アバター更新フロー
 
 1. `POST /api/account/avatar/upload-url`
-2. `PUBLIC_ENDPOINT` で署名されたURLへブラウザから `PUT`
+2. `PUBLIC_UPLOAD_ENDPOINT` で署名されたURLへブラウザから `PUT`
 3. `POST /api/account/avatar/complete` で `avatarUrl` を永続化
 
 ### 4.5 選考体験更新フロー

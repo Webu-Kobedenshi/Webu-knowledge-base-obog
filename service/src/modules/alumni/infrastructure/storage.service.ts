@@ -14,11 +14,12 @@ type UploadUrlResult = {
 export class StorageService implements StoragePort {
   private readonly endpoint: string;
   private readonly publicEndpoint: string;
+  private readonly publicUploadEndpoint: string;
   private readonly accessKey: string;
   private readonly secretKey: string;
   private readonly bucketName: string;
   private readonly s3Client: S3Client;
-  private readonly publicS3Client: S3Client;
+  private readonly uploadS3Client: S3Client;
 
   constructor() {
     this.endpoint = process.env.ENDPOINT ?? "http://minio:9000";
@@ -27,6 +28,9 @@ export class StorageService implements StoragePort {
       this.endpoint
         .replace("http://minio:", "http://localhost:")
         .replace("https://minio:", "https://localhost:");
+    this.publicUploadEndpoint =
+      process.env.PUBLIC_UPLOAD_ENDPOINT ??
+      (this.isR2PublicEndpoint(this.publicEndpoint) ? this.endpoint : this.publicEndpoint);
     this.accessKey = process.env.ACCESS_KEY ?? "minioadmin";
     this.secretKey = process.env.SECRET_KEY ?? "minioadmin";
     this.bucketName = process.env.BUCKET_NAME ?? "webu-portal";
@@ -43,9 +47,9 @@ export class StorageService implements StoragePort {
       },
     });
 
-    this.publicS3Client = new S3Client({
+    this.uploadS3Client = new S3Client({
       region: "us-east-1",
-      endpoint: this.publicEndpoint,
+      endpoint: this.publicUploadEndpoint,
       forcePathStyle: true,
       requestChecksumCalculation: "WHEN_REQUIRED",
       responseChecksumValidation: "WHEN_REQUIRED",
@@ -54,6 +58,14 @@ export class StorageService implements StoragePort {
         secretAccessKey: this.secretKey,
       },
     });
+  }
+
+  private isR2PublicEndpoint(endpoint: string): boolean {
+    try {
+      return new URL(endpoint).hostname.endsWith(".r2.dev");
+    } catch {
+      return false;
+    }
   }
 
   private normalizeFileName(fileName: string): string {
@@ -108,7 +120,7 @@ export class StorageService implements StoragePort {
       ContentType: params.contentType,
     });
 
-    const uploadUrl = await getSignedUrl(this.publicS3Client, command, {
+    const uploadUrl = await getSignedUrl(this.uploadS3Client, command, {
       expiresIn: 300,
     });
 

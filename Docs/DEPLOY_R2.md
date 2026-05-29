@@ -32,6 +32,11 @@ R2 画面から S3 endpoint を確認します。
 
 - `PUBLIC_ENDPOINT`: `https://<your-r2-public-domain>` もしくは `https://<bucket>.r2.dev`
 
+ブラウザからの署名付きアップロード先は S3 API endpoint を使います。
+
+- `PUBLIC_UPLOAD_ENDPOINT`: `https://<account-id>.r2.cloudflarestorage.com`
+- 未設定の場合、`PUBLIC_ENDPOINT` が `*.r2.dev` のときは `ENDPOINT` を使って署名付きアップロード URL を生成します。
+
 ## 4. CORS 設定（必須）
 
 R2 バケットで CORS を設定しないと、ブラウザの preflight (`OPTIONS`) が失敗し、
@@ -59,6 +64,7 @@ Cloudflare Dashboard → R2 → 対象バケット → `Settings` → `CORS poli
 ```bash
 flyctl secrets set \
   ENDPOINT="https://<account-id>.r2.cloudflarestorage.com" \
+  PUBLIC_UPLOAD_ENDPOINT="https://<account-id>.r2.cloudflarestorage.com" \
   PUBLIC_ENDPOINT="https://<your-r2-public-domain>" \
   ACCESS_KEY="<r2-access-key-id>" \
   SECRET_KEY="<r2-secret-access-key>" \

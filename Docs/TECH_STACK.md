@@ -24,6 +24,7 @@
 - Cloudflare R2（S3 互換オブジェクトストレージ）
   - アバター画像アップロードに利用（S3 署名付きURLで直接 PUT）
   - `ENDPOINT` は S3 API 用（例: `https://<account-id>.r2.cloudflarestorage.com`）
+  - `PUBLIC_UPLOAD_ENDPOINT` はブラウザから到達可能な署名付き PUT 用 S3 API URL（例: `https://<account-id>.r2.cloudflarestorage.com`、ローカルは `http://localhost:9000`）
   - `PUBLIC_ENDPOINT` は配信用の公開ベース URL（例: `https://<bucket>.r2.dev` またはカスタム CDN ドメイン`）
   - ブラウザから直接アップロードする場合は **バケットの CORS 設定** が必須
   - 実装注意点: 署名生成はサーバ側で行い、公開 URL は `PUBLIC_ENDPOINT` を元に生成する
