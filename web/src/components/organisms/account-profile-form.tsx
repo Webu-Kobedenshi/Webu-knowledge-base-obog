@@ -15,6 +15,7 @@ import { showErrorToast, showSuccessToast } from "@/components/atoms/toast";
 import { BasicProfileSection } from "@/components/organisms/account-profile/basic-profile-section";
 import { LinkedGmailSection } from "@/components/organisms/account-profile/linked-gmail-section";
 import type { AlumniProfile, Department, UserStatus } from "@/graphql/types";
+import { Ban, ImagePlus, LoaderCircle, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 
@@ -145,6 +146,20 @@ const interviewerCountOptions: Array<{ value: string; label: string }> = [
   { value: "OTHER", label: "その他" },
 ];
 
+const entryTriggerOptions = [
+  "学校求人",
+  "インターン経由",
+  "逆求人",
+  "企業説明会",
+  "合同説明会",
+  "先生・職員紹介",
+  "先輩紹介",
+  "求人サイト",
+  "企業サイト",
+  "SNS",
+  "その他",
+];
+
 const defaultSelectionStepOrder: SelectionStepKind[] = [
   "DOCUMENT_SCREENING",
   "FIRST_INTERVIEW",
@@ -252,6 +267,15 @@ function getStepDeleteKey(companyIndex: number, stepIndex: number) {
   return `${companyIndex}:${stepIndex}`;
 }
 
+function getEntryTriggerOptions(currentValue: string) {
+  const normalized = currentValue.trim();
+  if (!normalized || entryTriggerOptions.includes(normalized)) {
+    return entryTriggerOptions;
+  }
+
+  return [normalized, ...entryTriggerOptions];
+}
+
 export function AccountProfileForm({
   initialProfile,
   initialName,
@@ -356,6 +380,10 @@ export function AccountProfileForm({
   const [loginInfoOpen, setLoginInfoOpen] = useState(false);
   const [skillInput, setSkillInput] = useState("");
   const [pendingStepDeleteKey, setPendingStepDeleteKey] = useState<string | null>(null);
+  const canUploadAvatar = Boolean(selectedAvatarFile && state.isPublic && !isUploadingAvatar);
+  const avatarUploadHint = selectedAvatarFile
+    ? "選択した画像をアップロードできます"
+    : "画像を選択するとアップロードできます";
 
   const canSubmitInitial = useMemo(() => {
     const enrollmentYear = Number(state.enrollmentYear);
@@ -939,19 +967,41 @@ export function AccountProfileForm({
                       <div className="grid grid-cols-2 gap-2">
                         <label
                           htmlFor="profile-avatar-file"
-                          className="inline-flex h-9 w-full cursor-pointer items-center justify-center rounded-lg border border-stone-300 px-3 text-xs font-semibold text-stone-700 transition-colors hover:bg-stone-50 dark:border-stone-700 dark:text-stone-200 dark:hover:bg-stone-800"
+                          className="inline-flex h-9 w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-stone-300 px-3 text-xs font-semibold text-stone-700 transition-colors hover:bg-stone-50 dark:border-stone-700 dark:text-stone-200 dark:hover:bg-stone-800"
                         >
+                          <ImagePlus className="size-3.5" aria-hidden="true" />
                           写真を選択
                         </label>
 
                         <Button
                           type="button"
                           onClick={handleAvatarUpload}
-                          disabled={isUploadingAvatar || !selectedAvatarFile || !state.isPublic}
+                          disabled={!canUploadAvatar}
+                          aria-disabled={!canUploadAvatar}
+                          title={avatarUploadHint}
                           variant="secondary"
-                          className="h-9 w-full px-3 text-xs font-bold disabled:opacity-40"
+                          className={
+                            canUploadAvatar
+                              ? "h-9 w-full gap-1.5 px-3 text-xs font-bold"
+                              : "h-9 w-full gap-1.5 border border-dashed border-stone-300 bg-stone-100 px-3 text-xs font-bold text-stone-400 shadow-none hover:bg-stone-100 disabled:opacity-100 dark:border-stone-700 dark:bg-stone-800/60 dark:text-stone-500 dark:hover:bg-stone-800/60"
+                          }
                         >
-                          {isUploadingAvatar ? "アップロード中…" : "アップロード"}
+                          {isUploadingAvatar ? (
+                            <>
+                              <LoaderCircle className="size-3.5 animate-spin" aria-hidden="true" />
+                              アップロード中…
+                            </>
+                          ) : canUploadAvatar ? (
+                            <>
+                              <Upload className="size-3.5" aria-hidden="true" />
+                              アップロード
+                            </>
+                          ) : (
+                            <>
+                              <Ban className="size-3.5" aria-hidden="true" />
+                              未選択
+                            </>
+                          )}
                         </Button>
                       </div>
 
@@ -959,7 +1009,11 @@ export function AccountProfileForm({
                         <p className="truncate rounded-lg border border-stone-200/80 bg-stone-50 px-2 py-1 text-[11px] text-stone-500 dark:border-stone-700/60 dark:bg-stone-800/60 dark:text-stone-400">
                           {selectedAvatarFile.name}
                         </p>
-                      ) : null}
+                      ) : (
+                        <p className="text-[11px] font-medium text-stone-400 dark:text-stone-500">
+                          画像を選択するとアップロードできます
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1144,17 +1198,30 @@ export function AccountProfileForm({
                                 <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
                                   エントリーのきっかけ
                                 </span>
-                                <Input
-                                  value={experience.entryTrigger}
-                                  onChange={(event) =>
+                                <Select
+                                  value={experience.entryTrigger || "UNSELECTED"}
+                                  onValueChange={(value) =>
                                     updateSelectionExperienceAt(index, (prev) => ({
                                       ...prev,
-                                      entryTrigger: event.target.value,
+                                      entryTrigger: value === "UNSELECTED" ? "" : value,
                                     }))
                                   }
-                                  placeholder="例: 学校求人、逆求人、インターン経由"
                                   disabled={!canEditAlumniProfile}
-                                />
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="選択してください" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="UNSELECTED">選択してください</SelectItem>
+                                    {getEntryTriggerOptions(experience.entryTrigger).map(
+                                      (option) => (
+                                        <SelectItem key={option} value={option}>
+                                          {option}
+                                        </SelectItem>
+                                      ),
+                                    )}
+                                  </SelectContent>
+                                </Select>
                               </div>
 
                               <div className="space-y-3">
