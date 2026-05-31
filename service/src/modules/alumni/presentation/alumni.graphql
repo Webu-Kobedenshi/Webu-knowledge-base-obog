@@ -183,6 +183,7 @@ extend type Query {
   getMyProfile: User!
   getAlumniDetail(id: ID!): AlumniProfile
   findUserByLinkedGmail(gmail: String!): User
+  isAdminEmail(email: String!): Boolean!
 }
 
 extend type Mutation {
@@ -190,6 +191,6 @@ extend type Mutation {
   updateAlumniProfile(input: UpdateAlumniProfileInput!): AlumniProfile!
   updateAvatar(url: String!): AlumniProfile!
   deleteMyAccount: Boolean!
-  linkGmail(gmail: String!): User!
+  linkGmail(verificationToken: String!): User!
   unlinkGmail: User!
 }

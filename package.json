@@ -15,7 +15,8 @@
     "prisma:generate": "pnpm --filter service exec prisma generate",
     "prisma:migrate": "pnpm --filter service exec prisma migrate dev",
     "prisma:studio": "pnpm --filter service exec prisma studio",
-    "prisma:seed": "pnpm --filter service run db:seed"
+    "prisma:seed": "pnpm --filter service run db:seed",
+    "prisma:seed:admin-emails": "pnpm --filter service run db:seed:admin-emails"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4"

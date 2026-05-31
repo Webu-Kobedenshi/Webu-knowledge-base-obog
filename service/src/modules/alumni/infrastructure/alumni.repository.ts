@@ -259,6 +259,15 @@ export class AlumniRepository implements AlumniRepositoryPort {
     return record ? this.toUserDto(record) : null;
   }
 
+  async findUserByEmail(email: string): Promise<UserDto | null> {
+    const record = await this.prisma.user.findUnique({
+      where: { email: email.toLowerCase().trim() },
+      select: userSelect,
+    });
+
+    return record ? this.toUserDto(record) : null;
+  }
+
   async updateInitialSettings(
     userId: string,
     input: InitialSettingsPersistenceInput,
@@ -458,6 +467,20 @@ export class AlumniRepository implements AlumniRepositoryPort {
     });
 
     return record ? this.toUserDto(record) : null;
+  }
+
+  async isAdminEmail(email: string): Promise<boolean> {
+    const normalizedEmail = email.toLowerCase().trim();
+    if (!normalizedEmail) {
+      return false;
+    }
+
+    const record = await this.prisma.adminEmail.findUnique({
+      where: { email: normalizedEmail },
+      select: { id: true },
+    });
+
+    return Boolean(record);
   }
 
   async updateLinkedGmail(userId: string, gmail: string | null): Promise<UserDto> {

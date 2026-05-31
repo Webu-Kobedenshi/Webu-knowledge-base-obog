@@ -37,6 +37,7 @@ describe("AlumniQueryService", () => {
       findPublicById: jest.fn(),
       findUserById: jest.fn(),
       findUserByLinkedGmail: jest.fn(),
+      isAdminEmail: jest.fn(),
     } as unknown as AlumniRepositoryPort;
 
     const service = new AlumniQueryService(repo);
@@ -174,6 +175,36 @@ describe("AlumniQueryService", () => {
 
       expect(result).toEqual(profile);
     });
+
+    it("returns admin profile with nullable initial settings as-is", async () => {
+      const { service, repo } = createService();
+      const profile = createUser({
+        role: "ADMIN",
+        studentId: null,
+        enrollmentYear: null,
+        durationYears: null,
+        department: null,
+      });
+      (repo.findUserById as jest.Mock).mockResolvedValue(profile);
+
+      const result = await service.getMyProfile("u1");
+
+      expect(result).toEqual(profile);
+    });
+
+    it("does not apply student graduation role resolution to admin profiles", async () => {
+      const { service, repo } = createService();
+      const profile = createUser({
+        role: "ADMIN",
+        enrollmentYear: 2020,
+        durationYears: 1,
+      });
+      (repo.findUserById as jest.Mock).mockResolvedValue(profile);
+
+      const result = await service.getMyProfile("u1");
+
+      expect(result).toEqual(profile);
+    });
   });
 
   describe("findUserByLinkedGmail", () => {
@@ -186,6 +217,18 @@ describe("AlumniQueryService", () => {
 
       expect(repo.findUserByLinkedGmail).toHaveBeenCalledWith("user@gmail.com");
       expect(result).toEqual(profile);
+    });
+  });
+
+  describe("isAdminEmail", () => {
+    it("delegates to repository", async () => {
+      const { service, repo } = createService();
+      (repo.isAdminEmail as jest.Mock).mockResolvedValue(true);
+
+      const result = await service.isAdminEmail("teacher@example.com");
+
+      expect(repo.isAdminEmail).toHaveBeenCalledWith("teacher@example.com");
+      expect(result).toBe(true);
     });
   });
 });

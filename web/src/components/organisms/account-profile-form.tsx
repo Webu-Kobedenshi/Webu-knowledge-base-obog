@@ -368,7 +368,6 @@ export function AccountProfileForm({
   const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null);
   const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-  const [linkedGmailInput, setLinkedGmailInput] = useState("");
   const [currentLinkedGmail, setCurrentLinkedGmail] = useState<string | null>(
     initialProfile?.linkedGmail ?? null,
   );
@@ -742,38 +741,8 @@ export function AccountProfileForm({
   };
 
   const handleLinkGmail = async () => {
-    const email = linkedGmailInput.trim().toLowerCase();
-    if (!email) {
-      showErrorToast("Gmailアドレスを入力してください");
-      return;
-    }
-
-    if (!email.endsWith("@gmail.com")) {
-      showErrorToast("有効な @gmail.com アドレスを指定してください");
-      return;
-    }
-
     setIsLinkingGmail(true);
-    try {
-      const response = await fetch("/api/account/gmail", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ gmail: email }),
-      });
-
-      const json = await response.json();
-      if (!response.ok || !json.ok) {
-        throw new Error(json.message || "Gmail連携に失敗しました");
-      }
-
-      setCurrentLinkedGmail(email);
-      setLinkedGmailInput("");
-      showSuccessToast("引き継ぎGmailアドレスを登録しました");
-    } catch (err) {
-      showErrorToast(err instanceof Error ? err.message : "サーバーエラーが発生しました");
-    } finally {
-      setIsLinkingGmail(false);
-    }
+    window.location.href = "/api/account/gmail/verify/start";
   };
 
   const handleUnlinkGmail = async () => {
@@ -831,8 +800,6 @@ export function AccountProfileForm({
           loginInfoOpen={loginInfoOpen}
           onToggleLoginInfoOpen={() => setLoginInfoOpen((prev) => !prev)}
           currentLinkedGmail={currentLinkedGmail}
-          linkedGmailInput={linkedGmailInput}
-          onLinkedGmailInputChange={setLinkedGmailInput}
           onLinkGmail={handleLinkGmail}
           onUnlinkGmail={handleUnlinkGmail}
           isLinkingGmail={isLinkingGmail}

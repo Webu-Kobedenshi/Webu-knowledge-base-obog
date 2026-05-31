@@ -10,6 +10,10 @@ import { Role, type User, UserStatus } from "@prisma/client";
 import { jwtVerify } from "jose";
 import { PrismaService } from "../../prisma.service";
 
+const DEFAULT_AUTHORIZED_DOMAIN = "st.kobedenshi.ac.jp,gmail.com";
+const SCHOOL_EMAIL_DOMAIN = "st.kobedenshi.ac.jp";
+const TEACHER_EMAIL_LOCAL_PART_PATTERN = /^[a-z][a-z._-]*$/;
+
 type AuthPayload = {
   sub?: string;
   email?: string;
@@ -30,10 +34,47 @@ export class GqlAuthGuard implements CanActivate {
     return new TextEncoder().encode(secret);
   }
 
+  private normalizeEmail(email: string): string {
+    return email.toLowerCase().trim();
+  }
+
+  private isTeacherEmailFormat(email: string): boolean {
+    const [localPart, domain, ...rest] = email.split("@");
+    return (
+      rest.length === 0 &&
+      domain === SCHOOL_EMAIL_DOMAIN &&
+      TEACHER_EMAIL_LOCAL_PART_PATTERN.test(localPart)
+    );
+  }
+
+  private isAllowedDomain(email: string): boolean {
+    const allowedDomainsRaw = process.env.AUTH_ALLOWED_DOMAINS?.trim() || DEFAULT_AUTHORIZED_DOMAIN;
+    const allowedDomains = allowedDomainsRaw
+      .split(",")
+      .map((item) => item.trim().toLowerCase().replace(/^@/, ""))
+      .filter(Boolean);
+
+    return allowedDomains.some((domain) => email.endsWith(`@${domain}`));
+  }
+
+  private async isAdminEmail(email: string): Promise<boolean> {
+    const record = await this.prisma.adminEmail.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+
+    return Boolean(record);
+  }
+
   private async findOrCreateUser(payload: Required<Pick<AuthPayload, "email">> & AuthPayload) {
-    if (payload.email.toLowerCase().endsWith("@gmail.com")) {
+    const email = this.normalizeEmail(payload.email);
+    const isAdmin = await this.isAdminEmail(email);
+    const isAllowed = this.isAllowedDomain(email);
+    const isTeacherEmail = this.isTeacherEmailFormat(email);
+
+    if (email.endsWith("@gmail.com")) {
       const linkedUser = await this.prisma.user.findUnique({
-        where: { linkedGmail: payload.email.toLowerCase().trim() },
+        where: { linkedGmail: email },
       });
 
       if (linkedUser) {
@@ -41,19 +82,41 @@ export class GqlAuthGuard implements CanActivate {
       }
     }
 
+    if ((!isAllowed && !isAdmin) || (isTeacherEmail && !isAdmin)) {
+      throw new UnauthorizedException("Email is not allowed");
+    }
+
     const existing = await this.prisma.user.findUnique({
-      where: { email: payload.email },
+      where: { email },
     });
 
     if (existing) {
+      if (isAdmin && existing.role !== Role.ADMIN) {
+        return this.prisma.user.update({
+          where: { id: existing.id },
+          data: { role: Role.ADMIN },
+        });
+      }
+
       return existing;
+    }
+
+    if (isAdmin) {
+      return this.prisma.user.create({
+        data: {
+          email,
+          name: payload.name,
+          role: Role.ADMIN,
+          status: UserStatus.ENROLLED,
+        },
+      });
     }
 
     return this.prisma.user.create({
       data: {
-        email: payload.email,
+        email,
         name: payload.name,
-        role: (payload.role as Role | undefined) ?? Role.STUDENT,
+        role: Role.STUDENT,
         status: UserStatus.ENROLLED,
       },
     });

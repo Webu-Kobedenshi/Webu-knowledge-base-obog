@@ -1,5 +1,6 @@
 import { AccountActions } from "@/app/account/account-actions";
 import { authOptions } from "@/auth";
+import { ToastOnMount } from "@/components/atoms/toast-on-mount";
 import { AccountProfileForm } from "@/components/organisms/account-profile-form";
 import { fetchMyProfile } from "@/graphql/account";
 import { getServerSession } from "next-auth";
@@ -17,9 +18,20 @@ const roleGradient: Record<"STUDENT" | "ALUMNI" | "ADMIN", string> = {
   ADMIN: "from-amber-500 to-orange-500",
 };
 
-export default async function AccountPage() {
+type AccountPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function getSearchParamValue(value: string | string[] | undefined): string {
+  return (Array.isArray(value) ? value[0] : value)?.trim() ?? "";
+}
+
+export default async function AccountPage({ searchParams }: AccountPageProps) {
   const session = await getServerSession(authOptions);
   const { profile } = await fetchMyProfile();
+  const params = (await searchParams) ?? {};
+  const gmailLinkStatus = getSearchParamValue(params.gmailLinkStatus);
+  const gmailLinkMessage = getSearchParamValue(params.gmailLinkMessage);
   const role = (profile?.role ?? session?.user?.role) as "STUDENT" | "ALUMNI" | "ADMIN" | undefined;
   const displayName = profile?.name ?? session?.user?.name ?? "ユーザー";
   const email = profile?.email ?? session?.user?.email ?? "";
@@ -29,6 +41,10 @@ export default async function AccountPage() {
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-2xl px-4 py-6 md:px-6 md:py-10">
+      <ToastOnMount
+        variant={gmailLinkStatus === "success" ? "success" : "error"}
+        message={gmailLinkMessage}
+      />
       {/* ── Navigation ── */}
       <nav className="mb-6">
         <Link
@@ -109,15 +125,21 @@ export default async function AccountPage() {
           </div>
 
           <div className="mt-6 border-t border-stone-200/80 pt-6 dark:border-stone-800/70">
-            {/* ── Profile Form ── */}
-            <AccountProfileForm
-              initialProfile={profile}
-              initialName={profile?.name ?? session?.user?.name}
-              initialEmail={profile?.email ?? session?.user?.email}
-              title="プロフィール"
-              description="初期設定で入力した項目を更新できます。"
-              showPublicProfileFields={false}
-            />
+            {role === "ADMIN" ? (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+                <p className="font-bold">教員アカウント</p>
+                <p className="mt-1 text-xs opacity-80">{email}</p>
+              </div>
+            ) : (
+              <AccountProfileForm
+                initialProfile={profile}
+                initialName={profile?.name ?? session?.user?.name}
+                initialEmail={profile?.email ?? session?.user?.email}
+                title="プロフィール"
+                description="初期設定で入力した項目を更新できます。"
+                showPublicProfileFields={false}
+              />
+            )}
 
             {/* ── Account Actions ── */}
             <div className="mt-6">

@@ -107,6 +107,14 @@ model User {
   sessions Session[]
 }
 
+model AdminEmail {
+  id    String @id @default(cuid())
+  email String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // ------------------------------------------------------
 // 4. Alumni Models (Pagination Indexing Included)
 // ------------------------------------------------------

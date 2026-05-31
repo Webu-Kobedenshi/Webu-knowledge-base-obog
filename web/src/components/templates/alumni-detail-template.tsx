@@ -223,13 +223,15 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
                   <span className="block max-w-40 truncate text-[12px] font-bold">
                     {company.companyName}
                   </span>
-                  <span
-                    className={`mt-0.5 block text-[10px] ${
-                      isSelected ? "text-white/70 dark:text-stone-600" : "text-stone-400"
-                    }`}
-                  >
-                    {company.selectionExperience ? "選考体験あり" : "企業名のみ"}
-                  </span>
+                  {company.selectionExperience ? (
+                    <span
+                      className={`mt-0.5 block text-[10px] ${
+                        isSelected ? "text-white/70 dark:text-stone-600" : "text-stone-400"
+                      }`}
+                    >
+                      選考体験あり
+                    </span>
+                  ) : null}
                 </Button>
               );
             })}

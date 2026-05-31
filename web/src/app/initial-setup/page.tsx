@@ -1,9 +1,14 @@
 import { LogoutButton } from "@/components/molecules/logout-button";
 import { AccountProfileForm } from "@/components/organisms/account-profile-form";
 import { fetchMyProfile } from "@/graphql/account";
+import { redirect } from "next/navigation";
 
 export default async function InitialSetupPage() {
   const { profile } = await fetchMyProfile();
+
+  if (profile?.role === "ADMIN") {
+    redirect("/");
+  }
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-3xl px-6 py-10">

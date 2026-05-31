@@ -28,6 +28,10 @@ export class AlumniQueryService {
       return null;
     }
 
+    if (profile.role === "ADMIN") {
+      return profile;
+    }
+
     if (profile.enrollmentYear && profile.durationYears) {
       const resolved = resolveRoleAndStatus({
         enrollmentYear: profile.enrollmentYear,
@@ -48,5 +52,9 @@ export class AlumniQueryService {
 
   findUserByLinkedGmail(gmail: string): Promise<UserDto | null> {
     return this.alumniRepository.findUserByLinkedGmail(gmail);
+  }
+
+  isAdminEmail(email: string): Promise<boolean> {
+    return this.alumniRepository.isAdminEmail(email);
   }
 }

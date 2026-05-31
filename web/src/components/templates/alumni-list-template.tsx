@@ -112,12 +112,14 @@ export function AlumniListTemplate({
           <Badge variant="default">卒業年度: {initialGraduationYear}</Badge>
         ) : null}
         {initialCompany ? <Badge variant="default">企業: {initialCompany}</Badge> : null}
-        <Link
-          href="/account/public"
-          className="ml-auto inline-flex h-8 items-center rounded-lg border border-violet-200/80 bg-violet-50/80 px-3 text-xs font-semibold text-violet-700 transition hover:bg-violet-100/80 dark:border-violet-700/60 dark:bg-violet-900/30 dark:text-violet-200 dark:hover:bg-violet-900/50"
-        >
-          内定先を公開する
-        </Link>
+        {account.role !== "ADMIN" ? (
+          <Link
+            href="/account/public"
+            className="ml-auto inline-flex h-8 items-center rounded-lg border border-violet-200/80 bg-violet-50/80 px-3 text-xs font-semibold text-violet-700 transition hover:bg-violet-100/80 dark:border-violet-700/60 dark:bg-violet-900/30 dark:text-violet-200 dark:hover:bg-violet-900/50"
+          >
+            内定先を公開する
+          </Link>
+        ) : null}
       </section>
 
       {error ? <ToastOnMount variant="error" message={error} /> : null}

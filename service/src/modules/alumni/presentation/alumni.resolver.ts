@@ -24,9 +24,12 @@ export class AlumniResolver {
 
   @Query("findUserByLinkedGmail")
   findUserByLinkedGmail(@Args("gmail") gmail: string): Promise<UserDto | null> {
-    // ログイン前に auth.ts から呼ばれるため Guard をバイパスするか、Repository を利用する。
-    // QueryService にメソッドがないためリポジトリから引くか、QueryService に追加する。
     return this.alumniQueryService.findUserByLinkedGmail(gmail);
+  }
+
+  @Query("isAdminEmail")
+  isAdminEmail(@Args("email") email: string): Promise<boolean> {
+    return this.alumniQueryService.isAdminEmail(email);
   }
 
   @Query("getAlumniList")
@@ -107,8 +110,11 @@ export class AlumniResolver {
 
   @Mutation("linkGmail")
   @UseGuards(GqlAuthGuard)
-  linkGmail(@CurrentUser() user: User, @Args("gmail") gmail: string): Promise<UserDto> {
-    return this.alumniCommandService.linkGmail(user.id, gmail);
+  linkGmail(
+    @CurrentUser() user: User,
+    @Args("verificationToken") verificationToken: string,
+  ): Promise<UserDto> {
+    return this.alumniCommandService.linkGmail(user.id, verificationToken);
   }
 
   @Mutation("unlinkGmail")

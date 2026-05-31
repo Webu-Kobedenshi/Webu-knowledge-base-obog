@@ -62,6 +62,8 @@ services:
       PORT: 4000
       DATABASE_URL: postgresql://postgres:postgres@db:5432/webu_portal?schema=public
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-change-this-in-env}
+      AUTH_ALLOWED_DOMAINS: ${AUTH_ALLOWED_DOMAINS:-st.kobedenshi.ac.jp,gmail.com}
+      ADMIN_SEED_EMAILS: ${ADMIN_SEED_EMAILS:-}
       ENDPOINT: ${ENDPOINT:-http://minio:9000}
       PUBLIC_UPLOAD_ENDPOINT: ${PUBLIC_UPLOAD_ENDPOINT:-http://localhost:9000}
       PUBLIC_ENDPOINT: ${PUBLIC_ENDPOINT:-http://localhost:9000}
@@ -94,6 +96,7 @@ services:
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-change-this-in-env}
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-change-this-in-env}
+      AUTH_ALLOWED_DOMAINS: ${AUTH_ALLOWED_DOMAINS:-st.kobedenshi.ac.jp,gmail.com}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       ENDPOINT: ${ENDPOINT:-http://minio:9000}

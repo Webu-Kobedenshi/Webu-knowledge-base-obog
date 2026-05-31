@@ -42,6 +42,7 @@ Google Cloud Console の OAuth Client に以下を追加:
   - `https://<your-vercel-domain>`
 - Authorized redirect URIs:
   - `https://<your-vercel-domain>/api/auth/callback/google`
+  - `https://<your-vercel-domain>/api/account/gmail/verify/callback`
 
 ## 5. service（Fly）側の CORS 設定
 

@@ -1,20 +1,7 @@
 import { authOptions } from "@/auth";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-
-type GraphQlResponse<T> = {
-  data?: T;
-  errors?: Array<{ message: string }>;
-};
-
-const linkGmailMutation = `
-  mutation LinkGmail($gmail: String!) {
-    linkGmail(gmail: $gmail) {
-      id
-      linkedGmail
-    }
-  }
-`;
+import { linkGmailWithVerificationToken } from "./gmail-linking";
 
 const unlinkGmailMutation = `
   mutation UnlinkGmail {
@@ -24,6 +11,11 @@ const unlinkGmailMutation = `
     }
   }
 `;
+
+type GraphQlResponse<T> = {
+  data?: T;
+  errors?: Array<{ message: string }>;
+};
 
 async function executeGraphql<T>(serviceToken: string, query: string, variables?: unknown) {
   const endpoint = process.env.GRAPHQL_ENDPOINT ?? "http://localhost:4000/graphql";
@@ -59,31 +51,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    const { gmail } = await request.json();
-    if (!gmail || typeof gmail !== "string" || !gmail.endsWith("@gmail.com")) {
+    const { verificationToken } = await request.json();
+    if (!verificationToken || typeof verificationToken !== "string") {
       return NextResponse.json(
-        { ok: false, message: "有効な @gmail.com アドレスを指定してください" },
+        { ok: false, message: "GoogleでGmailアドレスを確認してください" },
         { status: 400 },
       );
     }
 
-    const result = await executeGraphql<{ linkGmail: { id: string } }>(
+    const result = await linkGmailWithVerificationToken({
       serviceToken,
-      linkGmailMutation,
-      { gmail: gmail.trim().toLowerCase() },
-    );
+      verificationToken,
+    });
 
-    if (result.errors?.length || !result.data?.linkGmail) {
-      return NextResponse.json(
-        {
-          ok: false,
-          message: result.errors?.map((item) => item.message).join(", ") || "Registration failed",
-        },
-        { status: 400 },
-      );
+    if (!result.ok) {
+      return NextResponse.json({ ok: false, message: result.message }, { status: 400 });
     }
 
-    return NextResponse.json({ ok: true, message: "Gmail account linked successfully" });
+    return NextResponse.json({
+      ok: true,
+      message: result.message,
+      linkedGmail: result.linkedGmail,
+    });
   } catch (err) {
     console.error("[POST /api/account/gmail] Unexpected error:", err);
     return NextResponse.json(

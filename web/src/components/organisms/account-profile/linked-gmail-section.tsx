@@ -1,13 +1,10 @@
 import { Button } from "@/components/atoms/button";
 import { Card } from "@/components/atoms/card";
-import { Input } from "@/components/atoms/input";
 
 type LinkedGmailSectionProps = {
   loginInfoOpen: boolean;
   onToggleLoginInfoOpen: () => void;
   currentLinkedGmail: string | null;
-  linkedGmailInput: string;
-  onLinkedGmailInputChange: (value: string) => void;
   onLinkGmail: () => void;
   onUnlinkGmail: () => void;
   isLinkingGmail: boolean;
@@ -17,8 +14,6 @@ export function LinkedGmailSection({
   loginInfoOpen,
   onToggleLoginInfoOpen,
   currentLinkedGmail,
-  linkedGmailInput,
-  onLinkedGmailInputChange,
   onLinkGmail,
   onUnlinkGmail,
   isLinkingGmail,
@@ -106,33 +101,19 @@ export function LinkedGmailSection({
                 </Button>
               </div>
             ) : (
-              <div className="space-y-2">
-                <label
-                  htmlFor="linked-gmail"
-                  className="block text-[11px] font-semibold text-stone-500 dark:text-stone-400"
-                >
-                  個人のGmailアドレス
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    id="linked-gmail"
-                    value={linkedGmailInput}
-                    onChange={(event) => onLinkedGmailInputChange(event.target.value)}
-                    placeholder="example@gmail.com"
-                    type="email"
-                    disabled={isLinkingGmail}
-                    className="flex-1"
-                  />
-                  <Button
-                    type="button"
-                    onClick={onLinkGmail}
-                    disabled={isLinkingGmail || !linkedGmailInput}
-                    variant="secondary"
-                    className="h-10 shrink-0 px-4 text-xs font-bold disabled:opacity-50"
-                  >
-                    {isLinkingGmail ? "登録中…" : "登録する"}
-                  </Button>
+              <div className="space-y-3">
+                <div className="rounded-lg border border-sky-100 bg-sky-50 px-4 py-3 text-xs leading-relaxed text-sky-800 dark:border-sky-900/50 dark:bg-sky-950/20 dark:text-sky-200">
+                  Googleの画面で個人のGmailを選択して、本人確認が完了したアドレスだけを登録します。
                 </div>
+                <Button
+                  type="button"
+                  onClick={onLinkGmail}
+                  disabled={isLinkingGmail}
+                  variant="secondary"
+                  className="h-10 w-full px-4 text-xs font-bold disabled:opacity-50"
+                >
+                  {isLinkingGmail ? "Google確認へ移動中…" : "GoogleでGmailを確認して登録"}
+                </Button>
               </div>
             )}
           </div>

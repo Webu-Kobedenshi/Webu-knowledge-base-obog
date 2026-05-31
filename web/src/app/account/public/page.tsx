@@ -24,6 +24,10 @@ export default async function AccountPublicProfilePage() {
     );
   }
 
+  if (profile.role === "ADMIN") {
+    redirect("/");
+  }
+
   return (
     <main className="mx-auto min-h-screen w-full max-w-2xl px-4 py-6 md:px-6 md:py-10">
       <nav className="mb-6">

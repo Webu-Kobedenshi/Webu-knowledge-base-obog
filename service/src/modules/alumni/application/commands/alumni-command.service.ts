@@ -1,4 +1,5 @@
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
+import { jwtVerify } from "jose";
 import { AlumniProfileDraft } from "../../domain/entities/alumni-profile.entity";
 import { InitialSettingsDraft } from "../../domain/entities/initial-settings.entity";
 import { DomainValidationError } from "../../domain/errors/domain-validation.error";
@@ -11,6 +12,27 @@ import type {
 } from "../dto/alumni.input";
 import { ALUMNI_REPOSITORY, type AlumniRepositoryPort } from "../ports/alumni-repository.port";
 import { STORAGE, type StoragePort } from "../ports/storage.port";
+
+const LINKED_GMAIL_VERIFICATION_PURPOSE = "linked-gmail-verification";
+const DUPLICATE_GMAIL_MESSAGE = "このGmailアドレスは既に他のアカウントに登録されています。";
+const INVALID_GMAIL_VERIFICATION_MESSAGE =
+  "Gmailアドレスの確認が完了していません。もう一度Googleで確認してください。";
+
+type LinkedGmailVerificationPayload = {
+  purpose?: string;
+  gmail?: string;
+  verifiedAt?: string;
+  sub?: string;
+};
+
+function isUniqueConstraintError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: unknown }).code === "P2002"
+  );
+}
 
 @Injectable()
 export class AlumniCommandService {
@@ -135,25 +157,70 @@ export class AlumniCommandService {
     return updated;
   }
 
-  async linkGmail(userId: string, gmail: string): Promise<UserDto> {
+  private getJwtSecret(): Uint8Array {
+    const secret = process.env.AUTH_JWT_SECRET ?? process.env.NEXTAUTH_SECRET;
+    if (!secret) {
+      throw new BadRequestException("Authentication is not configured");
+    }
+
+    return new TextEncoder().encode(secret);
+  }
+
+  private async verifyLinkedGmailToken(userId: string, verificationToken: string): Promise<string> {
+    let payload: LinkedGmailVerificationPayload;
+    try {
+      const result = await jwtVerify<LinkedGmailVerificationPayload>(
+        verificationToken,
+        this.getJwtSecret(),
+      );
+      payload = result.payload;
+    } catch {
+      throw new BadRequestException(INVALID_GMAIL_VERIFICATION_MESSAGE);
+    }
+
+    if (payload.purpose !== LINKED_GMAIL_VERIFICATION_PURPOSE || payload.sub !== userId) {
+      throw new BadRequestException(INVALID_GMAIL_VERIFICATION_MESSAGE);
+    }
+
     let address: GmailAddress;
     try {
-      address = GmailAddress.from(gmail);
+      address = GmailAddress.from(payload.gmail ?? "");
     } catch (error) {
       if (error instanceof DomainValidationError) {
         throw new BadRequestException(error.message);
       }
       throw error;
     }
-    const normalized = address.toString();
+
+    return address.toString();
+  }
+
+  async linkGmail(userId: string, verificationToken: string): Promise<UserDto> {
+    const normalized = await this.verifyLinkedGmailToken(userId, verificationToken);
+
+    const primaryEmailUser = await this.alumniRepository.findUserByEmail(normalized);
+    if (primaryEmailUser && primaryEmailUser.id !== userId) {
+      throw new BadRequestException(DUPLICATE_GMAIL_MESSAGE);
+    }
 
     // 既に他のユーザーが使用していないか確認
     const existing = await this.alumniRepository.findUserByLinkedGmail(normalized);
     if (existing && existing.id !== userId) {
-      throw new BadRequestException("このGmailアドレスは既に他のアカウントに登録されています。");
+      throw new BadRequestException(DUPLICATE_GMAIL_MESSAGE);
     }
 
-    return this.alumniRepository.updateLinkedGmail(userId, normalized);
+    if (existing?.id === userId) {
+      return existing;
+    }
+
+    try {
+      return await this.alumniRepository.updateLinkedGmail(userId, normalized);
+    } catch (error) {
+      if (isUniqueConstraintError(error)) {
+        throw new BadRequestException(DUPLICATE_GMAIL_MESSAGE);
+      }
+      throw error;
+    }
   }
 
   async unlinkGmail(userId: string): Promise<UserDto> {

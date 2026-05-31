@@ -70,7 +70,9 @@ export interface AlumniRepositoryPort {
   findPublicList(params: FindPublicAlumniListParams): Promise<AlumniConnectionDto>;
   findPublicById(id: string): Promise<AlumniProfileDto | null>;
   findUserById(userId: string): Promise<UserDto | null>;
+  findUserByEmail(email: string): Promise<UserDto | null>;
   findUserByLinkedGmail(gmail: string): Promise<UserDto | null>;
+  isAdminEmail(email: string): Promise<boolean>;
   updateInitialSettings(userId: string, input: InitialSettingsPersistenceInput): Promise<UserDto>;
   upsertAlumniProfile(
     userId: string,

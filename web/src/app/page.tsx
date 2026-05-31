@@ -30,10 +30,8 @@ export default async function Home({ searchParams }: PageProps) {
   }
 
   if (
-    !profile.studentId ||
-    !profile.enrollmentYear ||
-    !profile.durationYears ||
-    !profile.department
+    profile.role !== "ADMIN" &&
+    (!profile.studentId || !profile.enrollmentYear || !profile.durationYears || !profile.department)
   ) {
     redirect("/initial-setup");
   }

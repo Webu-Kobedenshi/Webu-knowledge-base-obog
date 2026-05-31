@@ -32,6 +32,7 @@ flyctl launch --no-deploy
 flyctl secrets set \
   DATABASE_URL="<Neon Direct URL>" \
   AUTH_JWT_SECRET="<strong-secret>" \
+  ADMIN_SEED_EMAILS="<admin-email@example.com>" \
   CORS_ORIGINS="https://<your-web-domain>"
 ```
 
@@ -53,6 +54,12 @@ flyctl deploy
 ```
 
 このリポジトリでは `fly.toml` の `release_command` で `pnpm prisma migrate deploy` が実行されます。
+
+管理者メールを追加する場合は、`ADMIN_SEED_EMAILS` を設定したうえで追加専用seedを実行します。このseedは既存の管理者メールを削除せず、新しいメールアドレスだけを追加します。
+
+```bash
+flyctl ssh console -C "cd /app/service && pnpm db:seed:admin-emails"
+```
 
 ## 5. 動作確認
 
