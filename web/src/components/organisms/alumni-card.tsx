@@ -46,7 +46,7 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
   const displayName = alumni.nickname ?? "匿名";
 
   return (
-    <article className="alumni-card group relative isolate overflow-hidden rounded-3xl border border-stone-200 bg-white transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_20px_60px_-12px_rgba(0,0,0,0.15)] dark:border-stone-800 dark:bg-stone-950 dark:hover:shadow-[0_20px_60px_-12px_rgba(0,0,0,0.5)]">
+    <article className="alumni-card group relative isolate flex h-full flex-col overflow-hidden rounded-3xl border border-stone-200 bg-white transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_20px_60px_-12px_rgba(0,0,0,0.15)] dark:border-stone-800 dark:bg-stone-950 dark:hover:shadow-[0_20px_60px_-12px_rgba(0,0,0,0.5)]">
       {/* ── Hero zone ── */}
       <div className="relative h-24 overflow-hidden">
         {/* Gradient background — always present */}
@@ -75,7 +75,7 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
       </div>
 
       {/* ── Avatar row (overlapping hero/body) ── */}
-      <div className="relative z-10 -mt-8 flex items-start justify-between gap-3 px-4">
+      <div className="relative z-10 -mt-8 flex min-h-[4.75rem] items-start justify-between gap-3 px-4">
         {/* Avatar */}
         <div className="relative inline-block">
           {alumni.avatarUrl ? (
@@ -110,8 +110,8 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
           ) : null}
         </div>
 
-        {alumni.skills.length > 0 ? (
-          <div className="flex min-w-0 flex-1 justify-end pt-10">
+        <div className="flex min-w-0 flex-1 justify-end pt-10">
+          {alumni.skills.length > 0 ? (
             <div className="flex max-w-full flex-col items-start gap-1">
               <span className="shrink-0 text-[10px] font-bold text-stone-400 dark:text-stone-500">
                 就活武器
@@ -128,12 +128,12 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
                 ))}
               </div>
             </div>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
       </div>
 
       {/* ── Body ── */}
-      <div className="relative px-4 pb-3 pt-2">
+      <div className="relative flex flex-1 flex-col px-4 pb-3 pt-2">
         {/* Name + year */}
         <div className="flex items-baseline gap-2">
           <h3 className="truncate text-[15px] font-bold text-stone-900 dark:text-stone-100">
@@ -145,12 +145,20 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
         </div>
 
         {/* ── Company — the centerpiece ── */}
-        <div className="mt-2">
-          <p className="text-[20px] font-extrabold leading-tight tracking-tight text-stone-900 dark:text-stone-100">
+        <div
+          className={`mt-2 min-h-[3.25rem] ${
+            otherCompanies.length === 0 ? "flex items-center" : ""
+          }`}
+        >
+          <p
+            className={`line-clamp-2 font-extrabold leading-tight tracking-tight text-stone-900 dark:text-stone-100 ${
+              otherCompanies.length === 0 ? "text-[26px]" : "text-[20px]"
+            }`}
+          >
             {primaryCompany}
           </p>
           {otherCompanies.length > 0 ? (
-            <div className="mt-1.5 flex flex-wrap gap-1.5">
+            <div className="mt-1.5 flex min-h-[1.375rem] flex-wrap gap-1.5">
               {otherCompanies.slice(0, 2).map((name) => (
                 <span
                   key={name}
@@ -164,7 +172,7 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
         </div>
 
         {/* ── Remarks as personal quote ── */}
-        <p className="mt-2 line-clamp-2 border-l-2 border-stone-200 pl-2.5 text-[12px] leading-relaxed text-stone-500 dark:border-stone-700 dark:text-stone-400">
+        <p className="mt-2 min-h-[3.25rem] line-clamp-2 border-l-2 border-stone-200 pl-2.5 text-[12px] leading-relaxed text-stone-500 dark:border-stone-700 dark:text-stone-400">
           {alumni.remarks ? (
             alumni.remarks
           ) : (
@@ -173,34 +181,36 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
         </p>
 
         {/* ── Detail Link ── */}
-        {alumni.skills.length > 0 ||
-        alumni.gakuchika ||
-        alumni.usefulCoursework ||
-        alumni.portfolioUrl ||
-        selectionExperienceCount > 0 ? (
-          <Link
-            href={`/alumni/${alumni.id}`}
-            className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-violet-600 transition-colors hover:text-violet-800 dark:text-violet-400 dark:hover:text-violet-300"
-          >
-            <span>詳しく見る</span>
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+        <div className="mt-2 min-h-[1.25rem]">
+          {alumni.skills.length > 0 ||
+          alumni.gakuchika ||
+          alumni.usefulCoursework ||
+          alumni.portfolioUrl ||
+          selectionExperienceCount > 0 ? (
+            <Link
+              href={`/alumni/${alumni.id}`}
+              className="inline-flex items-center gap-1 text-[11px] font-semibold text-violet-600 transition-colors hover:text-violet-800 dark:text-violet-400 dark:hover:text-violet-300"
             >
-              <title>詳細</title>
-              <path d="m9 18 6-6-6-6" />
-            </svg>
-          </Link>
-        ) : null}
+              <span>詳しく見る</span>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <title>詳細</title>
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+            </Link>
+          ) : null}
+        </div>
 
         {/* ── Contact CTA ── */}
-        <div className="mt-3">
+        <div className="mt-auto pt-3">
           {canContact ? (
             <div className="space-y-1">
               <p className="text-[10px] font-semibold text-stone-400 dark:text-stone-500">

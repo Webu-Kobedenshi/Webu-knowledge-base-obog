@@ -16,6 +16,7 @@ import { BasicProfileSection } from "@/components/organisms/account-profile/basi
 import { LinkedGmailSection } from "@/components/organisms/account-profile/linked-gmail-section";
 import type { AlumniProfile, Department, UserStatus } from "@/graphql/types";
 import { Ban, ImagePlus, LoaderCircle, Upload } from "lucide-react";
+import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 
@@ -762,7 +763,19 @@ export function AccountProfileForm({
         throw new Error(json.message || "Gmail連携の解除に失敗しました");
       }
 
+      const shouldReauthenticate =
+        Boolean(json.requiresReauthentication) ||
+        (currentLinkedGmail
+          ? currentUserEmail.toLowerCase().trim() === currentLinkedGmail.toLowerCase().trim()
+          : false);
+
       setCurrentLinkedGmail(null);
+      if (shouldReauthenticate) {
+        showSuccessToast("引き継ぎGmailアドレスの登録を解除しました。再ログインしてください。");
+        await signOut({ callbackUrl: "/login?callbackUrl=/account" });
+        return;
+      }
+
       showSuccessToast("引き継ぎGmailアドレスの登録を解除しました");
     } catch (err) {
       showErrorToast(err instanceof Error ? err.message : "サーバーエラーが発生しました");

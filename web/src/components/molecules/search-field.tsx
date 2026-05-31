@@ -219,7 +219,8 @@ export function SearchField({
           </Select>
         </label>
 
-        <div className="flex items-end">
+        <div className="space-y-1.5">
+          <span className="text-[11px] font-semibold text-transparent select-none">リセット</span>
           <Button
             type="button"
             onClick={handleReset}

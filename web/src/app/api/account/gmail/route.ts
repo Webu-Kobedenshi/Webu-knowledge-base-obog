@@ -86,6 +86,7 @@ export async function DELETE() {
   try {
     const session = await getServerSession(authOptions);
     const serviceToken = session?.serviceToken;
+    const sessionEmail = session?.user?.email?.toLowerCase().trim() ?? "";
 
     if (!serviceToken) {
       return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
@@ -106,7 +107,11 @@ export async function DELETE() {
       );
     }
 
-    return NextResponse.json({ ok: true, message: "Gmail account unlinked successfully" });
+    return NextResponse.json({
+      ok: true,
+      message: "Gmail account unlinked successfully",
+      requiresReauthentication: sessionEmail.endsWith("@gmail.com"),
+    });
   } catch (err) {
     console.error("[DELETE /api/account/gmail] Unexpected error:", err);
     return NextResponse.json(
