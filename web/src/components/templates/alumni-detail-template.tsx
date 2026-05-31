@@ -5,6 +5,12 @@ import { SocialContactIcon } from "@/components/atoms/social-contact-icon";
 import type { AlumniProfile } from "@/graphql/types";
 import { getAlumniContactClassName, getAlumniContactLinks } from "@/lib/alumni-contact";
 import { departmentGradient } from "@/lib/department-theme";
+import {
+  decodeWebTestTimeAssessment,
+  decodeWebTestType,
+  getWebTestTimeAssessmentLabel,
+  getWebTestTypeLabel,
+} from "@/lib/selection-step-meta";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
@@ -256,65 +262,112 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
                 {visibleSelectionSteps.length > 0 ? (
                   <div className="relative space-y-3">
                     <div className="absolute bottom-4 left-[15px] top-4 w-px bg-stone-200 dark:bg-stone-700" />
-                    {visibleSelectionSteps.map((step, index) => (
-                      <div
-                        key={step.id}
-                        className="relative grid grid-cols-[32px_minmax(0,1fr)] gap-3"
-                      >
-                        <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full bg-stone-900 text-[11px] font-bold text-white dark:bg-stone-100 dark:text-stone-900">
-                          {index + 1}
-                        </div>
-                        <article className="rounded-xl border border-stone-200 bg-stone-50/70 p-4 dark:border-stone-800 dark:bg-stone-950/60">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h4 className="text-sm font-extrabold text-stone-900 dark:text-stone-100">
-                              {selectionStepKindLabel[step.stepKind] || "選考ステップ"}
-                            </h4>
-                            <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
-                              {selectionFormatLabel[step.format] ?? step.format}
-                            </span>
-                            {step.interviewerCount ? (
-                              <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
-                                {step.interviewerCount >= 4
-                                  ? "面接官 複数人"
-                                  : `面接官 ${step.interviewerCount}人`}
-                              </span>
-                            ) : null}
-                            {step.durationMinutes ? (
-                              <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
-                                面接時間 {step.durationMinutes}分
-                              </span>
-                            ) : null}
-                          </div>
+                    {visibleSelectionSteps.map((step, index) =>
+                      (() => {
+                        const isWebTestStep = step.stepKind === "WEB_TEST";
+                        const isCodingTestStep = step.stepKind === "CODING_TEST";
+                        const webTestTypeLabel = getWebTestTypeLabel(
+                          decodeWebTestType(step.questions),
+                        );
+                        const webTestTimeAssessmentLabel = getWebTestTimeAssessmentLabel(
+                          decodeWebTestTimeAssessment(step.atmosphere),
+                        );
 
-                          {step.questions ? (
-                            <div className="mt-3">
-                              <p className="text-[10px] font-bold text-stone-400">聞かれた質問</p>
-                              <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
-                                {step.questions}
-                              </p>
+                        return (
+                          <div
+                            key={step.id}
+                            className="relative grid grid-cols-[32px_minmax(0,1fr)] gap-3"
+                          >
+                            <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full bg-stone-900 text-[11px] font-bold text-white dark:bg-stone-100 dark:text-stone-900">
+                              {index + 1}
                             </div>
-                          ) : null}
-                          {step.atmosphere ? (
-                            <div className="mt-3">
-                              <p className="text-[10px] font-bold text-stone-400">雰囲気</p>
-                              <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
-                                {step.atmosphere}
-                              </p>
-                            </div>
-                          ) : null}
-                          {step.preparation ? (
-                            <div className="mt-3">
-                              <p className="text-[10px] font-bold text-stone-400">
-                                準備してよかったこと
-                              </p>
-                              <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
-                                {step.preparation}
-                              </p>
-                            </div>
-                          ) : null}
-                        </article>
-                      </div>
-                    ))}
+                            <article className="rounded-xl border border-stone-200 bg-stone-50/70 p-4 dark:border-stone-800 dark:bg-stone-950/60">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h4 className="text-sm font-extrabold text-stone-900 dark:text-stone-100">
+                                  {selectionStepKindLabel[step.stepKind] || "選考ステップ"}
+                                </h4>
+                                <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
+                                  {selectionFormatLabel[step.format] ?? step.format}
+                                </span>
+                                {!isWebTestStep && step.interviewerCount ? (
+                                  <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
+                                    {step.interviewerCount >= 4
+                                      ? isCodingTestStep
+                                        ? "試験官 複数人"
+                                        : "面接官 複数人"
+                                      : isCodingTestStep
+                                        ? `試験官 ${step.interviewerCount}人`
+                                        : `面接官 ${step.interviewerCount}人`}
+                                  </span>
+                                ) : null}
+                                {step.durationMinutes ? (
+                                  <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
+                                    {isWebTestStep
+                                      ? `所要時間 ${step.durationMinutes}分`
+                                      : isCodingTestStep
+                                        ? `制限時間 ${step.durationMinutes}分`
+                                        : `面接時間 ${step.durationMinutes}分`}
+                                  </span>
+                                ) : null}
+                              </div>
+
+                              {isWebTestStep && webTestTypeLabel ? (
+                                <div className="mt-3">
+                                  <p className="text-[10px] font-bold text-stone-400">
+                                    Webテストの種類
+                                  </p>
+                                  <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
+                                    {webTestTypeLabel}
+                                  </p>
+                                </div>
+                              ) : null}
+                              {isWebTestStep && webTestTimeAssessmentLabel ? (
+                                <div className="mt-3">
+                                  <p className="text-[10px] font-bold text-stone-400">時間の感覚</p>
+                                  <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
+                                    {webTestTimeAssessmentLabel}
+                                  </p>
+                                </div>
+                              ) : null}
+                              {!isWebTestStep && step.questions ? (
+                                <div className="mt-3">
+                                  <p className="text-[10px] font-bold text-stone-400">
+                                    {isCodingTestStep ? "出題内容" : "聞かれた質問"}
+                                  </p>
+                                  <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
+                                    {step.questions}
+                                  </p>
+                                </div>
+                              ) : null}
+                              {!isWebTestStep && step.atmosphere ? (
+                                <div className="mt-3">
+                                  <p className="text-[10px] font-bold text-stone-400">
+                                    {isCodingTestStep ? "使用言語・実行環境" : "雰囲気"}
+                                  </p>
+                                  <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
+                                    {step.atmosphere}
+                                  </p>
+                                </div>
+                              ) : null}
+                              {step.preparation ? (
+                                <div className="mt-3">
+                                  <p className="text-[10px] font-bold text-stone-400">
+                                    {isWebTestStep
+                                      ? "対策してよかったこと"
+                                      : isCodingTestStep
+                                        ? "解き方や対策で役立ったこと"
+                                        : "準備してよかったこと"}
+                                  </p>
+                                  <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
+                                    {step.preparation}
+                                  </p>
+                                </div>
+                              ) : null}
+                            </article>
+                          </div>
+                        );
+                      })(),
+                    )}
                   </div>
                 ) : null}
 

@@ -10,7 +10,7 @@ import {
 import { Pool } from "pg";
 
 const SEED_EMAIL_DOMAIN = "seed.kobedenshi.ac.jp";
-const GRADUATION_YEAR = 2025;
+const GRADUATION_YEARS = [2023, 2024, 2025, 2026] as const;
 
 type SeedStep = {
   stepKind: SelectionStepKind;
@@ -74,8 +74,6 @@ const departmentDurationYears: Record<Department, number> = {
   INTERNATIONAL_COMM: 2,
   OTHERS: 2,
 };
-
-const graduationYear = GRADUATION_YEAR;
 
 const commonQuestions =
   "自己紹介、志望理由、学生時代に力を入れたこと、制作物で工夫した点、チーム開発で困ったことをどう解決したか。";
@@ -218,15 +216,15 @@ const businessFlow = (entryTrigger = "就活サイト"): SeedCompany["selectionE
 });
 
 const trackPlans: Array<{ track: SeedTrack; count: number }> = [
-  { track: "engineering", count: 48 },
-  { track: "game", count: 18 },
-  { track: "creative", count: 18 },
-  { track: "sound", count: 10 },
-  { track: "construction", count: 18 },
-  { track: "business", count: 18 },
+  { track: "engineering", count: 56 },
+  { track: "game", count: 21 },
+  { track: "creative", count: 21 },
+  { track: "sound", count: 12 },
+  { track: "construction", count: 20 },
+  { track: "business", count: 20 },
 ];
 
-const departmentCycles: Record<SeedTrack, Department[]> = {
+const departmentPools: Record<SeedTrack, Department[]> = {
   engineering: [
     Department.IT_EXPERT,
     Department.IT_SPECIALIST,
@@ -243,7 +241,7 @@ const departmentCycles: Record<SeedTrack, Department[]> = {
   ],
   sound: [Department.SOUND_CREATE, Department.SOUND_TECHNIQUE],
   construction: [Department.ARCHITECTURAL],
-  business: [Department.INFO_BUSINESS],
+  business: [Department.INFO_BUSINESS, Department.INTERNATIONAL_COMM, Department.OTHERS],
 };
 
 const companyPools: Record<SeedTrack, string[]> = {
@@ -567,7 +565,7 @@ function mulberry32(seed: number) {
   };
 }
 
-function pickByIndex<T>(items: T[], index: number): T {
+function pickByIndex<T>(items: readonly T[], index: number): T {
   return items[index % items.length];
 }
 
@@ -592,7 +590,7 @@ const namePool = shuffleWithSeed(
     })),
   ),
   20250301,
-).slice(0, 130);
+).slice(0, 150);
 
 function toKatakana(text: string) {
   return text.replace(/[ぁ-ゖ]/g, (char) => String.fromCharCode(char.charCodeAt(0) + 0x60));
@@ -713,6 +711,26 @@ function buildSelectionExperience(
   }
 }
 
+function pickDepartment(track: SeedTrack, rng: () => number, localIndex: number) {
+  const pool = departmentPools[track];
+  const offset = Math.floor(rng() * pool.length);
+  return pool[(localIndex + offset) % pool.length] ?? pool[0];
+}
+
+function buildGraduationYear(rng: () => number, index: number): number {
+  const weightedYears: number[] = [
+    2026,
+    2025,
+    2025,
+    2024,
+    2024,
+    2023,
+    pickByIndex(GRADUATION_YEARS, index),
+  ];
+
+  return weightedYears[Math.floor(rng() * weightedYears.length)] ?? 2025;
+}
+
 function buildCompanies(
   track: SeedTrack,
   department: Department,
@@ -758,14 +776,13 @@ function buildSeedAlumni() {
   let globalIndex = 0;
 
   for (const plan of trackPlans) {
-    const departments = departmentCycles[plan.track];
-
     for (let localIndex = 0; localIndex < plan.count; localIndex += 1) {
       const index = globalIndex;
       const rng = mulberry32(20250301 + index * 97);
       const { name, nickname } = buildName(index, rng);
-      const department = departments[localIndex % departments.length];
+      const department = pickDepartment(plan.track, rng, localIndex);
       const durationYears = departmentDurationYears[department];
+      const graduationYear = buildGraduationYear(rng, index);
       const enrollmentYear = graduationYear - durationYears;
       const emailLocal = `${plan.track}.${String(index + 1).padStart(3, "0")}`;
       const skills = buildSkills(plan.track, index);
@@ -791,7 +808,7 @@ function buildSeedAlumni() {
     }
   }
 
-  return seedAlumni;
+  return shuffleWithSeed(seedAlumni, 20260531);
 }
 
 const seedAlumni = buildSeedAlumni();
@@ -806,14 +823,12 @@ async function main() {
   const prisma = new PrismaClient({ adapter });
 
   try {
-    const seedEmails = seedAlumni.map((alumni) => `${alumni.emailLocal}@${SEED_EMAIL_DOMAIN}`);
-
     console.log(`Seeding ${seedAlumni.length} coherent alumni profiles...`);
 
     await prisma.user.deleteMany({
       where: {
         email: {
-          in: seedEmails,
+          endsWith: `@${SEED_EMAIL_DOMAIN}`,
         },
       },
     });
@@ -827,7 +842,7 @@ async function main() {
         data: {
           email,
           name: alumni.name,
-          studentId: `KD${String(250000 + index + 1)}`,
+          studentId: `KD${String(950000 + index + 1)}`,
           enrollmentYear: alumni.enrollmentYear,
           durationYears,
           department: alumni.department,

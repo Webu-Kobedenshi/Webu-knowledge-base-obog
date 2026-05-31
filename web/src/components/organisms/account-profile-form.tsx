@@ -15,6 +15,16 @@ import { showErrorToast, showSuccessToast } from "@/components/atoms/toast";
 import { BasicProfileSection } from "@/components/organisms/account-profile/basic-profile-section";
 import { LinkedGmailSection } from "@/components/organisms/account-profile/linked-gmail-section";
 import type { AlumniProfile, Department, UserStatus } from "@/graphql/types";
+import {
+  type WebTestTimeAssessment,
+  type WebTestType,
+  decodeWebTestTimeAssessment,
+  decodeWebTestType,
+  encodeWebTestTimeAssessment,
+  encodeWebTestType,
+  webTestTimeAssessmentOptions,
+  webTestTypeOptions,
+} from "@/lib/selection-step-meta";
 import { Ban, ImagePlus, LoaderCircle, Upload } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -89,6 +99,8 @@ type SelectionStepFormState = {
   format: SelectionFormat;
   interviewerCount: string;
   durationMinutes: string;
+  webTestType: WebTestType | "";
+  webTestTimeAssessment: WebTestTimeAssessment | "";
   questions: string;
   atmosphere: string;
   preparation: string;
@@ -223,6 +235,8 @@ function createBlankSelectionStep(stepKind: SelectionStepKind = "DOCUMENT_SCREEN
     format: "UNKNOWN",
     interviewerCount: "",
     durationMinutes: "",
+    webTestType: "",
+    webTestTimeAssessment: "",
     questions: "",
     atmosphere: "",
     preparation: "",
@@ -247,6 +261,15 @@ function createBlankSelectionExperience(): SelectionExperienceFormState {
 }
 
 function hasSelectionStepContent(step: SelectionStepFormState) {
+  if (step.stepKind === "WEB_TEST") {
+    return Boolean(
+      step.webTestType ||
+        step.webTestTimeAssessment ||
+        step.durationMinutes.trim() ||
+        step.preparation.trim(),
+    );
+  }
+
   return Boolean(
     step.interviewerCount.trim() ||
       step.durationMinutes.trim() ||
@@ -275,6 +298,10 @@ function getEntryTriggerOptions(currentValue: string) {
   }
 
   return [normalized, ...entryTriggerOptions];
+}
+
+function getSelectionStepLabel(stepKind: SelectionStepKind) {
+  return selectionStepOptions.find((option) => option.value === stepKind)?.label ?? "選考";
 }
 
 export function AccountProfileForm({
@@ -324,8 +351,11 @@ export function AccountProfileForm({
                 step.durationMinutes !== null && step.durationMinutes !== undefined
                   ? String(step.durationMinutes)
                   : "",
-              questions: step.questions ?? "",
-              atmosphere: step.atmosphere ?? "",
+              webTestType: step.stepKind === "WEB_TEST" ? decodeWebTestType(step.questions) : "",
+              webTestTimeAssessment:
+                step.stepKind === "WEB_TEST" ? decodeWebTestTimeAssessment(step.atmosphere) : "",
+              questions: step.stepKind === "WEB_TEST" ? "" : (step.questions ?? ""),
+              atmosphere: step.stepKind === "WEB_TEST" ? "" : (step.atmosphere ?? ""),
               preparation: step.preparation ?? "",
             }))
           : [createBlankSelectionStep()],
@@ -368,6 +398,7 @@ export function AccountProfileForm({
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl);
   const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null);
   const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
+  const selectionStepScrollerRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [currentLinkedGmail, setCurrentLinkedGmail] = useState<string | null>(
     initialProfile?.linkedGmail ?? null,
@@ -476,6 +507,33 @@ export function AccountProfileForm({
         createBlankSelectionStep(getNextSelectionStepKind(experience.steps)),
       ],
     }));
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const scroller = selectionStepScrollerRefs.current[companyIndex];
+        scroller?.scrollTo({
+          left: scroller.scrollWidth,
+          behavior: "smooth",
+        });
+      });
+    });
+  };
+
+  const scrollToSelectionStep = (companyIndex: number, stepIndex: number) => {
+    setPendingStepDeleteKey(null);
+    const scroller = selectionStepScrollerRefs.current[companyIndex];
+    const target = scroller?.querySelector<HTMLElement>(
+      `[data-selection-step-index="${stepIndex}"]`,
+    );
+
+    if (!scroller || !target) {
+      return;
+    }
+
+    scroller.scrollTo({
+      left: target.offsetLeft - scroller.offsetLeft,
+      behavior: "smooth",
+    });
   };
 
   const removeSelectionStep = (companyIndex: number, stepIndex: number) => {
@@ -528,8 +586,14 @@ export function AccountProfileForm({
                 durationMinutes: step.durationMinutes.trim()
                   ? Number(step.durationMinutes)
                   : undefined,
-                questions: step.questions.trim() || undefined,
-                atmosphere: step.atmosphere.trim() || undefined,
+                questions:
+                  step.stepKind === "WEB_TEST"
+                    ? encodeWebTestType(step.webTestType)
+                    : step.questions.trim() || undefined,
+                atmosphere:
+                  step.stepKind === "WEB_TEST"
+                    ? encodeWebTestTimeAssessment(step.webTestTimeAssessment)
+                    : step.atmosphere.trim() || undefined,
                 preparation: step.preparation.trim() || undefined,
               })),
             }
@@ -1173,7 +1237,7 @@ export function AccountProfileForm({
                           </label>
 
                           {experience.enabled ? (
-                            <div className="mt-3 space-y-3 rounded-xl border border-emerald-100 bg-emerald-50/40 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/10">
+                            <div className="mt-3 space-y-4 rounded-2xl border border-stone-200/80 bg-stone-50/70 p-3 shadow-inner shadow-white/60 dark:border-stone-800/80 dark:bg-stone-950/30 dark:shadow-black/20">
                               <div className="block space-y-1.5">
                                 <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
                                   エントリーのきっかけ
@@ -1204,194 +1268,370 @@ export function AccountProfileForm({
                                 </Select>
                               </div>
 
-                              <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
-                                    選考フロー
-                                  </span>
+                              <div className="space-y-3 rounded-2xl border border-stone-200/70 bg-white/80 p-3 shadow-[0_10px_30px_-24px_rgba(0,0,0,0.35)] dark:border-stone-800/80 dark:bg-stone-950/50">
+                                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                  <div className="min-w-0">
+                                    <span className="text-[12px] font-bold text-stone-900 dark:text-stone-100">
+                                      選考フロー
+                                    </span>
+                                  </div>
                                   <Button
                                     type="button"
                                     onClick={() => addSelectionStep(index)}
                                     disabled={!canEditAlumniProfile}
                                     variant="outline"
                                     size="sm"
-                                    className="h-8 border-emerald-200 px-3 text-[11px] font-bold text-emerald-700 hover:bg-emerald-50 disabled:opacity-40 dark:border-emerald-800 dark:text-emerald-300"
+                                    className="h-8 rounded-full border-stone-200 bg-white px-3 text-[11px] font-bold text-stone-700 shadow-sm hover:bg-stone-50 disabled:opacity-40 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800"
                                   >
                                     ステップ追加
                                   </Button>
                                 </div>
 
-                                {experience.steps.map((step, stepIndex) => {
-                                  const deleteKey = getStepDeleteKey(index, stepIndex);
-                                  const isDeletePending = pendingStepDeleteKey === deleteKey;
+                                <ol className="flex gap-2 overflow-x-auto pb-1">
+                                  {experience.steps.map((step, stepIndex) => (
+                                    <li key={`${companyRowIds[index]}-${stepIndex}-summary`}>
+                                      <Button
+                                        type="button"
+                                        onClick={() => scrollToSelectionStep(index, stepIndex)}
+                                        variant="ghost"
+                                        className="flex h-auto shrink-0 items-center gap-1.5 rounded-full border border-stone-200/80 bg-stone-50 px-2.5 py-1 text-[10px] font-bold text-stone-600 shadow-sm hover:bg-white disabled:opacity-40 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-300 dark:hover:bg-stone-800"
+                                        disabled={!canEditAlumniProfile}
+                                      >
+                                        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white text-[9px] text-stone-500 ring-1 ring-stone-200 dark:bg-stone-950 dark:text-stone-400 dark:ring-stone-700">
+                                          {stepIndex + 1}
+                                        </span>
+                                        {getSelectionStepLabel(step.stepKind)}
+                                      </Button>
+                                    </li>
+                                  ))}
+                                </ol>
 
-                                  return (
-                                    <div
-                                      key={`${companyRowIds[index]}-${stepIndex}`}
-                                      className="space-y-3 rounded-xl border border-stone-200 bg-white p-3 dark:border-stone-800 dark:bg-stone-950/60"
-                                    >
-                                      <div className="grid gap-2 sm:grid-cols-2">
-                                        <div className="space-y-1.5">
-                                          <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-400">
-                                            選考種別
-                                          </span>
-                                          <Select
-                                            value={step.stepKind}
-                                            onValueChange={(value) =>
+                                <div
+                                  ref={(node) => {
+                                    selectionStepScrollerRefs.current[index] = node;
+                                  }}
+                                  className="-mx-3 snap-x snap-mandatory overflow-x-auto scroll-smooth px-5 pb-2"
+                                >
+                                  <div className="flex gap-3">
+                                    {experience.steps.map((step, stepIndex) => {
+                                      const deleteKey = getStepDeleteKey(index, stepIndex);
+                                      const isDeletePending = pendingStepDeleteKey === deleteKey;
+                                      const isWebTestStep = step.stepKind === "WEB_TEST";
+                                      const isCodingTestStep = step.stepKind === "CODING_TEST";
+
+                                      return (
+                                        <div
+                                          key={`${companyRowIds[index]}-${stepIndex}`}
+                                          data-selection-step-index={stepIndex}
+                                          className="w-[calc(100%-1rem)] shrink-0 snap-start snap-always space-y-3 rounded-2xl border border-stone-200/80 bg-white/95 p-4 dark:border-stone-800 dark:bg-stone-950/80"
+                                        >
+                                          <div className="flex items-center justify-between gap-2 border-b border-stone-100 pb-3 dark:border-stone-800">
+                                            <span className="text-[10px] font-bold tracking-[0.08em] text-stone-400 dark:text-stone-500">
+                                              {String(stepIndex + 1).padStart(2, "0")}
+                                            </span>
+                                            <span className="truncate text-[11px] font-bold text-stone-700 dark:text-stone-200">
+                                              {getSelectionStepLabel(step.stepKind)}
+                                            </span>
+                                          </div>
+                                          <div className="grid gap-2 sm:grid-cols-2">
+                                            <div className="space-y-1.5">
+                                              <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-400">
+                                                選考種別
+                                              </span>
+                                              <Select
+                                                value={step.stepKind}
+                                                onValueChange={(value) =>
+                                                  updateSelectionStepAt(
+                                                    index,
+                                                    stepIndex,
+                                                    (prev) => ({
+                                                      ...prev,
+                                                      stepKind: value as SelectionStepKind,
+                                                      interviewerCount:
+                                                        value === "WEB_TEST"
+                                                          ? ""
+                                                          : prev.interviewerCount,
+                                                      webTestType:
+                                                        value === "WEB_TEST"
+                                                          ? prev.webTestType
+                                                          : "",
+                                                      webTestTimeAssessment:
+                                                        value === "WEB_TEST"
+                                                          ? prev.webTestTimeAssessment
+                                                          : "",
+                                                      questions:
+                                                        value === "WEB_TEST" ? "" : prev.questions,
+                                                      atmosphere:
+                                                        value === "WEB_TEST" ? "" : prev.atmosphere,
+                                                    }),
+                                                  )
+                                                }
+                                                disabled={!canEditAlumniProfile}
+                                              >
+                                                <SelectTrigger>
+                                                  <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                  {selectionStepOptions.map((option) => (
+                                                    <SelectItem
+                                                      key={option.value}
+                                                      value={option.value}
+                                                    >
+                                                      {option.label}
+                                                    </SelectItem>
+                                                  ))}
+                                                </SelectContent>
+                                              </Select>
+                                            </div>
+                                            <div className="space-y-1.5">
+                                              <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-400">
+                                                実施形式
+                                              </span>
+                                              <Select
+                                                value={step.format}
+                                                onValueChange={(value) =>
+                                                  updateSelectionStepAt(
+                                                    index,
+                                                    stepIndex,
+                                                    (prev) => ({
+                                                      ...prev,
+                                                      format: value as SelectionFormat,
+                                                    }),
+                                                  )
+                                                }
+                                                disabled={!canEditAlumniProfile}
+                                              >
+                                                <SelectTrigger>
+                                                  <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                  {selectionFormatOptions.map((option) => (
+                                                    <SelectItem
+                                                      key={option.value}
+                                                      value={option.value}
+                                                    >
+                                                      {option.label}
+                                                    </SelectItem>
+                                                  ))}
+                                                </SelectContent>
+                                              </Select>
+                                            </div>
+                                          </div>
+
+                                          <div className="grid gap-2 sm:grid-cols-2">
+                                            {isWebTestStep ? (
+                                              <Select
+                                                value={step.webTestType || "UNSELECTED"}
+                                                onValueChange={(value) =>
+                                                  updateSelectionStepAt(
+                                                    index,
+                                                    stepIndex,
+                                                    (prev) => ({
+                                                      ...prev,
+                                                      webTestType:
+                                                        value === "UNSELECTED"
+                                                          ? ""
+                                                          : (value as WebTestType),
+                                                    }),
+                                                  )
+                                                }
+                                                disabled={!canEditAlumniProfile}
+                                              >
+                                                <SelectTrigger>
+                                                  <SelectValue placeholder="Webテストの種類" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                  <SelectItem value="UNSELECTED">
+                                                    種類を選択
+                                                  </SelectItem>
+                                                  {webTestTypeOptions.map((option) => (
+                                                    <SelectItem
+                                                      key={option.value}
+                                                      value={option.value}
+                                                    >
+                                                      {option.label}
+                                                    </SelectItem>
+                                                  ))}
+                                                </SelectContent>
+                                              </Select>
+                                            ) : (
+                                              <Select
+                                                value={step.interviewerCount}
+                                                onValueChange={(value) =>
+                                                  updateSelectionStepAt(
+                                                    index,
+                                                    stepIndex,
+                                                    (prev) => ({
+                                                      ...prev,
+                                                      interviewerCount: value,
+                                                    }),
+                                                  )
+                                                }
+                                                disabled={!canEditAlumniProfile}
+                                              >
+                                                <SelectTrigger>
+                                                  <SelectValue
+                                                    placeholder={
+                                                      isCodingTestStep ? "試験官人数" : "面接官人数"
+                                                    }
+                                                  />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                  {interviewerCountOptions.map((option) => (
+                                                    <SelectItem
+                                                      key={option.value}
+                                                      value={option.value}
+                                                    >
+                                                      {option.label}
+                                                    </SelectItem>
+                                                  ))}
+                                                </SelectContent>
+                                              </Select>
+                                            )}
+                                            <Input
+                                              value={step.durationMinutes}
+                                              onChange={(event) =>
+                                                updateSelectionStepAt(index, stepIndex, (prev) => ({
+                                                  ...prev,
+                                                  durationMinutes: event.target.value,
+                                                }))
+                                              }
+                                              type="number"
+                                              min={0}
+                                              placeholder={
+                                                isCodingTestStep ? "制限時間(分)" : "所要時間(分)"
+                                              }
+                                              disabled={!canEditAlumniProfile}
+                                            />
+                                          </div>
+
+                                          {isWebTestStep ? (
+                                            <Select
+                                              value={step.webTestTimeAssessment || "UNSELECTED"}
+                                              onValueChange={(value) =>
+                                                updateSelectionStepAt(index, stepIndex, (prev) => ({
+                                                  ...prev,
+                                                  webTestTimeAssessment:
+                                                    value === "UNSELECTED"
+                                                      ? ""
+                                                      : (value as WebTestTimeAssessment),
+                                                }))
+                                              }
+                                              disabled={!canEditAlumniProfile}
+                                            >
+                                              <SelectTrigger>
+                                                <SelectValue placeholder="時間の感覚" />
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                <SelectItem value="UNSELECTED">
+                                                  時間は足りましたか？
+                                                </SelectItem>
+                                                {webTestTimeAssessmentOptions.map((option) => (
+                                                  <SelectItem
+                                                    key={option.value}
+                                                    value={option.value}
+                                                  >
+                                                    {option.label}
+                                                  </SelectItem>
+                                                ))}
+                                              </SelectContent>
+                                            </Select>
+                                          ) : (
+                                            <>
+                                              <Textarea
+                                                value={step.questions}
+                                                onChange={(event) =>
+                                                  updateSelectionStepAt(
+                                                    index,
+                                                    stepIndex,
+                                                    (prev) => ({
+                                                      ...prev,
+                                                      questions: event.target.value,
+                                                    }),
+                                                  )
+                                                }
+                                                placeholder={
+                                                  isCodingTestStep ? "出題内容" : "聞かれた質問"
+                                                }
+                                                disabled={!canEditAlumniProfile}
+                                              />
+                                              <Textarea
+                                                value={step.atmosphere}
+                                                onChange={(event) =>
+                                                  updateSelectionStepAt(
+                                                    index,
+                                                    stepIndex,
+                                                    (prev) => ({
+                                                      ...prev,
+                                                      atmosphere: event.target.value,
+                                                    }),
+                                                  )
+                                                }
+                                                placeholder={
+                                                  isCodingTestStep
+                                                    ? "使用言語・実行環境"
+                                                    : "面接の雰囲気"
+                                                }
+                                                disabled={!canEditAlumniProfile}
+                                              />
+                                            </>
+                                          )}
+                                          <Textarea
+                                            value={step.preparation}
+                                            onChange={(event) =>
                                               updateSelectionStepAt(index, stepIndex, (prev) => ({
                                                 ...prev,
-                                                stepKind: value as SelectionStepKind,
+                                                preparation: event.target.value,
                                               }))
                                             }
-                                            disabled={!canEditAlumniProfile}
-                                          >
-                                            <SelectTrigger>
-                                              <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              {selectionStepOptions.map((option) => (
-                                                <SelectItem key={option.value} value={option.value}>
-                                                  {option.label}
-                                                </SelectItem>
-                                              ))}
-                                            </SelectContent>
-                                          </Select>
-                                        </div>
-                                        <div className="space-y-1.5">
-                                          <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-400">
-                                            実施形式
-                                          </span>
-                                          <Select
-                                            value={step.format}
-                                            onValueChange={(value) =>
-                                              updateSelectionStepAt(index, stepIndex, (prev) => ({
-                                                ...prev,
-                                                format: value as SelectionFormat,
-                                              }))
+                                            placeholder={
+                                              isWebTestStep
+                                                ? "対策してよかったこと"
+                                                : isCodingTestStep
+                                                  ? "解き方や対策で役立ったこと"
+                                                  : "準備してよかったこと"
                                             }
                                             disabled={!canEditAlumniProfile}
-                                          >
-                                            <SelectTrigger>
-                                              <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              {selectionFormatOptions.map((option) => (
-                                                <SelectItem key={option.value} value={option.value}>
-                                                  {option.label}
-                                                </SelectItem>
-                                              ))}
-                                            </SelectContent>
-                                          </Select>
+                                          />
+                                          <div className="flex items-center justify-end gap-2">
+                                            {isDeletePending ? (
+                                              <Button
+                                                type="button"
+                                                onClick={() => setPendingStepDeleteKey(null)}
+                                                variant="link"
+                                                className="h-auto px-0 text-[11px] font-semibold text-stone-400 hover:text-stone-600"
+                                              >
+                                                やめる
+                                              </Button>
+                                            ) : null}
+                                            <Button
+                                              type="button"
+                                              onClick={() => {
+                                                if (isDeletePending) {
+                                                  removeSelectionStep(index, stepIndex);
+                                                  return;
+                                                }
+                                                setPendingStepDeleteKey(deleteKey);
+                                              }}
+                                              disabled={!canEditAlumniProfile}
+                                              variant={isDeletePending ? "destructive" : "ghost"}
+                                              size="sm"
+                                              className={`h-auto rounded-full px-3 py-1 text-[11px] font-semibold disabled:opacity-40 ${
+                                                isDeletePending
+                                                  ? "bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/20 dark:text-rose-300"
+                                                  : "text-stone-400 hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-200"
+                                              }`}
+                                            >
+                                              {isDeletePending
+                                                ? "もう一度押して削除"
+                                                : "このステップを削除"}
+                                            </Button>
+                                          </div>
                                         </div>
-                                      </div>
-
-                                      <div className="grid gap-2 sm:grid-cols-2">
-                                        <Select
-                                          value={step.interviewerCount}
-                                          onValueChange={(value) =>
-                                            updateSelectionStepAt(index, stepIndex, (prev) => ({
-                                              ...prev,
-                                              interviewerCount: value,
-                                            }))
-                                          }
-                                          disabled={!canEditAlumniProfile}
-                                        >
-                                          <SelectTrigger>
-                                            <SelectValue placeholder="面接官人数" />
-                                          </SelectTrigger>
-                                          <SelectContent>
-                                            {interviewerCountOptions.map((option) => (
-                                              <SelectItem key={option.value} value={option.value}>
-                                                {option.label}
-                                              </SelectItem>
-                                            ))}
-                                          </SelectContent>
-                                        </Select>
-                                        <Input
-                                          value={step.durationMinutes}
-                                          onChange={(event) =>
-                                            updateSelectionStepAt(index, stepIndex, (prev) => ({
-                                              ...prev,
-                                              durationMinutes: event.target.value,
-                                            }))
-                                          }
-                                          type="number"
-                                          min={0}
-                                          placeholder="所要時間(分)"
-                                          disabled={!canEditAlumniProfile}
-                                        />
-                                      </div>
-
-                                      <Textarea
-                                        value={step.questions}
-                                        onChange={(event) =>
-                                          updateSelectionStepAt(index, stepIndex, (prev) => ({
-                                            ...prev,
-                                            questions: event.target.value,
-                                          }))
-                                        }
-                                        placeholder="聞かれた質問"
-                                        disabled={!canEditAlumniProfile}
-                                      />
-                                      <Textarea
-                                        value={step.atmosphere}
-                                        onChange={(event) =>
-                                          updateSelectionStepAt(index, stepIndex, (prev) => ({
-                                            ...prev,
-                                            atmosphere: event.target.value,
-                                          }))
-                                        }
-                                        placeholder="面接の雰囲気"
-                                        disabled={!canEditAlumniProfile}
-                                      />
-                                      <Textarea
-                                        value={step.preparation}
-                                        onChange={(event) =>
-                                          updateSelectionStepAt(index, stepIndex, (prev) => ({
-                                            ...prev,
-                                            preparation: event.target.value,
-                                          }))
-                                        }
-                                        placeholder="準備してよかったこと"
-                                        disabled={!canEditAlumniProfile}
-                                      />
-                                      <div className="flex items-center justify-end gap-2">
-                                        {isDeletePending ? (
-                                          <Button
-                                            type="button"
-                                            onClick={() => setPendingStepDeleteKey(null)}
-                                            variant="link"
-                                            className="text-[11px] font-semibold text-stone-400 hover:text-stone-600"
-                                          >
-                                            やめる
-                                          </Button>
-                                        ) : null}
-                                        <Button
-                                          type="button"
-                                          onClick={() => {
-                                            if (isDeletePending) {
-                                              removeSelectionStep(index, stepIndex);
-                                              return;
-                                            }
-                                            setPendingStepDeleteKey(deleteKey);
-                                          }}
-                                          disabled={!canEditAlumniProfile}
-                                          variant={isDeletePending ? "destructive" : "ghost"}
-                                          size="sm"
-                                          className={`h-auto px-2.5 py-1 text-[11px] font-semibold disabled:opacity-40 ${
-                                            isDeletePending
-                                              ? "bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/20 dark:text-rose-300"
-                                              : "text-stone-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/20"
-                                          }`}
-                                        >
-                                          {isDeletePending
-                                            ? "もう一度押して削除"
-                                            : "このステップを削除"}
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  );
-                                })}
+                                      );
+                                    })}
+                                  </div>
+                                </div>
                               </div>
 
                               <Textarea
