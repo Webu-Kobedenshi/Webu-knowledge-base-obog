@@ -30,6 +30,14 @@ type GraphQlResponse<TData> = {
   errors?: Array<{ message: string }>;
 };
 
+function toGraphqlErrorMessage(errors: Array<{ message: string }> | undefined): string {
+  return errors?.map((item) => item.message).join(", ") ?? "";
+}
+
+function normalizeProfileError(message: string): string {
+  return message.includes("Email is not allowed") ? "Authentication required" : message;
+}
+
 const getMyProfileQuery = `
   query GetMyProfile {
     getMyProfile {
@@ -132,7 +140,7 @@ export async function fetchMyProfile() {
     if (json.errors?.length) {
       return {
         profile: null,
-        error: json.errors.map((item) => item.message).join(", "),
+        error: normalizeProfileError(toGraphqlErrorMessage(json.errors)),
       } as const;
     }
 
@@ -175,7 +183,7 @@ export async function fetchMyProfileSummary() {
     if (json.errors?.length) {
       return {
         profile: null,
-        error: json.errors.map((item) => item.message).join(", "),
+        error: normalizeProfileError(toGraphqlErrorMessage(json.errors)),
       } as const;
     }
 

@@ -113,7 +113,29 @@ describe("GqlAuthGuard admin email handling", () => {
       }),
     ).rejects.toBeInstanceOf(UnauthorizedException);
 
-    expect(prisma.user.findUnique).not.toHaveBeenCalled();
+    expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      where: { email: "outsider@example.com" },
+    });
+    expect(prisma.user.create).not.toHaveBeenCalled();
+  });
+
+  it("accepts an existing user even when the allowed domain setting changed", async () => {
+    process.env.AUTH_ALLOWED_DOMAINS = "st.kobedenshi.ac.jp";
+    const prisma = createPrismaMock();
+    const existingUser = {
+      id: "u1",
+      email: "student@example.com",
+      role: Role.STUDENT,
+    };
+    prisma.adminEmail.findUnique.mockResolvedValue(null);
+    prisma.user.findUnique.mockResolvedValue(existingUser);
+    const guard = new GqlAuthGuard(prisma as never);
+
+    const result = await findOrCreateUser(guard, {
+      email: "student@example.com",
+    });
+
+    expect(result).toEqual(existingUser);
     expect(prisma.user.create).not.toHaveBeenCalled();
   });
 

@@ -82,7 +82,7 @@ export class GqlAuthGuard implements CanActivate {
       }
     }
 
-    if ((!isAllowed && !isAdmin) || (isTeacherEmail && !isAdmin)) {
+    if (isTeacherEmail && !isAdmin) {
       throw new UnauthorizedException("Email is not allowed");
     }
 
@@ -99,6 +99,10 @@ export class GqlAuthGuard implements CanActivate {
       }
 
       return existing;
+    }
+
+    if (!isAllowed && !isAdmin) {
+      throw new UnauthorizedException("Email is not allowed");
     }
 
     if (isAdmin) {

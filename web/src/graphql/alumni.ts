@@ -10,6 +10,14 @@ type GraphQlResponse<TData> = {
   errors?: Array<{ message: string }>;
 };
 
+function toGraphqlErrorMessage(errors: Array<{ message: string }> | undefined): string {
+  return errors?.map((item) => item.message).join(", ") ?? "";
+}
+
+function normalizeAuthError(message: string): string {
+  return message.includes("Email is not allowed") ? "Authentication required" : message;
+}
+
 const alumniListQuery = `
   query GetAlumniListItems(
     $department: Department
@@ -107,7 +115,7 @@ export async function fetchAlumniList(params: {
         alumniList: [] satisfies AlumniListItem[],
         totalCount: 0,
         hasNextPage: false,
-        error: json.errors.map((item) => item.message).join(", "),
+        error: normalizeAuthError(toGraphqlErrorMessage(json.errors)),
       };
     }
 
@@ -207,7 +215,7 @@ export async function fetchAlumniDetail(id: string) {
     if (json.errors?.length) {
       return {
         alumni: null,
-        error: json.errors.map((item) => item.message).join(", "),
+        error: normalizeAuthError(toGraphqlErrorMessage(json.errors)),
       };
     }
 
