@@ -2,7 +2,7 @@ import { SignJWT } from "jose";
 import type { NextAuthOptions } from "next-auth";
 import Google from "next-auth/providers/google";
 
-const DEFAULT_AUTHORIZED_DOMAIN = "st.kobedenshi.ac.jp,gmail.com";
+const DEFAULT_AUTHORIZED_DOMAIN = "st.kobedenshi.ac.jp";
 const SCHOOL_EMAIL_DOMAIN = "st.kobedenshi.ac.jp";
 const TEACHER_EMAIL_LOCAL_PART_PATTERN = /^[a-z][a-z._-]*$/;
 
@@ -73,10 +73,12 @@ async function isAdminEmail(email?: string | null): Promise<boolean> {
 
   const endpoint = process.env.GRAPHQL_ENDPOINT ?? "http://localhost:4000/graphql";
   try {
+    const authCheckToken = await createAuthCheckToken(normalizedEmail);
     const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "content-type": "application/json",
+        authorization: `Bearer ${authCheckToken}`,
       },
       cache: "no-store",
       body: JSON.stringify({
@@ -100,10 +102,12 @@ async function isLinkedGmail(email?: string | null): Promise<boolean> {
 
   const endpoint = process.env.GRAPHQL_ENDPOINT ?? "http://localhost:4000/graphql";
   try {
+    const authCheckToken = await createAuthCheckToken(normalizedEmail);
     const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "content-type": "application/json",
+        authorization: `Bearer ${authCheckToken}`,
       },
       cache: "no-store",
       body: JSON.stringify({
@@ -132,6 +136,18 @@ async function isAuthorizedEmail(email?: string | null): Promise<boolean> {
   }
 
   return isAllowedDomainEmail(email) || isAdmin || (await isLinkedGmail(email));
+}
+
+async function createAuthCheckToken(email: string) {
+  return new SignJWT({
+    email,
+    role: "STUDENT",
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(`auth-check:${email}`)
+    .setIssuedAt()
+    .setExpirationTime("5m")
+    .sign(getJwtSecret());
 }
 
 async function createServiceToken(payload: {

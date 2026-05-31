@@ -10,7 +10,7 @@ import { Role, type User, UserStatus } from "@prisma/client";
 import { jwtVerify } from "jose";
 import { PrismaService } from "../../prisma.service";
 
-const DEFAULT_AUTHORIZED_DOMAIN = "st.kobedenshi.ac.jp,gmail.com";
+const DEFAULT_AUTHORIZED_DOMAIN = "st.kobedenshi.ac.jp";
 const SCHOOL_EMAIL_DOMAIN = "st.kobedenshi.ac.jp";
 const TEACHER_EMAIL_LOCAL_PART_PATTERN = /^[a-z][a-z._-]*$/;
 

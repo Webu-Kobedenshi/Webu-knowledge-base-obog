@@ -157,6 +157,25 @@ describe("GqlAuthGuard admin email handling", () => {
     expect(result).toEqual(linkedUser);
   });
 
+  it("rejects an unlinked Gmail by default", async () => {
+    process.env.AUTH_ALLOWED_DOMAINS = undefined;
+    const prisma = createPrismaMock();
+    prisma.adminEmail.findUnique.mockResolvedValue(null);
+    prisma.user.findUnique.mockResolvedValue(null);
+    const guard = new GqlAuthGuard(prisma as never);
+
+    await expect(
+      findOrCreateUser(guard, {
+        email: "unlinked@gmail.com",
+      }),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+
+    expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      where: { linkedGmail: "unlinked@gmail.com" },
+    });
+    expect(prisma.user.create).not.toHaveBeenCalled();
+  });
+
   it("does not trust an ADMIN role claim unless the email is registered as admin", async () => {
     process.env.AUTH_ALLOWED_DOMAINS = "st.kobedenshi.ac.jp";
     const prisma = createPrismaMock();

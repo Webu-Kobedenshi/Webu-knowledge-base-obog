@@ -14,7 +14,12 @@ import type {
   InitialSettingsPersistenceInput,
   UpdateAlumniProfilePersistenceInput,
 } from "../application/ports/alumni-repository.port";
-import type { AlumniProfileDto, UserDto } from "../domain/read-models/alumni.read-model";
+import type {
+  AlumniListConnectionDto,
+  AlumniListItemDto,
+  AlumniProfileDto,
+  UserDto,
+} from "../domain/read-models/alumni.read-model";
 import type { Department } from "../domain/types/department";
 import type { UserRole, UserStatus } from "../domain/types/user";
 
@@ -109,6 +114,40 @@ const alumniProfileSelect = {
   },
 } satisfies Prisma.AlumniProfileSelect;
 
+const alumniListItemSelect = {
+  id: true,
+  userId: true,
+  nickname: true,
+  graduationYear: true,
+  department: true,
+  companies: {
+    select: {
+      id: true,
+      companyName: true,
+      selectionExperience: {
+        select: {
+          id: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+  },
+  remarks: true,
+  xUrl: true,
+  instagramUrl: true,
+  avatarUrl: true,
+  skills: true,
+  portfolioUrl: true,
+  gakuchika: true,
+  usefulCoursework: true,
+  isPublic: true,
+  acceptContact: true,
+  createdAt: true,
+  updatedAt: true,
+} satisfies Prisma.AlumniProfileSelect;
+
 const userSelect = {
   ...userBaseSelect,
   alumniProfile: {
@@ -117,6 +156,7 @@ const userSelect = {
 } satisfies Prisma.UserSelect;
 
 type AlumniProfileRecord = Prisma.AlumniProfileGetPayload<{ select: typeof alumniProfileSelect }>;
+type AlumniListItemRecord = Prisma.AlumniProfileGetPayload<{ select: typeof alumniListItemSelect }>;
 type UserRecord = Prisma.UserGetPayload<{ select: typeof userSelect }>;
 
 @Injectable()
@@ -200,9 +240,44 @@ export class AlumniRepository implements AlumniRepositoryPort {
     };
   }
 
-  async findPublicList(params: FindPublicAlumniListParams): Promise<AlumniConnection> {
-    const { department, company, graduationYear, limit, offset } = params;
-    const where: Prisma.AlumniProfileWhereInput = {
+  private toAlumniListItemDto(record: AlumniListItemRecord): AlumniListItemDto {
+    return {
+      id: record.id,
+      userId: record.userId,
+      nickname: record.nickname,
+      graduationYear: record.graduationYear,
+      department: record.department as Department,
+      companyNames: record.companies.map((item) => item.companyName),
+      companyExperiences: record.companies.map((item) => ({
+        id: item.id,
+        companyName: item.companyName,
+        selectionExperience: item.selectionExperience
+          ? {
+              id: item.selectionExperience.id,
+            }
+          : null,
+      })),
+      remarks: record.remarks,
+      xUrl: record.xUrl,
+      instagramUrl: record.instagramUrl,
+      avatarUrl: record.avatarUrl,
+      skills: record.skills,
+      hasPortfolio: Boolean(record.portfolioUrl),
+      hasGakuchika: Boolean(record.gakuchika),
+      hasUsefulCoursework: Boolean(record.usefulCoursework),
+      isPublic: record.isPublic,
+      acceptContact: record.acceptContact,
+      createdAt: record.createdAt,
+      updatedAt: record.updatedAt,
+    };
+  }
+
+  private buildPublicListWhere(
+    params: Pick<FindPublicAlumniListParams, "company" | "department" | "graduationYear">,
+  ) {
+    const { department, company, graduationYear } = params;
+
+    return {
       isPublic: true,
       ...(department ? { department: this.toPrismaDepartment(department) } : {}),
       ...(graduationYear ? { graduationYear } : {}),
@@ -218,7 +293,12 @@ export class AlumniRepository implements AlumniRepositoryPort {
             },
           }
         : {}),
-    };
+    } satisfies Prisma.AlumniProfileWhereInput;
+  }
+
+  async findPublicList(params: FindPublicAlumniListParams): Promise<AlumniConnection> {
+    const { limit, offset } = params;
+    const where = this.buildPublicListWhere(params);
 
     const [items, totalCount] = await this.prisma.$transaction([
       this.prisma.alumniProfile.findMany({
@@ -233,6 +313,28 @@ export class AlumniRepository implements AlumniRepositoryPort {
 
     return {
       items: items.map((item) => this.toAlumniProfileDto(item)),
+      totalCount,
+      hasNextPage: offset + items.length < totalCount,
+    };
+  }
+
+  async findPublicListItems(params: FindPublicAlumniListParams): Promise<AlumniListConnectionDto> {
+    const { limit, offset } = params;
+    const where = this.buildPublicListWhere(params);
+
+    const [items, totalCount] = await this.prisma.$transaction([
+      this.prisma.alumniProfile.findMany({
+        where,
+        select: alumniListItemSelect,
+        orderBy: [{ graduationYear: "desc" }, { createdAt: "desc" }],
+        skip: offset,
+        take: limit,
+      }),
+      this.prisma.alumniProfile.count({ where }),
+    ]);
+
+    return {
+      items: items.map((item) => this.toAlumniListItemDto(item)),
       totalCount,
       hasNextPage: offset + items.length < totalCount,
     };

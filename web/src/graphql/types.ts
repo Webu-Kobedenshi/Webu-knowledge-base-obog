@@ -92,6 +92,38 @@ export type AlumniConnection = {
   hasNextPage: boolean;
 };
 
+export type AlumniListItem = {
+  id: string;
+  userId: string;
+  nickname: string | null;
+  graduationYear: number;
+  department: Department;
+  companyNames: string[];
+  companyExperiences: Array<{
+    id: string;
+    companyName: string;
+    selectionExperience: { id: string } | null;
+  }>;
+  remarks: string | null;
+  xUrl: string | null;
+  instagramUrl: string | null;
+  avatarUrl: string | null;
+  skills: string[];
+  hasPortfolio: boolean;
+  hasGakuchika: boolean;
+  hasUsefulCoursework: boolean;
+  isPublic: boolean;
+  acceptContact: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AlumniListConnection = {
+  items: AlumniListItem[];
+  totalCount: number;
+  hasNextPage: boolean;
+};
+
 export type MyAccountProfile = {
   id: string;
   name: string;

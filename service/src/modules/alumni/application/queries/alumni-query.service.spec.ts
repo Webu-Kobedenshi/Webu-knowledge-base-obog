@@ -34,6 +34,7 @@ describe("AlumniQueryService", () => {
   const createService = () => {
     const repo = {
       findPublicList: jest.fn(),
+      findPublicListItems: jest.fn(),
       findPublicById: jest.fn(),
       findUserById: jest.fn(),
       findUserByLinkedGmail: jest.fn(),
@@ -59,6 +60,31 @@ describe("AlumniQueryService", () => {
       });
 
       expect(repo.findPublicList).toHaveBeenCalledWith({
+        department: "IT_EXPERT",
+        company: "ACME",
+        graduationYear: 2027,
+        limit: 10,
+        offset: 5,
+      });
+      expect(result).toEqual(expected);
+    });
+  });
+
+  describe("getAlumniListItems", () => {
+    it("delegates filters to lightweight repository query", async () => {
+      const { service, repo } = createService();
+      const expected = createAlumniConnection({ totalCount: 2, hasNextPage: true });
+      (repo.findPublicListItems as jest.Mock).mockResolvedValue(expected);
+
+      const result = await service.getAlumniListItems({
+        department: "IT_EXPERT",
+        company: "ACME",
+        graduationYear: 2027,
+        limit: 10,
+        offset: 5,
+      });
+
+      expect(repo.findPublicListItems).toHaveBeenCalledWith({
         department: "IT_EXPERT",
         company: "ACME",
         graduationYear: 2027,

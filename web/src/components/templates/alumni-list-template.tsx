@@ -3,11 +3,11 @@ import { ToastOnMount } from "@/components/atoms/toast-on-mount";
 import { SearchField } from "@/components/molecules/search-field";
 import { AccountBadge } from "@/components/organisms/account-badge";
 import { AlumniCard } from "@/components/organisms/alumni-card";
-import type { AlumniProfile, MyAccountProfile } from "@/graphql/types";
+import type { AlumniListItem, MyAccountProfile } from "@/graphql/types";
 import Link from "next/link";
 
 type AlumniListTemplateProps = {
-  alumni: AlumniProfile[];
+  alumni: AlumniListItem[];
   initialDepartment: string;
   initialCompany: string;
   initialGraduationYear: string;

@@ -531,7 +531,8 @@ export function AccountProfileForm({
     }
 
     scroller.scrollTo({
-      left: target.offsetLeft - scroller.offsetLeft,
+      left:
+        target.offsetLeft - scroller.offsetLeft - (scroller.clientWidth - target.clientWidth) / 2,
       behavior: "smooth",
     });
   };
@@ -611,7 +612,7 @@ export function AccountProfileForm({
     const isPublicToSave = forcePrivate ? false : state.isPublic;
 
     if (showPublicProfileFields && isPublicToSave && normalizedCompanyNames.length === 0) {
-      const msg = "公開する場合は内定先・勤務先を1件以上入力してください。";
+      const msg = "公開する場合は内定先を1件以上入力してください。";
       showErrorToast(msg);
       return false;
     }
@@ -1138,7 +1139,7 @@ export function AccountProfileForm({
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
-                      内定先・勤務先 <span className="text-rose-500">*</span>
+                      内定先 <span className="text-rose-500">*</span>
                     </span>
                     <span className="text-[10px] text-stone-400 dark:text-stone-500">
                       複数登録可
@@ -1212,10 +1213,7 @@ export function AccountProfileForm({
                           <label className="mt-3 flex cursor-pointer items-center justify-between gap-3 rounded-xl bg-stone-50 px-3 py-2 dark:bg-stone-900/60">
                             <span>
                               <span className="block text-[12px] font-bold text-stone-800 dark:text-stone-100">
-                                この企業の選考体験を書く
-                              </span>
-                              <span className="block text-[10px] text-stone-500 dark:text-stone-400">
-                                任意。全ての内定先に書く必要はありません
+                                選考フロー ・ 体験を書く
                               </span>
                             </span>
                             <span className="relative inline-flex">
@@ -1310,7 +1308,7 @@ export function AccountProfileForm({
                                   ref={(node) => {
                                     selectionStepScrollerRefs.current[index] = node;
                                   }}
-                                  className="-mx-3 snap-x snap-mandatory overflow-x-auto scroll-smooth px-5 pb-2"
+                                  className="snap-x snap-mandatory overflow-x-auto scroll-smooth px-4 pb-2"
                                 >
                                   <div className="flex gap-3">
                                     {experience.steps.map((step, stepIndex) => {
@@ -1323,7 +1321,7 @@ export function AccountProfileForm({
                                         <div
                                           key={`${companyRowIds[index]}-${stepIndex}`}
                                           data-selection-step-index={stepIndex}
-                                          className="w-[calc(100%-1rem)] shrink-0 snap-start snap-always space-y-3 rounded-2xl border border-stone-200/80 bg-white/95 p-4 dark:border-stone-800 dark:bg-stone-950/80"
+                                          className="w-full shrink-0 snap-center snap-always space-y-3 rounded-2xl border border-stone-200/80 bg-white/95 p-4 dark:border-stone-800 dark:bg-stone-950/80"
                                         >
                                           <div className="flex items-center justify-between gap-2 border-b border-stone-100 pb-3 dark:border-stone-800">
                                             <span className="text-[10px] font-bold tracking-[0.08em] text-stone-400 dark:text-stone-500">
@@ -1673,7 +1671,7 @@ export function AccountProfileForm({
                       <path d="M12 5v14" />
                       <path d="M5 12h14" />
                     </svg>
-                    内定先・勤務先を追加
+                    内定先を追加
                   </Button>
                 </div>
 

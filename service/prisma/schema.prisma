@@ -150,6 +150,8 @@ model AlumniProfile {
 
   // ページネーションと検索のためのインデックス
   @@index([department, createdAt(sort: Desc)])
+  @@index([isPublic, graduationYear(sort: Desc), createdAt(sort: Desc)])
+  @@index([isPublic, department, graduationYear(sort: Desc), createdAt(sort: Desc)])
 }
 
 model AlumniImage {

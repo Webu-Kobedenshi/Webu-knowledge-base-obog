@@ -1,12 +1,11 @@
-import { authOptions } from "@/auth";
 import { AccountProfileForm } from "@/components/organisms/account-profile-form";
 import { fetchMyProfile } from "@/graphql/account";
-import { getServerSession } from "next-auth";
+import { getCachedServerSession } from "@/graphql/session";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function AccountPublicProfilePage() {
-  const session = await getServerSession(authOptions);
+  const session = await getCachedServerSession();
   const { profile, error } = await fetchMyProfile();
 
   if (error === "Authentication required") {

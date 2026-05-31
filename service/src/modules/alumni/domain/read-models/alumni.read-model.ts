@@ -41,6 +41,34 @@ export type AlumniProfileDto = {
   user?: UserDto;
 };
 
+export type AlumniListCompanyExperienceDto = {
+  id: string;
+  companyName: string;
+  selectionExperience: { id: string } | null;
+};
+
+export type AlumniListItemDto = {
+  id: string;
+  userId: string;
+  nickname: string | null;
+  graduationYear: number;
+  department: Department;
+  companyNames: string[];
+  companyExperiences: AlumniListCompanyExperienceDto[];
+  remarks: string | null;
+  xUrl: string | null;
+  instagramUrl: string | null;
+  avatarUrl: string | null;
+  skills: string[];
+  hasPortfolio: boolean;
+  hasGakuchika: boolean;
+  hasUsefulCoursework: boolean;
+  isPublic: boolean;
+  acceptContact: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type SelectionStepKind =
   | "DOCUMENT_SCREENING"
   | "WEB_TEST"
@@ -82,6 +110,12 @@ export type CompanyExperienceDto = {
 
 export type AlumniConnectionDto = {
   items: AlumniProfileDto[];
+  totalCount: number;
+  hasNextPage: boolean;
+};
+
+export type AlumniListConnectionDto = {
+  items: AlumniListItemDto[];
   totalCount: number;
   hasNextPage: boolean;
 };

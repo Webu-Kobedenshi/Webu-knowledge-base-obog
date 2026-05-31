@@ -125,6 +125,44 @@ type AlumniConnection {
   hasNextPage: Boolean!
 }
 
+type AlumniListItem {
+  id: ID!
+  userId: String!
+  nickname: String
+  graduationYear: Int!
+  department: Department!
+  companyNames: [String!]!
+  companyExperiences: [AlumniListCompanyExperience!]!
+  remarks: String
+  xUrl: String
+  instagramUrl: String
+  avatarUrl: String
+  skills: [String!]!
+  hasPortfolio: Boolean!
+  hasGakuchika: Boolean!
+  hasUsefulCoursework: Boolean!
+  isPublic: Boolean!
+  acceptContact: Boolean!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type AlumniListCompanyExperience {
+  id: ID!
+  companyName: String!
+  selectionExperience: AlumniListSelectionExperience
+}
+
+type AlumniListSelectionExperience {
+  id: ID!
+}
+
+type AlumniListConnection {
+  items: [AlumniListItem!]!
+  totalCount: Int!
+  hasNextPage: Boolean!
+}
+
 input UpdateAlumniProfileInput {
   nickname: String
   graduationYear: Int!
@@ -180,7 +218,15 @@ extend type Query {
     limit: Int!
     offset: Int!
   ): AlumniConnection!
+  getAlumniListItems(
+    department: Department
+    company: String
+    graduationYear: Int
+    limit: Int!
+    offset: Int!
+  ): AlumniListConnection!
   getMyProfile: User!
+  getMyProfileSummary: User!
   getAlumniDetail(id: ID!): AlumniProfile
   findUserByLinkedGmail(gmail: String!): User
   isAdminEmail(email: String!): Boolean!

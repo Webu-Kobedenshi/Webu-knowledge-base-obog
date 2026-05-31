@@ -383,8 +383,8 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
                 ) : null}
               </div>
             ) : (
-              <div className="mt-4 rounded-xl border border-dashed border-stone-200 p-4 text-[12px] text-stone-500 dark:border-stone-800 dark:text-stone-400">
-                この企業は内定先として公開されています。選考フローや面接質問はまだ登録されていません。
+              <div className="mt-4 rounded-xl border border-dashed border-stone-200 p-4 text-center text-[12px] text-stone-500 dark:border-stone-800 dark:text-stone-400">
+                未登録
               </div>
             )}
           </div>

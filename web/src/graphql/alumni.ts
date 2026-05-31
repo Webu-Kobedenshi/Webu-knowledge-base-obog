@@ -1,9 +1,8 @@
-import { authOptions } from "@/auth";
-import { getServerSession } from "next-auth";
-import type { AlumniConnection, AlumniProfile, Department } from "./types";
+import { getCachedServerSession } from "./session";
+import type { AlumniListConnection, AlumniListItem, AlumniProfile, Department } from "./types";
 
 type AlumniListData = {
-  getAlumniList: AlumniConnection;
+  getAlumniListItems: AlumniListConnection;
 };
 
 type GraphQlResponse<TData> = {
@@ -12,14 +11,14 @@ type GraphQlResponse<TData> = {
 };
 
 const alumniListQuery = `
-  query GetAlumniList(
+  query GetAlumniListItems(
     $department: Department
     $company: String
     $graduationYear: Int
     $limit: Int!
     $offset: Int!
   ) {
-    getAlumniList(
+    getAlumniListItems(
       department: $department
       company: $company
       graduationYear: $graduationYear
@@ -39,31 +38,17 @@ const alumniListQuery = `
           companyName
           selectionExperience {
             id
-            entryTrigger
-            overallTip
-            steps {
-              id
-              stepKind
-              format
-              interviewerCount
-              durationMinutes
-              questions
-              atmosphere
-              preparation
-              sortOrder
-            }
           }
         }
         remarks
-        contactEmail
         xUrl
         instagramUrl
         isPublic
         acceptContact
         skills
-        portfolioUrl
-        gakuchika
-        usefulCoursework
+        hasPortfolio
+        hasGakuchika
+        hasUsefulCoursework
         createdAt
         updatedAt
       }
@@ -80,11 +65,11 @@ export async function fetchAlumniList(params: {
   limit?: number;
   offset?: number;
 }) {
-  const session = await getServerSession(authOptions);
+  const session = await getCachedServerSession();
   const serviceToken = session?.serviceToken;
   if (!serviceToken) {
     return {
-      alumniList: [] satisfies AlumniProfile[],
+      alumniList: [] satisfies AlumniListItem[],
       totalCount: 0,
       hasNextPage: false,
       error: "Authentication required",
@@ -119,7 +104,7 @@ export async function fetchAlumniList(params: {
 
     if (json.errors?.length) {
       return {
-        alumniList: [] satisfies AlumniProfile[],
+        alumniList: [] satisfies AlumniListItem[],
         totalCount: 0,
         hasNextPage: false,
         error: json.errors.map((item) => item.message).join(", "),
@@ -127,14 +112,14 @@ export async function fetchAlumniList(params: {
     }
 
     return {
-      alumniList: json.data?.getAlumniList.items ?? [],
-      totalCount: json.data?.getAlumniList.totalCount ?? 0,
-      hasNextPage: json.data?.getAlumniList.hasNextPage ?? false,
+      alumniList: json.data?.getAlumniListItems.items ?? [],
+      totalCount: json.data?.getAlumniListItems.totalCount ?? 0,
+      hasNextPage: json.data?.getAlumniListItems.hasNextPage ?? false,
       error: "",
     };
   } catch (error) {
     return {
-      alumniList: [] satisfies AlumniProfile[],
+      alumniList: [] satisfies AlumniListItem[],
       totalCount: 0,
       hasNextPage: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -195,7 +180,7 @@ const alumniDetailQuery = `
 `;
 
 export async function fetchAlumniDetail(id: string) {
-  const session = await getServerSession(authOptions);
+  const session = await getCachedServerSession();
   const serviceToken = session?.serviceToken;
   if (!serviceToken) {
     return { alumni: null, error: "Authentication required" };

@@ -127,4 +127,31 @@ describe("AlumniProfileDraft", () => {
       ),
     ).toThrow("xUrl or instagramUrl is required when acceptContact is true");
   });
+
+  it("rejects offer as a selection step", () => {
+    expect(() =>
+      AlumniProfileDraft.create(
+        {
+          nickname: "taro",
+          companyNames: [],
+          companyExperiences: [
+            {
+              companyName: "ACME",
+              selectionExperience: {
+                steps: [
+                  {
+                    stepKind: "OFFER" as never,
+                    questions: "内定",
+                  },
+                ],
+              },
+            },
+          ],
+          isPublic: true,
+          acceptContact: false,
+        },
+        "fallback@example.com",
+      ),
+    ).toThrow("selection step kind is invalid");
+  });
 });

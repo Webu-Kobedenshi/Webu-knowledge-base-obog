@@ -1,5 +1,5 @@
 import { AlumniDetailTemplate } from "@/components/templates/alumni-detail-template";
-import { fetchMyProfile } from "@/graphql/account";
+import { fetchMyProfileSummary } from "@/graphql/account";
 import { fetchAlumniDetail } from "@/graphql/alumni";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -11,7 +11,7 @@ type PageProps = {
 export default async function AlumniDetailPage({ params }: PageProps) {
   const { id } = await params;
 
-  const { profile, error: profileError } = await fetchMyProfile();
+  const { profile, error: profileError } = await fetchMyProfileSummary();
 
   if (profileError === "Authentication required") {
     redirect(`/login?callbackUrl=/alumni/${id}`);

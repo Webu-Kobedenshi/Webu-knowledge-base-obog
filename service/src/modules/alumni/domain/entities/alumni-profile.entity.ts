@@ -29,7 +29,6 @@ export type SelectionStepKind =
   | "FIRST_INTERVIEW"
   | "SECOND_INTERVIEW"
   | "FINAL_INTERVIEW"
-  | "OFFER"
   | "OTHER";
 
 export type SelectionFormat = "ONLINE" | "IN_PERSON" | "UNKNOWN";
@@ -161,7 +160,6 @@ const validStepKinds = new Set<SelectionStepKind>([
   "FIRST_INTERVIEW",
   "SECOND_INTERVIEW",
   "FINAL_INTERVIEW",
-  "OFFER",
   "OTHER",
 ]);
 

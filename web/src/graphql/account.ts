@@ -1,5 +1,4 @@
-import { authOptions } from "@/auth";
-import { getServerSession } from "next-auth";
+import { getCachedServerSession } from "./session";
 import type { AlumniProfile, Department, UserStatus } from "./types";
 
 type Role = "STUDENT" | "ALUMNI" | "ADMIN";
@@ -18,6 +17,12 @@ type GetMyProfileData = {
     department: Department | null;
     alumniProfile: AlumniProfile | null;
   };
+};
+
+type MyProfile = GetMyProfileData["getMyProfile"];
+
+type GetMyProfileSummaryData = {
+  getMyProfileSummary: Omit<MyProfile, "alumniProfile">;
 };
 
 type GraphQlResponse<TData> = {
@@ -83,8 +88,25 @@ const getMyProfileQuery = `
   }
 `;
 
+const getMyProfileSummaryQuery = `
+  query GetMyProfileSummary {
+    getMyProfileSummary {
+      id
+      email
+      name
+      studentId
+      linkedGmail
+      role
+      status
+      enrollmentYear
+      durationYears
+      department
+    }
+  }
+`;
+
 export async function fetchMyProfile() {
-  const session = await getServerSession(authOptions);
+  const session = await getCachedServerSession();
   const serviceToken = session?.serviceToken;
   if (!serviceToken) {
     return { profile: null, error: "Authentication required" } as const;
@@ -116,6 +138,54 @@ export async function fetchMyProfile() {
 
     return {
       profile: json.data?.getMyProfile ?? null,
+      error: "",
+    } as const;
+  } catch (error) {
+    return {
+      profile: null,
+      error: error instanceof Error ? error.message : "Unknown error",
+    } as const;
+  }
+}
+
+export async function fetchMyProfileSummary() {
+  const session = await getCachedServerSession();
+  const serviceToken = session?.serviceToken;
+  if (!serviceToken) {
+    return { profile: null, error: "Authentication required" } as const;
+  }
+
+  const endpoint = process.env.GRAPHQL_ENDPOINT ?? "http://localhost:4000/graphql";
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${serviceToken}`,
+      },
+      cache: "no-store",
+      body: JSON.stringify({
+        query: getMyProfileSummaryQuery,
+      }),
+    });
+
+    const json = (await response.json()) as GraphQlResponse<GetMyProfileSummaryData>;
+
+    if (json.errors?.length) {
+      return {
+        profile: null,
+        error: json.errors.map((item) => item.message).join(", "),
+      } as const;
+    }
+
+    return {
+      profile: json.data?.getMyProfileSummary
+        ? {
+            ...json.data.getMyProfileSummary,
+            alumniProfile: null,
+          }
+        : null,
       error: "",
     } as const;
   } catch (error) {

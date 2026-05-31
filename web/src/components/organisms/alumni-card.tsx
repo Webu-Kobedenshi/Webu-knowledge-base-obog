@@ -1,14 +1,14 @@
 import { SocialContactIcon } from "@/components/atoms/social-contact-icon";
-import type { AlumniProfile } from "@/graphql/types";
+import type { AlumniListItem } from "@/graphql/types";
 import { getAlumniContactClassName, getAlumniContactLinks } from "@/lib/alumni-contact";
 import { departmentGradient } from "@/lib/department-theme";
 import Link from "next/link";
 
 type AlumniCardProps = {
-  alumni: AlumniProfile;
+  alumni: AlumniListItem;
 };
 
-const departmentLabel: Record<AlumniProfile["department"], string> = {
+const departmentLabel: Record<AlumniListItem["department"], string> = {
   IT_EXPERT: "ITエキスパート",
   IT_SPECIALIST: "ITスペシャリスト",
   INFORMATION_PROCESS: "情報処理",
@@ -183,9 +183,9 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
         {/* ── Detail Link ── */}
         <div className="mt-2 min-h-[1.25rem]">
           {alumni.skills.length > 0 ||
-          alumni.gakuchika ||
-          alumni.usefulCoursework ||
-          alumni.portfolioUrl ||
+          alumni.hasGakuchika ||
+          alumni.hasUsefulCoursework ||
+          alumni.hasPortfolio ||
           selectionExperienceCount > 0 ? (
             <Link
               href={`/alumni/${alumni.id}`}

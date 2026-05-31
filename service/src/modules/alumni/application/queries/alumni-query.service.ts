@@ -1,7 +1,12 @@
 import { Inject, Injectable } from "@nestjs/common";
 import type { Department } from "../../domain/types/department";
 import { resolveRoleAndStatus } from "../../domain/user-role-transition";
-import type { AlumniConnectionDto, AlumniProfileDto, UserDto } from "../dto/alumni.dto";
+import type {
+  AlumniConnectionDto,
+  AlumniListConnectionDto,
+  AlumniProfileDto,
+  UserDto,
+} from "../dto/alumni.dto";
 import { ALUMNI_REPOSITORY, type AlumniRepositoryPort } from "../ports/alumni-repository.port";
 
 @Injectable()
@@ -16,6 +21,16 @@ export class AlumniQueryService {
     offset: number;
   }): Promise<AlumniConnectionDto> {
     return this.alumniRepository.findPublicList(params);
+  }
+
+  getAlumniListItems(params: {
+    department?: Department;
+    company?: string;
+    graduationYear?: number;
+    limit: number;
+    offset: number;
+  }): Promise<AlumniListConnectionDto> {
+    return this.alumniRepository.findPublicListItems(params);
   }
 
   getAlumniDetail(id: string): Promise<AlumniProfileDto | null> {

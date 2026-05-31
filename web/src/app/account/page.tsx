@@ -1,9 +1,8 @@
 import { AccountActions } from "@/app/account/account-actions";
-import { authOptions } from "@/auth";
 import { ToastOnMount } from "@/components/atoms/toast-on-mount";
 import { AccountProfileForm } from "@/components/organisms/account-profile-form";
 import { fetchMyProfile } from "@/graphql/account";
-import { getServerSession } from "next-auth";
+import { getCachedServerSession } from "@/graphql/session";
 import Link from "next/link";
 
 const roleLabel: Record<"STUDENT" | "ALUMNI" | "ADMIN", string> = {
@@ -27,7 +26,7 @@ function getSearchParamValue(value: string | string[] | undefined): string {
 }
 
 export default async function AccountPage({ searchParams }: AccountPageProps) {
-  const session = await getServerSession(authOptions);
+  const session = await getCachedServerSession();
   const { profile } = await fetchMyProfile();
   const params = (await searchParams) ?? {};
   const gmailLinkStatus = getSearchParamValue(params.gmailLinkStatus);

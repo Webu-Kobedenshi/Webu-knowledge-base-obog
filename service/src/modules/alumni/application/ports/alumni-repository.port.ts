@@ -1,11 +1,15 @@
 import type {
+  SelectionFormat,
+  SelectionStepKind,
+} from "../../domain/entities/alumni-profile.entity";
+import type {
   AlumniConnectionDto,
+  AlumniListConnectionDto,
   AlumniProfileDto,
   UserDto,
 } from "../../domain/read-models/alumni.read-model";
 import type { Department } from "../../domain/types/department";
 import type { UserRole, UserStatus } from "../../domain/types/user";
-import type { SelectionFormat, SelectionStepKind } from "../dto/alumni.input";
 
 export const ALUMNI_REPOSITORY = Symbol("ALUMNI_REPOSITORY");
 
@@ -68,6 +72,7 @@ export type FindPublicAlumniListParams = {
 
 export interface AlumniRepositoryPort {
   findPublicList(params: FindPublicAlumniListParams): Promise<AlumniConnectionDto>;
+  findPublicListItems(params: FindPublicAlumniListParams): Promise<AlumniListConnectionDto>;
   findPublicById(id: string): Promise<AlumniProfileDto | null>;
   findUserById(userId: string): Promise<UserDto | null>;
   findUserByEmail(email: string): Promise<UserDto | null>;
