@@ -143,7 +143,13 @@ export function AlumniListResults({
   error,
 }: AlumniListResultsProps) {
   const hasPrevPage = currentPage > 1;
+  const hasFirstPage = currentPage > 1;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const hasLastPage = currentPage < totalPages;
+  const paginationButtonClassName =
+    "inline-flex h-9 w-9 items-center justify-center rounded-xl border border-stone-200/80 bg-white/80 text-stone-600 transition-all hover:bg-stone-50 hover:text-stone-900 active:scale-95 dark:border-stone-700/60 dark:bg-stone-900/60 dark:text-stone-400 dark:hover:bg-stone-800/80 dark:hover:text-stone-200";
+  const paginationDisabledClassName =
+    "inline-flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-xl border border-stone-200/50 text-stone-300 dark:border-stone-800/50 dark:text-stone-700";
 
   const buildPageHref = (page: number) => {
     const query = new URLSearchParams();
@@ -216,18 +222,28 @@ export function AlumniListResults({
 
       {totalCount > 0 && (
         <section className="mt-8 flex items-center justify-center gap-1.5">
+          {hasFirstPage ? (
+            <Link
+              href={buildPageHref(1)}
+              className={paginationButtonClassName}
+              aria-label="最初のページ"
+            >
+              <span>«</span>
+            </Link>
+          ) : (
+            <span className={paginationDisabledClassName}>«</span>
+          )}
+
           {hasPrevPage ? (
             <Link
               href={buildPageHref(currentPage - 1)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-stone-200/80 bg-white/80 text-stone-600 transition-all hover:bg-stone-50 hover:text-stone-900 active:scale-95 dark:border-stone-700/60 dark:bg-stone-900/60 dark:text-stone-400 dark:hover:bg-stone-800/80 dark:hover:text-stone-200"
+              className={paginationButtonClassName}
               aria-label="前のページ"
             >
               <span>‹</span>
             </Link>
           ) : (
-            <span className="inline-flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-xl border border-stone-200/50 text-stone-300 dark:border-stone-800/50 dark:text-stone-700">
-              ‹
-            </span>
+            <span className={paginationDisabledClassName}>‹</span>
           )}
 
           <span className="px-3 text-[13px] tabular-nums text-stone-600 dark:text-stone-400">
@@ -239,15 +255,25 @@ export function AlumniListResults({
           {hasNextPage ? (
             <Link
               href={buildPageHref(currentPage + 1)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-stone-200/80 bg-white/80 text-stone-600 transition-all hover:bg-stone-50 hover:text-stone-900 active:scale-95 dark:border-stone-700/60 dark:bg-stone-900/60 dark:text-stone-400 dark:hover:bg-stone-800/80 dark:hover:text-stone-200"
+              className={paginationButtonClassName}
               aria-label="次のページ"
             >
               <span>›</span>
             </Link>
           ) : (
-            <span className="inline-flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-xl border border-stone-200/50 text-stone-300 dark:border-stone-800/50 dark:text-stone-700">
-              ›
-            </span>
+            <span className={paginationDisabledClassName}>›</span>
+          )}
+
+          {hasLastPage ? (
+            <Link
+              href={buildPageHref(totalPages)}
+              className={paginationButtonClassName}
+              aria-label="最後のページ"
+            >
+              <span>»</span>
+            </Link>
+          ) : (
+            <span className={paginationDisabledClassName}>»</span>
           )}
         </section>
       )}

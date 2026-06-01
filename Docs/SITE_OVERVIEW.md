@@ -145,16 +145,12 @@
 - remarks, contactEmail（互換用）, xUrl, instagramUrl, avatarUrl
 - skills, portfolioUrl, gakuchika, usefulCoursework
 - isPublic, acceptContact
-- 1対多: AlumniCompany, AlumniImage
+- 1対多: AlumniCompany
 - 現行UIのプロフィール画像は `avatarUrl` を主に参照する
 
 ### AlumniCompany
 - companyName（ユニーク制約: alumniProfileId + companyName）
 - 任意で 1対1: SelectionExperience
-
-### AlumniImage
-- url, caption, sortOrder
-- 現時点ではプロフィール表示の主導データではなく、画像拡張用の永続化モデル
 
 ### SelectionExperience
 - entryTrigger, overallTip
