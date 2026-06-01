@@ -1,44 +1,43 @@
-# 開発・運用フロー (Git Workflow)
+# Git Workflow
 
-最終更新: 2026-02-19
+開発時の基本フローです。
 
-## 1. ブランチ構成
+## Branches
 
-本プロジェクトでは、以下の2つの主要ブランチを使用して開発・運用を行います。
+- `develop`: 日々の開発ブランチ
+- `release`: 本番反映用の安定ブランチ
 
-| ブランチ名 | 環境 / 役割                | 内容                                                       |
-| :--------- | :------------------------- | :--------------------------------------------------------- |
-| `release`  | **本番環境 (Production)**  | **デフォルトブランチ**。常にリリース可能な安定したコード。 |
-| `develop`  | **開発環境 (Development)** | **日々の開発ベース**。新機能や修正はここからスタートする。 |
+## Development Flow
 
----
+1. `develop` から作業ブランチを作る
+2. 実装、確認、コミットを行う
+3. `develop` に Pull Request を出す
+4. レビュー後に merge する
 
-## 2. 標準的な開発フロー
+ブランチ名の例:
 
-### 2.1 新機能開発・バグ修正
+```text
+feature/alumni-card-loading
+fix/google-oauth-callback
+docs/setup-readme
+```
 
-1. `develop` からブランチを作成する: `feature/feature-name` や `fix/bug-name`
-2. 開発を行い、コミットする
-3. `develop` ブランチに対してプルリクエスト (PR) を作成・マージする
+## Release Flow
 
-### 2.2 リリース (Production)
+1. `develop` で確認する
+2. `release` に Pull Request を出す
+3. merge 後に本番へ反映する
 
-1. `develop` での実装および検証が完了後、`release` ブランチへ PR を作成・マージする
-2. `release` ブランチへのマージをトリガーに本番環境へのデプロイが行われる
+## Hotfix
 
----
+本番で急ぎの修正が必要な場合:
 
-## 3. 緊急修正 (Hotfix)
+1. `release` から `hotfix/*` を作る
+2. 修正して `release` に merge する
+3. 同じ修正を `develop` にも反映する
 
-本番環境で緊急の修正が必要な場合：
+## Notes
 
-1. `release` から直接 `hotfix/xxx` ブランチを作成して修正
-2. `release` へマージし、即時デプロイ
-3. 修正内容を忘れずに `develop` にも反映（バックポート）させる
-
----
-
-## 4. 注意事項
-
-- **直接コミット禁止**: `release` ブランチへの直接コミットは避け、必ず PR を経由してください。
-- **追跡設定**: `git pull` がエラーになる場合は、`git branch --set-upstream-to=origin/<branch> <branch>` で追跡情報を再設定してください。
+- `release` へ直接 push しない
+- Prisma migration は必ず commit に含める
+- 動作確認に使ったコマンドは PR に書く

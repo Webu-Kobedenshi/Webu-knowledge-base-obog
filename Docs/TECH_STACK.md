@@ -1,45 +1,45 @@
-# 技術スタック（2026-02-20）
+# Tech Stack
 
-## 1. Frontend（web）
+このプロジェクトで使っている主要技術の一覧です。
 
-- Next.js `16.1.6`（App Router）
+## Frontend
+
+- Next.js `16.1.6`
 - React `19.2.3`
 - TypeScript `5.x`
 - Tailwind CSS `4.x`
-- NextAuth `4.24.x`（Google OAuth）
-- jose `6.x`（JWT 署名）
+- shadcn/ui
+- NextAuth `4.24.x`
+- jose `6.x`
 
-## 2. Backend（service）
+## Backend
 
 - NestJS `11.x`
-- GraphQL（Schema-first）
+- GraphQL schema-first
 - Apollo Server `5.x`
-- Prisma `7.4.x`（`@prisma/client`, `prisma`, `@prisma/adapter-pg`）
-- PostgreSQL Driver: `pg 8.x`
-- AWS SDK v3（S3 Client / Presigner）
+- Prisma `7.4.x`
+- PostgreSQL driver `pg`
+- AWS SDK v3（S3 compatible storage）
 
-## 3. Data / Storage
+## Data And Storage
 
-- PostgreSQL `16`（Docker image: `postgres:16-alpine`）
-- Cloudflare R2（S3 互換オブジェクトストレージ）
-  - アバター画像アップロードに利用（S3 署名付きURLで直接 PUT）
-  - `ENDPOINT` は S3 API 用（例: `https://<account-id>.r2.cloudflarestorage.com`）
-  - `PUBLIC_UPLOAD_ENDPOINT` はブラウザから到達可能な署名付き PUT 用 S3 API URL（例: `https://<account-id>.r2.cloudflarestorage.com`、ローカルは `http://localhost:9000`）
-  - `PUBLIC_ENDPOINT` は配信用の公開ベース URL（例: `https://<bucket>.r2.dev` またはカスタム CDN ドメイン`）
-  - ブラウザから直接アップロードする場合は **バケットの CORS 設定** が必須
-  - 実装注意点: 署名生成はサーバ側で行い、公開 URL は `PUBLIC_ENDPOINT` を元に生成する
+- PostgreSQL `16`
+- Local DB: Docker Compose
+- Production DB: Neon
+- Local object storage: MinIO
+- Production object storage: Cloudflare R2
 
-## 4. 開発・運用ツール
+## Tooling
 
-- Node.js `22 LTS`（`>=22 <23`）
+- Node.js `22 LTS`
 - pnpm `10.8.1`
-- Biome `1.9.x`（Lint / Format）
-- Jest `30.x`
 - Docker / Docker Compose
+- Biome
+- Jest
 
-## 5. アーキテクチャ方針
+## Architecture Policy
 
-- Frontend: App Router + Server Components 中心
-- Backend: Layered Architecture + CQRS（Command / Query 分離）
-- API: GraphQL を単一エントリとして提供
-- ORM: Prisma の型を活用し、`select` ベースで必要フィールドを取得
+- Frontend は App Router と Server Components を中心にする
+- UI は atomic design に沿って `atoms` から再利用する
+- Backend は Layered Architecture + CQRS を基本にする
+- Prisma の読み取りは必要フィールドを `select` で絞る

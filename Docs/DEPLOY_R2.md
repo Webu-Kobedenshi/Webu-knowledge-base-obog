@@ -1,49 +1,41 @@
-# Cloudflare R2 設定手順（画像アップロード）
+# Cloudflare R2 Deploy
 
-このドキュメントは `service` の S3 互換ストレージとして R2 を設定する手順です。
+アバター画像用の S3 互換ストレージを R2 で用意する手順です。
 
-## 1. バケット作成
+## Bucket
 
-1. Cloudflare Dashboard → R2
-2. `Create bucket`
-3. バケット名: `webu-portal`（推奨）
+- Bucket name: `webu-portal`
+- Public access は配信用ドメインに合わせて設定する
 
-## 2. API Token 作成
+## API Token
 
-1. R2 → API Tokens → `Create API token`
-2. 権限: `オブジェクト読み取りと書き込み`
-3. バケット適用範囲: `特定のバケットのみ`（`webu-portal` を指定推奨）
-4. 生成後に値を保存
-   - `Access Key ID`
-   - `Secret Access Key`
+R2 の S3 API 用 token を作成します。
 
-補足:
+必要な値:
 
-- 画面上部の Cloudflare API Token 値はこのアプリでは未使用
-- 使用するのは S3 クライアント用の `Access Key ID` / `Secret Access Key`
+```text
+Access Key ID
+Secret Access Key
+S3 Endpoint
+```
 
-## 3. エンドポイント確認
+## Environment Variables
 
-R2 画面から S3 endpoint を確認します。
+Fly.io の service に設定します。
 
-- `ENDPOINT`: `https://<account-id>.r2.cloudflarestorage.com`
+```bash
+flyctl secrets set \
+  ENDPOINT="https://<account-id>.r2.cloudflarestorage.com" \
+  PUBLIC_UPLOAD_ENDPOINT="https://<account-id>.r2.cloudflarestorage.com" \
+  PUBLIC_ENDPOINT="https://<your-r2-public-domain>" \
+  ACCESS_KEY="<r2-access-key-id>" \
+  SECRET_KEY="<r2-secret-access-key>" \
+  BUCKET_NAME="webu-portal"
+```
 
-公開画像用 URL は別で設定します。
+## CORS
 
-- `PUBLIC_ENDPOINT`: `https://<your-r2-public-domain>` もしくは `https://<bucket>.r2.dev`
-
-ブラウザからの署名付きアップロード先は S3 API endpoint を使います。
-
-- `PUBLIC_UPLOAD_ENDPOINT`: `https://<account-id>.r2.cloudflarestorage.com`
-- 未設定の場合、`PUBLIC_ENDPOINT` が `*.r2.dev` のときは `ENDPOINT` を使って署名付きアップロード URL を生成します。
-
-## 4. CORS 設定（必須）
-
-R2 バケットで CORS を設定しないと、ブラウザの preflight (`OPTIONS`) が失敗し、
-`No 'Access-Control-Allow-Origin' header` でアップロードできません。
-
-Cloudflare Dashboard → R2 → 対象バケット → `Settings` → `CORS policy` に、
-以下の JSON を設定してください。
+ブラウザから署名付き URL へ `PUT` するため、R2 bucket に CORS を設定します。
 
 ```json
 [
@@ -57,34 +49,14 @@ Cloudflare Dashboard → R2 → 対象バケット → `Settings` → `CORS poli
 ]
 ```
 
-カスタムドメインを使う場合は、`AllowedOrigins` に本番の Web ドメインを追加してください。
+## Check
 
-## 5. Fly.io secrets 設定
+1. service を deploy する
+2. `/account` からアバターをアップロードする
+3. 保存された画像 URL が表示できる
 
-```bash
-flyctl secrets set \
-  ENDPOINT="https://<account-id>.r2.cloudflarestorage.com" \
-  PUBLIC_UPLOAD_ENDPOINT="https://<account-id>.r2.cloudflarestorage.com" \
-  PUBLIC_ENDPOINT="https://<your-r2-public-domain>" \
-  ACCESS_KEY="<r2-access-key-id>" \
-  SECRET_KEY="<r2-secret-access-key>" \
-  BUCKET_NAME="webu-portal"
-```
+## Common Issues
 
-## 6. 反映確認
-
-1. `flyctl deploy`
-2. Web から画像アップロード
-3. 保存された URL で画像が表示されることを確認
-
-### preflight エラー時の確認
-
-- エラー例: `No 'Access-Control-Allow-Origin' header`
-- `AllowedOrigins` が実際のフロント URL と完全一致しているか
-- `PUT` と `AllowedHeaders: ["*"]` が入っているか
-- CORS 保存後に数十秒待ってから再試行
-
-## 7. セキュリティ注意
-
-- キーを誤って公開した場合は即時ローテーション
-- `PUBLIC_ENDPOINT` は公開配信用、`ENDPOINT` は S3 API 用として分離
+- `AllowedOrigins` が実際の Web URL と違う
+- `PUBLIC_UPLOAD_ENDPOINT` がブラウザから到達できない
+- `PUBLIC_ENDPOINT` が公開配信用 URL になっていない

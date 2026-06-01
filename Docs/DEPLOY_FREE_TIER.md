@@ -1,28 +1,24 @@
-# デプロイ構成（現在）
+# Deploy Overview
 
-## 何を使っているか
+本番環境で使うサービスの全体像です。
 
-- Web（Next.js）: Vercel
-- Service（NestJS / GraphQL）: Fly.io
-- DB（PostgreSQL）: Neon
-- 画像ストレージ（S3互換）: Cloudflare R2
+## Services
 
-## お金がかかる可能性があるもの
+- Web: Vercel
+- API: Fly.io
+- Database: Neon
+- Image Storage: Cloudflare R2
 
-- Vercel
-  - 無料枠超過時（ビルド回数・帯域・実行時間など）
-- Fly.io
-  - マシン稼働時間・リソース使用量に応じて課金
-  - `auto_stop_machines = "off"` のため継続稼働で課金可能性あり
-- Neon
-  - 無料枠の容量・接続・使用量超過時
-- Cloudflare R2
-  - ストレージ容量・リクエスト数・外部転送量で課金の可能性
+## Cost Notes
 
-## 補足
+- Vercel はビルド回数、帯域、実行時間で無料枠を超える可能性があります
+- Fly.io はマシン稼働時間とリソース使用量で課金されます
+- Neon は容量、接続、利用時間で無料枠を超える可能性があります
+- R2 は保存容量、リクエスト数、転送量で課金されます
 
-- 詳細手順:
-  - [Docs/DEPLOY_VERCEL.md](./DEPLOY_VERCEL.md)
-  - [Docs/DEPLOY_FLYIO.md](./DEPLOY_FLYIO.md)
-  - [Docs/DEPLOY_NEON.md](./DEPLOY_NEON.md)
-  - [Docs/DEPLOY_R2.md](./DEPLOY_R2.md)
+## Related Docs
+
+- [Vercel Deploy](./DEPLOY_VERCEL.md)
+- [Fly.io Deploy](./DEPLOY_FLYIO.md)
+- [Neon Deploy](./DEPLOY_NEON.md)
+- [Cloudflare R2 Deploy](./DEPLOY_R2.md)
