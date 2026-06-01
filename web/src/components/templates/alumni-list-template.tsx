@@ -3,8 +3,10 @@ import { ToastOnMount } from "@/components/atoms/toast-on-mount";
 import { SearchField } from "@/components/molecules/search-field";
 import { AccountBadge } from "@/components/organisms/account-badge";
 import { AlumniCard } from "@/components/organisms/alumni-card";
+import { AlumniCardSkeleton } from "@/components/organisms/alumni-card-skeleton";
 import type { AlumniListItem, MyAccountProfile } from "@/graphql/types";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 type AlumniListTemplateProps = {
   alumni: AlumniListItem[];
@@ -31,32 +33,47 @@ export function AlumniListTemplate({
   account,
   error,
 }: AlumniListTemplateProps) {
-  const hasPrevPage = currentPage > 1;
-  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-  const currentShownCount = alumni.length;
+  return (
+    <AlumniListTemplateFrame
+      initialDepartment={initialDepartment}
+      initialCompany={initialCompany}
+      initialGraduationYear={initialGraduationYear}
+      pageSize={pageSize}
+      account={account}
+    >
+      <AlumniListResults
+        alumni={alumni}
+        initialDepartment={initialDepartment}
+        initialCompany={initialCompany}
+        initialGraduationYear={initialGraduationYear}
+        totalCount={totalCount}
+        currentPage={currentPage}
+        pageSize={pageSize}
+        hasNextPage={hasNextPage}
+        account={account}
+        error={error}
+      />
+    </AlumniListTemplateFrame>
+  );
+}
 
-  const buildPageHref = (page: number) => {
-    const query = new URLSearchParams();
-    if (initialDepartment) {
-      query.set("department", initialDepartment);
-    }
-    if (initialCompany) {
-      query.set("company", initialCompany);
-    }
-    if (initialGraduationYear) {
-      query.set("graduationYear", initialGraduationYear);
-    }
-    if (pageSize !== 12) {
-      query.set("pageSize", String(pageSize));
-    }
-    if (page > 1) {
-      query.set("page", String(page));
-    }
+type AlumniListTemplateFrameProps = {
+  initialDepartment: string;
+  initialCompany: string;
+  initialGraduationYear: string;
+  pageSize: number;
+  account: MyAccountProfile;
+  children: ReactNode;
+};
 
-    const serialized = query.toString();
-    return serialized ? `/?${serialized}` : "/";
-  };
-
+export function AlumniListTemplateFrame({
+  initialDepartment,
+  initialCompany,
+  initialGraduationYear,
+  pageSize,
+  account,
+  children,
+}: AlumniListTemplateFrameProps) {
   return (
     <main className="mx-auto min-h-screen w-full max-w-[1400px] px-4 py-6 md:px-8 md:py-8">
       <header className="liquid-glass-strong rounded-2xl p-5 md:p-6">
@@ -95,6 +112,63 @@ export function AlumniListTemplate({
         />
       </section>
 
+      {children}
+    </main>
+  );
+}
+
+type AlumniListResultsProps = {
+  alumni: AlumniListItem[];
+  initialDepartment: string;
+  initialCompany: string;
+  initialGraduationYear: string;
+  totalCount: number;
+  currentPage: number;
+  pageSize: number;
+  hasNextPage: boolean;
+  account: MyAccountProfile;
+  error?: string;
+};
+
+export function AlumniListResults({
+  alumni,
+  initialDepartment,
+  initialCompany,
+  initialGraduationYear,
+  totalCount,
+  currentPage,
+  pageSize,
+  hasNextPage,
+  account,
+  error,
+}: AlumniListResultsProps) {
+  const hasPrevPage = currentPage > 1;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+  const buildPageHref = (page: number) => {
+    const query = new URLSearchParams();
+    if (initialDepartment) {
+      query.set("department", initialDepartment);
+    }
+    if (initialCompany) {
+      query.set("company", initialCompany);
+    }
+    if (initialGraduationYear) {
+      query.set("graduationYear", initialGraduationYear);
+    }
+    if (pageSize !== 12) {
+      query.set("pageSize", String(pageSize));
+    }
+    if (page > 1) {
+      query.set("page", String(page));
+    }
+
+    const serialized = query.toString();
+    return serialized ? `/?${serialized}` : "/";
+  };
+
+  return (
+    <>
       <section className="mt-4 flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-1.5 text-[13px] font-medium text-stone-600 dark:text-stone-400">
           <span className="tabular-nums font-semibold text-stone-900 dark:text-stone-200">
@@ -177,6 +251,62 @@ export function AlumniListTemplate({
           )}
         </section>
       )}
-    </main>
+    </>
+  );
+}
+
+type AlumniListResultsSkeletonProps = {
+  initialDepartment: string;
+  initialCompany: string;
+  initialGraduationYear: string;
+  pageSize: number;
+  account: MyAccountProfile;
+};
+
+export function AlumniListResultsSkeleton({
+  initialDepartment,
+  initialCompany,
+  initialGraduationYear,
+  pageSize,
+  account,
+}: AlumniListResultsSkeletonProps) {
+  const skeletonKeys = Array.from(
+    { length: pageSize },
+    (_, index) => `alumni-card-skeleton-${index + 1}`,
+  );
+
+  return (
+    <>
+      <section className="mt-4 flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-1.5 text-[13px] font-medium text-stone-600 dark:text-stone-400">
+          <div className="h-5 w-12 animate-pulse rounded bg-stone-200/80 dark:bg-stone-800/80" />
+          <span>件</span>
+        </div>
+        <div className="h-3.5 w-px bg-stone-200 dark:bg-stone-700" />
+        {initialDepartment ? (
+          <Badge variant="default">学科で絞り込み中</Badge>
+        ) : (
+          <Badge variant="secondary">全学科</Badge>
+        )}
+        {initialGraduationYear ? (
+          <Badge variant="default">卒業年度: {initialGraduationYear}</Badge>
+        ) : null}
+        {initialCompany ? <Badge variant="default">企業: {initialCompany}</Badge> : null}
+        {account.role !== "ADMIN" ? (
+          <Link
+            href="/account/public"
+            className="ml-auto inline-flex h-8 items-center rounded-lg border border-violet-200/80 bg-violet-50/80 px-3 text-xs font-semibold text-violet-700 transition hover:bg-violet-100/80 dark:border-violet-700/60 dark:bg-violet-900/30 dark:text-violet-200 dark:hover:bg-violet-900/50"
+          >
+            内定先を公開する
+          </Link>
+        ) : null}
+      </section>
+
+      <section className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {skeletonKeys.map((skeletonKey) => (
+          <AlumniCardSkeleton key={skeletonKey} />
+        ))}
+      </section>
+    </>
   );
 }

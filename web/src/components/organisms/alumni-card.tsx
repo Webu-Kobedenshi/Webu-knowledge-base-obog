@@ -1,8 +1,8 @@
 import { SocialContactIcon } from "@/components/atoms/social-contact-icon";
+import { AlumniDetailLink } from "@/components/molecules/alumni-detail-link";
 import type { AlumniListItem } from "@/graphql/types";
 import { getAlumniContactClassName, getAlumniContactLinks } from "@/lib/alumni-contact";
 import { departmentGradient } from "@/lib/department-theme";
-import Link from "next/link";
 
 type AlumniCardProps = {
   alumni: AlumniListItem;
@@ -187,25 +187,7 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
           alumni.hasUsefulCoursework ||
           alumni.hasPortfolio ||
           selectionExperienceCount > 0 ? (
-            <Link
-              href={`/alumni/${alumni.id}`}
-              className="inline-flex items-center gap-1 text-[11px] font-semibold text-violet-600 transition-colors hover:text-violet-800 dark:text-violet-400 dark:hover:text-violet-300"
-            >
-              <span>詳しく見る</span>
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <title>詳細</title>
-                <path d="m9 18 6-6-6-6" />
-              </svg>
-            </Link>
+            <AlumniDetailLink href={`/alumni/${alumni.id}`} />
           ) : null}
         </div>
 

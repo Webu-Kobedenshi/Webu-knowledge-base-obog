@@ -1,7 +1,12 @@
-import { AlumniListTemplate } from "@/components/templates/alumni-list-template";
+import {
+  AlumniListResults,
+  AlumniListResultsSkeleton,
+  AlumniListTemplateFrame,
+} from "@/components/templates/alumni-list-template";
 import { fetchMyProfileSummary } from "@/graphql/account";
 import { fetchAlumniList } from "@/graphql/alumni";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -62,15 +67,6 @@ export default async function Home({ searchParams }: PageProps) {
   );
   const pageSize = [12, 24, 36, 48].includes(parsedPageSize) ? parsedPageSize : 12;
   const offset = (currentPage - 1) * pageSize;
-
-  const { alumniList, totalCount, hasNextPage, error } = await fetchAlumniList({
-    department: department || undefined,
-    company: company || undefined,
-    graduationYear,
-    limit: pageSize,
-    offset,
-  });
-
   const account = {
     id: profile.id,
     name: profile.name ?? "ユーザー",
@@ -79,11 +75,86 @@ export default async function Home({ searchParams }: PageProps) {
   };
 
   return (
-    <AlumniListTemplate
-      alumni={alumniList}
+    <AlumniListTemplateFrame
       initialDepartment={department}
       initialCompany={company}
       initialGraduationYear={graduationYear ? String(graduationYear) : ""}
+      pageSize={pageSize}
+      account={account}
+    >
+      <Suspense
+        key={[department, company, graduationYear ?? "", currentPage, pageSize].join(":")}
+        fallback={
+          <AlumniListResultsSkeleton
+            initialDepartment={department}
+            initialCompany={company}
+            initialGraduationYear={graduationYear ? String(graduationYear) : ""}
+            pageSize={pageSize}
+            account={account}
+          />
+        }
+      >
+        <AlumniListData
+          department={department || undefined}
+          company={company || undefined}
+          graduationYear={graduationYear}
+          currentPage={currentPage}
+          pageSize={pageSize}
+          offset={offset}
+          initialDepartment={department}
+          initialCompany={company}
+          initialGraduationYear={graduationYear ? String(graduationYear) : ""}
+          account={account}
+        />
+      </Suspense>
+    </AlumniListTemplateFrame>
+  );
+}
+
+type AlumniListDataProps = {
+  department?: string;
+  company?: string;
+  graduationYear?: number;
+  currentPage: number;
+  pageSize: number;
+  offset: number;
+  initialDepartment: string;
+  initialCompany: string;
+  initialGraduationYear: string;
+  account: {
+    id: string;
+    name: string;
+    email: string;
+    role: "ADMIN" | "STUDENT" | "ALUMNI";
+  };
+};
+
+async function AlumniListData({
+  department,
+  company,
+  graduationYear,
+  currentPage,
+  pageSize,
+  offset,
+  initialDepartment,
+  initialCompany,
+  initialGraduationYear,
+  account,
+}: AlumniListDataProps) {
+  const { alumniList, totalCount, hasNextPage, error } = await fetchAlumniList({
+    department,
+    company,
+    graduationYear,
+    limit: pageSize,
+    offset,
+  });
+
+  return (
+    <AlumniListResults
+      alumni={alumniList}
+      initialDepartment={initialDepartment}
+      initialCompany={initialCompany}
+      initialGraduationYear={initialGraduationYear}
       totalCount={totalCount}
       currentPage={currentPage}
       pageSize={pageSize}
