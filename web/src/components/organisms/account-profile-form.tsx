@@ -270,6 +270,10 @@ function hasSelectionStepContent(step: SelectionStepFormState) {
     );
   }
 
+  if (step.stepKind === "DOCUMENT_SCREENING") {
+    return Boolean(step.questions.trim());
+  }
+
   return Boolean(
     step.interviewerCount.trim() ||
       step.durationMinutes.trim() ||
@@ -575,28 +579,38 @@ export function AccountProfileForm({
           ? {
               entryTrigger: experience.entryTrigger.trim() || undefined,
               overallTip: experience.overallTip.trim() || undefined,
-              steps: experience.steps.filter(hasSelectionStepContent).map((step) => ({
-                stepKind: step.stepKind,
-                format: step.format,
-                interviewerCount:
-                  step.interviewerCount.trim() === "OTHER"
-                    ? 4
-                    : step.interviewerCount.trim()
-                      ? Number(step.interviewerCount)
+              steps: experience.steps.filter(hasSelectionStepContent).map((step) => {
+                const isDocumentScreeningStep = step.stepKind === "DOCUMENT_SCREENING";
+                const isWebTestStep = step.stepKind === "WEB_TEST";
+
+                return {
+                  stepKind: step.stepKind,
+                  format: isDocumentScreeningStep ? "UNKNOWN" : step.format,
+                  interviewerCount: isDocumentScreeningStep
+                    ? undefined
+                    : step.interviewerCount.trim() === "OTHER"
+                      ? 4
+                      : step.interviewerCount.trim()
+                        ? Number(step.interviewerCount)
+                        : undefined,
+                  durationMinutes: isDocumentScreeningStep
+                    ? undefined
+                    : step.durationMinutes.trim()
+                      ? Number(step.durationMinutes)
                       : undefined,
-                durationMinutes: step.durationMinutes.trim()
-                  ? Number(step.durationMinutes)
-                  : undefined,
-                questions:
-                  step.stepKind === "WEB_TEST"
+                  questions: isWebTestStep
                     ? encodeWebTestType(step.webTestType)
                     : step.questions.trim() || undefined,
-                atmosphere:
-                  step.stepKind === "WEB_TEST"
+                  atmosphere: isWebTestStep
                     ? encodeWebTestTimeAssessment(step.webTestTimeAssessment)
-                    : step.atmosphere.trim() || undefined,
-                preparation: step.preparation.trim() || undefined,
-              })),
+                    : isDocumentScreeningStep
+                      ? undefined
+                      : step.atmosphere.trim() || undefined,
+                  preparation: isDocumentScreeningStep
+                    ? undefined
+                    : step.preparation.trim() || undefined,
+                };
+              }),
             }
           : null;
 
@@ -1316,6 +1330,8 @@ export function AccountProfileForm({
                                       const isDeletePending = pendingStepDeleteKey === deleteKey;
                                       const isWebTestStep = step.stepKind === "WEB_TEST";
                                       const isCodingTestStep = step.stepKind === "CODING_TEST";
+                                      const isDocumentScreeningStep =
+                                        step.stepKind === "DOCUMENT_SCREENING";
 
                                       return (
                                         <div
@@ -1331,39 +1347,61 @@ export function AccountProfileForm({
                                               {getSelectionStepLabel(step.stepKind)}
                                             </span>
                                           </div>
-                                          <div className="grid gap-2 sm:grid-cols-2">
+                                          <div
+                                            className={`grid gap-2 ${
+                                              isDocumentScreeningStep ? "" : "sm:grid-cols-2"
+                                            }`}
+                                          >
                                             <div className="space-y-1.5">
                                               <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-400">
                                                 選考種別
                                               </span>
                                               <Select
                                                 value={step.stepKind}
-                                                onValueChange={(value) =>
+                                                onValueChange={(value) => {
+                                                  const nextStepKind = value as SelectionStepKind;
+                                                  const nextIsWebTestStep =
+                                                    nextStepKind === "WEB_TEST";
+                                                  const nextIsDocumentScreeningStep =
+                                                    nextStepKind === "DOCUMENT_SCREENING";
+
                                                   updateSelectionStepAt(
                                                     index,
                                                     stepIndex,
                                                     (prev) => ({
                                                       ...prev,
-                                                      stepKind: value as SelectionStepKind,
+                                                      stepKind: nextStepKind,
+                                                      format: nextIsDocumentScreeningStep
+                                                        ? "UNKNOWN"
+                                                        : prev.format,
                                                       interviewerCount:
-                                                        value === "WEB_TEST"
+                                                        nextIsWebTestStep ||
+                                                        nextIsDocumentScreeningStep
                                                           ? ""
                                                           : prev.interviewerCount,
-                                                      webTestType:
-                                                        value === "WEB_TEST"
-                                                          ? prev.webTestType
-                                                          : "",
-                                                      webTestTimeAssessment:
-                                                        value === "WEB_TEST"
-                                                          ? prev.webTestTimeAssessment
-                                                          : "",
-                                                      questions:
-                                                        value === "WEB_TEST" ? "" : prev.questions,
+                                                      durationMinutes: nextIsDocumentScreeningStep
+                                                        ? ""
+                                                        : prev.durationMinutes,
+                                                      webTestType: nextIsWebTestStep
+                                                        ? prev.webTestType
+                                                        : "",
+                                                      webTestTimeAssessment: nextIsWebTestStep
+                                                        ? prev.webTestTimeAssessment
+                                                        : "",
+                                                      questions: nextIsWebTestStep
+                                                        ? ""
+                                                        : prev.questions,
                                                       atmosphere:
-                                                        value === "WEB_TEST" ? "" : prev.atmosphere,
+                                                        nextIsWebTestStep ||
+                                                        nextIsDocumentScreeningStep
+                                                          ? ""
+                                                          : prev.atmosphere,
+                                                      preparation: nextIsDocumentScreeningStep
+                                                        ? ""
+                                                        : prev.preparation,
                                                     }),
-                                                  )
-                                                }
+                                                  );
+                                                }}
                                                 disabled={!canEditAlumniProfile}
                                               >
                                                 <SelectTrigger>
@@ -1381,127 +1419,137 @@ export function AccountProfileForm({
                                                 </SelectContent>
                                               </Select>
                                             </div>
-                                            <div className="space-y-1.5">
-                                              <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-400">
-                                                実施形式
-                                              </span>
-                                              <Select
-                                                value={step.format}
-                                                onValueChange={(value) =>
-                                                  updateSelectionStepAt(
-                                                    index,
-                                                    stepIndex,
-                                                    (prev) => ({
-                                                      ...prev,
-                                                      format: value as SelectionFormat,
-                                                    }),
-                                                  )
-                                                }
-                                                disabled={!canEditAlumniProfile}
-                                              >
-                                                <SelectTrigger>
-                                                  <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                  {selectionFormatOptions.map((option) => (
-                                                    <SelectItem
-                                                      key={option.value}
-                                                      value={option.value}
-                                                    >
-                                                      {option.label}
-                                                    </SelectItem>
-                                                  ))}
-                                                </SelectContent>
-                                              </Select>
-                                            </div>
+                                            {!isDocumentScreeningStep ? (
+                                              <div className="space-y-1.5">
+                                                <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-400">
+                                                  実施形式
+                                                </span>
+                                                <Select
+                                                  value={step.format}
+                                                  onValueChange={(value) =>
+                                                    updateSelectionStepAt(
+                                                      index,
+                                                      stepIndex,
+                                                      (prev) => ({
+                                                        ...prev,
+                                                        format: value as SelectionFormat,
+                                                      }),
+                                                    )
+                                                  }
+                                                  disabled={!canEditAlumniProfile}
+                                                >
+                                                  <SelectTrigger>
+                                                    <SelectValue />
+                                                  </SelectTrigger>
+                                                  <SelectContent>
+                                                    {selectionFormatOptions.map((option) => (
+                                                      <SelectItem
+                                                        key={option.value}
+                                                        value={option.value}
+                                                      >
+                                                        {option.label}
+                                                      </SelectItem>
+                                                    ))}
+                                                  </SelectContent>
+                                                </Select>
+                                              </div>
+                                            ) : null}
                                           </div>
 
-                                          <div className="grid gap-2 sm:grid-cols-2">
-                                            {isWebTestStep ? (
-                                              <Select
-                                                value={step.webTestType || "UNSELECTED"}
-                                                onValueChange={(value) =>
+                                          {!isDocumentScreeningStep ? (
+                                            <div className="grid gap-2 sm:grid-cols-2">
+                                              {isWebTestStep ? (
+                                                <Select
+                                                  value={step.webTestType || "UNSELECTED"}
+                                                  onValueChange={(value) =>
+                                                    updateSelectionStepAt(
+                                                      index,
+                                                      stepIndex,
+                                                      (prev) => ({
+                                                        ...prev,
+                                                        webTestType:
+                                                          value === "UNSELECTED"
+                                                            ? ""
+                                                            : (value as WebTestType),
+                                                      }),
+                                                    )
+                                                  }
+                                                  disabled={!canEditAlumniProfile}
+                                                >
+                                                  <SelectTrigger>
+                                                    <SelectValue placeholder="Webテストの種類" />
+                                                  </SelectTrigger>
+                                                  <SelectContent>
+                                                    <SelectItem value="UNSELECTED">
+                                                      種類を選択
+                                                    </SelectItem>
+                                                    {webTestTypeOptions.map((option) => (
+                                                      <SelectItem
+                                                        key={option.value}
+                                                        value={option.value}
+                                                      >
+                                                        {option.label}
+                                                      </SelectItem>
+                                                    ))}
+                                                  </SelectContent>
+                                                </Select>
+                                              ) : (
+                                                <Select
+                                                  value={step.interviewerCount}
+                                                  onValueChange={(value) =>
+                                                    updateSelectionStepAt(
+                                                      index,
+                                                      stepIndex,
+                                                      (prev) => ({
+                                                        ...prev,
+                                                        interviewerCount: value,
+                                                      }),
+                                                    )
+                                                  }
+                                                  disabled={!canEditAlumniProfile}
+                                                >
+                                                  <SelectTrigger>
+                                                    <SelectValue
+                                                      placeholder={
+                                                        isCodingTestStep
+                                                          ? "試験官人数"
+                                                          : "面接官人数"
+                                                      }
+                                                    />
+                                                  </SelectTrigger>
+                                                  <SelectContent>
+                                                    {interviewerCountOptions.map((option) => (
+                                                      <SelectItem
+                                                        key={option.value}
+                                                        value={option.value}
+                                                      >
+                                                        {option.label}
+                                                      </SelectItem>
+                                                    ))}
+                                                  </SelectContent>
+                                                </Select>
+                                              )}
+                                              <Input
+                                                value={step.durationMinutes}
+                                                onChange={(event) =>
                                                   updateSelectionStepAt(
                                                     index,
                                                     stepIndex,
                                                     (prev) => ({
                                                       ...prev,
-                                                      webTestType:
-                                                        value === "UNSELECTED"
-                                                          ? ""
-                                                          : (value as WebTestType),
+                                                      durationMinutes: event.target.value,
                                                     }),
                                                   )
                                                 }
-                                                disabled={!canEditAlumniProfile}
-                                              >
-                                                <SelectTrigger>
-                                                  <SelectValue placeholder="Webテストの種類" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                  <SelectItem value="UNSELECTED">
-                                                    種類を選択
-                                                  </SelectItem>
-                                                  {webTestTypeOptions.map((option) => (
-                                                    <SelectItem
-                                                      key={option.value}
-                                                      value={option.value}
-                                                    >
-                                                      {option.label}
-                                                    </SelectItem>
-                                                  ))}
-                                                </SelectContent>
-                                              </Select>
-                                            ) : (
-                                              <Select
-                                                value={step.interviewerCount}
-                                                onValueChange={(value) =>
-                                                  updateSelectionStepAt(
-                                                    index,
-                                                    stepIndex,
-                                                    (prev) => ({
-                                                      ...prev,
-                                                      interviewerCount: value,
-                                                    }),
-                                                  )
+                                                type="number"
+                                                min={0}
+                                                placeholder={
+                                                  isCodingTestStep ? "制限時間(分)" : "所要時間(分)"
                                                 }
                                                 disabled={!canEditAlumniProfile}
-                                              >
-                                                <SelectTrigger>
-                                                  <SelectValue
-                                                    placeholder={
-                                                      isCodingTestStep ? "試験官人数" : "面接官人数"
-                                                    }
-                                                  />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                  {interviewerCountOptions.map((option) => (
-                                                    <SelectItem
-                                                      key={option.value}
-                                                      value={option.value}
-                                                    >
-                                                      {option.label}
-                                                    </SelectItem>
-                                                  ))}
-                                                </SelectContent>
-                                              </Select>
-                                            )}
-                                            <Input
-                                              value={step.durationMinutes}
-                                              onChange={(event) =>
-                                                updateSelectionStepAt(index, stepIndex, (prev) => ({
-                                                  ...prev,
-                                                  durationMinutes: event.target.value,
-                                                }))
-                                              }
-                                              type="number"
-                                              min={0}
-                                              placeholder={
-                                                isCodingTestStep ? "制限時間(分)" : "所要時間(分)"
-                                              }
-                                              disabled={!canEditAlumniProfile}
-                                            />
-                                          </div>
+                                              />
+                                            </div>
+                                          ) : null}
 
                                           {isWebTestStep ? (
                                             <Select
@@ -1538,6 +1586,9 @@ export function AccountProfileForm({
                                             <>
                                               <Textarea
                                                 value={step.questions}
+                                                className={
+                                                  isDocumentScreeningStep ? "min-h-80" : undefined
+                                                }
                                                 onChange={(event) =>
                                                   updateSelectionStepAt(
                                                     index,
@@ -1549,48 +1600,56 @@ export function AccountProfileForm({
                                                   )
                                                 }
                                                 placeholder={
-                                                  isCodingTestStep ? "出題内容" : "聞かれた質問"
-                                                }
-                                                disabled={!canEditAlumniProfile}
-                                              />
-                                              <Textarea
-                                                value={step.atmosphere}
-                                                onChange={(event) =>
-                                                  updateSelectionStepAt(
-                                                    index,
-                                                    stepIndex,
-                                                    (prev) => ({
-                                                      ...prev,
-                                                      atmosphere: event.target.value,
-                                                    }),
-                                                  )
-                                                }
-                                                placeholder={
                                                   isCodingTestStep
-                                                    ? "使用言語・実行環境"
-                                                    : "面接の雰囲気"
+                                                    ? "出題内容"
+                                                    : isDocumentScreeningStep
+                                                      ? "確認される内容"
+                                                      : "聞かれた質問"
                                                 }
                                                 disabled={!canEditAlumniProfile}
                                               />
+                                              {!isDocumentScreeningStep ? (
+                                                <Textarea
+                                                  value={step.atmosphere}
+                                                  onChange={(event) =>
+                                                    updateSelectionStepAt(
+                                                      index,
+                                                      stepIndex,
+                                                      (prev) => ({
+                                                        ...prev,
+                                                        atmosphere: event.target.value,
+                                                      }),
+                                                    )
+                                                  }
+                                                  placeholder={
+                                                    isCodingTestStep
+                                                      ? "使用言語・実行環境"
+                                                      : "面接の雰囲気"
+                                                  }
+                                                  disabled={!canEditAlumniProfile}
+                                                />
+                                              ) : null}
                                             </>
                                           )}
-                                          <Textarea
-                                            value={step.preparation}
-                                            onChange={(event) =>
-                                              updateSelectionStepAt(index, stepIndex, (prev) => ({
-                                                ...prev,
-                                                preparation: event.target.value,
-                                              }))
-                                            }
-                                            placeholder={
-                                              isWebTestStep
-                                                ? "対策してよかったこと"
-                                                : isCodingTestStep
-                                                  ? "解き方や対策で役立ったこと"
-                                                  : "準備してよかったこと"
-                                            }
-                                            disabled={!canEditAlumniProfile}
-                                          />
+                                          {!isDocumentScreeningStep ? (
+                                            <Textarea
+                                              value={step.preparation}
+                                              onChange={(event) =>
+                                                updateSelectionStepAt(index, stepIndex, (prev) => ({
+                                                  ...prev,
+                                                  preparation: event.target.value,
+                                                }))
+                                              }
+                                              placeholder={
+                                                isWebTestStep
+                                                  ? "対策してよかったこと"
+                                                  : isCodingTestStep
+                                                    ? "解き方や対策で役立ったこと"
+                                                    : "準備してよかったこと"
+                                              }
+                                              disabled={!canEditAlumniProfile}
+                                            />
+                                          ) : null}
                                           <div className="flex items-center justify-end gap-2">
                                             {isDeletePending ? (
                                               <Button

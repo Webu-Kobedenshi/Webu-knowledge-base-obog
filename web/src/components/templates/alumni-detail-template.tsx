@@ -266,6 +266,7 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
                       (() => {
                         const isWebTestStep = step.stepKind === "WEB_TEST";
                         const isCodingTestStep = step.stepKind === "CODING_TEST";
+                        const isDocumentScreeningStep = step.stepKind === "DOCUMENT_SCREENING";
                         const webTestTypeLabel = getWebTestTypeLabel(
                           decodeWebTestType(step.questions),
                         );
@@ -286,10 +287,14 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
                                 <h4 className="text-sm font-extrabold text-stone-900 dark:text-stone-100">
                                   {selectionStepKindLabel[step.stepKind] || "選考ステップ"}
                                 </h4>
-                                <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
-                                  {selectionFormatLabel[step.format] ?? step.format}
-                                </span>
-                                {!isWebTestStep && step.interviewerCount ? (
+                                {!isDocumentScreeningStep ? (
+                                  <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
+                                    {selectionFormatLabel[step.format] ?? step.format}
+                                  </span>
+                                ) : null}
+                                {!isWebTestStep &&
+                                !isDocumentScreeningStep &&
+                                step.interviewerCount ? (
                                   <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
                                     {step.interviewerCount >= 4
                                       ? isCodingTestStep
@@ -300,7 +305,7 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
                                         : `面接官 ${step.interviewerCount}人`}
                                   </span>
                                 ) : null}
-                                {step.durationMinutes ? (
+                                {!isDocumentScreeningStep && step.durationMinutes ? (
                                   <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
                                     {isWebTestStep
                                       ? `所要時間 ${step.durationMinutes}分`
@@ -332,14 +337,18 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
                               {!isWebTestStep && step.questions ? (
                                 <div className="mt-3">
                                   <p className="text-[10px] font-bold text-stone-400">
-                                    {isCodingTestStep ? "出題内容" : "聞かれた質問"}
+                                    {isCodingTestStep
+                                      ? "出題内容"
+                                      : isDocumentScreeningStep
+                                        ? "確認される内容"
+                                        : "聞かれた質問"}
                                   </p>
                                   <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
                                     {step.questions}
                                   </p>
                                 </div>
                               ) : null}
-                              {!isWebTestStep && step.atmosphere ? (
+                              {!isWebTestStep && !isDocumentScreeningStep && step.atmosphere ? (
                                 <div className="mt-3">
                                   <p className="text-[10px] font-bold text-stone-400">
                                     {isCodingTestStep ? "使用言語・実行環境" : "雰囲気"}
@@ -349,7 +358,7 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
                                   </p>
                                 </div>
                               ) : null}
-                              {step.preparation ? (
+                              {!isDocumentScreeningStep && step.preparation ? (
                                 <div className="mt-3">
                                   <p className="text-[10px] font-bold text-stone-400">
                                     {isWebTestStep

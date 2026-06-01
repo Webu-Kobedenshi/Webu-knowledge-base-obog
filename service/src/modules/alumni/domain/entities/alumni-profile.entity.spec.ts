@@ -87,6 +87,44 @@ describe("AlumniProfileDraft", () => {
     });
   });
 
+  it("keeps only questions for document screening steps", () => {
+    const draft = AlumniProfileDraft.create(
+      {
+        nickname: "taro",
+        companyNames: [],
+        companyExperiences: [
+          {
+            companyName: "ACME",
+            selectionExperience: {
+              steps: [
+                {
+                  stepKind: "DOCUMENT_SCREENING",
+                  format: "ONLINE",
+                  interviewerCount: 1,
+                  durationMinutes: 30,
+                  questions: " 提出書類で確認されたこと ",
+                  atmosphere: "不要な雰囲気",
+                  preparation: "不要な準備",
+                },
+              ],
+            },
+          },
+        ],
+        isPublic: true,
+        acceptContact: false,
+      },
+      "fallback@example.com",
+    );
+
+    expect(draft.toData().companyExperiences?.[0]?.selectionExperience?.steps).toEqual([
+      {
+        stepKind: "DOCUMENT_SCREENING",
+        format: "UNKNOWN",
+        questions: "提出書類で確認されたこと",
+      },
+    ]);
+  });
+
   it("throws when isPublic=true without nickname", () => {
     expect(() =>
       AlumniProfileDraft.create(

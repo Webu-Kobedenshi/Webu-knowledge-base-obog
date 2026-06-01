@@ -221,6 +221,18 @@ function normalizeSelectionStep(input: SelectionStepDraftInput): SelectionStepDr
   const atmosphere = input.atmosphere?.trim();
   const preparation = input.preparation?.trim();
 
+  if (input.stepKind === "DOCUMENT_SCREENING") {
+    if (!questions) {
+      return null;
+    }
+
+    return {
+      stepKind: input.stepKind,
+      format: "UNKNOWN",
+      questions,
+    };
+  }
+
   if (!questions && !atmosphere && !preparation && !interviewerCount && !durationMinutes) {
     return null;
   }
