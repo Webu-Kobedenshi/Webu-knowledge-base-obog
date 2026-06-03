@@ -109,7 +109,7 @@ export class GqlAuthGuard implements CanActivate {
       return this.prisma.user.create({
         data: {
           email,
-          name: payload.name,
+          name: null,
           role: Role.ADMIN,
           status: UserStatus.ENROLLED,
         },

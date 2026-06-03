@@ -79,6 +79,7 @@ export interface AlumniRepositoryPort {
   findUserByLinkedGmail(gmail: string): Promise<UserDto | null>;
   isAdminEmail(email: string): Promise<boolean>;
   updateInitialSettings(userId: string, input: InitialSettingsPersistenceInput): Promise<UserDto>;
+  updateAdminName(userId: string, name: string): Promise<UserDto>;
   upsertAlumniProfile(
     userId: string,
     input: UpdateAlumniProfilePersistenceInput,

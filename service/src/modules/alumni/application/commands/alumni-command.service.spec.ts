@@ -31,6 +31,7 @@ describe("AlumniCommandService", () => {
       findUserByEmail: jest.fn(),
       upsertAlumniProfile: jest.fn(),
       updateInitialSettings: jest.fn(),
+      updateAdminName: jest.fn(),
       findUserByLinkedGmail: jest.fn(),
       updateLinkedGmail: jest.fn(),
     } as unknown as AlumniRepositoryPort;
@@ -154,6 +155,46 @@ describe("AlumniCommandService", () => {
         department: "PROGRAMMING",
       } satisfies InitialSettingsInput),
     ).toThrow(BadRequestException);
+  });
+
+  it("normalizes and updates admin name", async () => {
+    const { service, repo } = createService();
+    (repo.findUserById as jest.Mock).mockResolvedValue({
+      id: "u1",
+      email: "admin@example.com",
+      role: "ADMIN",
+    });
+    (repo.updateAdminName as jest.Mock).mockResolvedValue({ id: "u1" });
+
+    await service.updateAdminName("u1", { name: "  Admin User  " });
+
+    expect(repo.updateAdminName).toHaveBeenCalledWith("u1", "Admin User");
+  });
+
+  it("throws BadRequestException when non-admin updates admin name", async () => {
+    const { service, repo } = createService();
+    (repo.findUserById as jest.Mock).mockResolvedValue({
+      id: "u1",
+      email: "student@example.com",
+      role: "STUDENT",
+    });
+
+    await expect(service.updateAdminName("u1", { name: "Student" })).rejects.toThrow(
+      BadRequestException,
+    );
+  });
+
+  it("throws BadRequestException for empty admin name", async () => {
+    const { service, repo } = createService();
+    (repo.findUserById as jest.Mock).mockResolvedValue({
+      id: "u1",
+      email: "admin@example.com",
+      role: "ADMIN",
+    });
+
+    await expect(service.updateAdminName("u1", { name: "   " })).rejects.toThrow(
+      BadRequestException,
+    );
   });
 
   it("normalizes verified gmail and delegates linkGmail", async () => {

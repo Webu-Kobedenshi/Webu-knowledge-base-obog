@@ -34,6 +34,10 @@ export default async function Home({ searchParams }: PageProps) {
     );
   }
 
+  if (profile.role === "ADMIN" && !profile.name?.trim()) {
+    redirect("/initial-setup");
+  }
+
   if (
     profile.role !== "ADMIN" &&
     (!profile.studentId || !profile.enrollmentYear || !profile.durationYears || !profile.department)

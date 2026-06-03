@@ -55,6 +55,7 @@ type AccountProfileFormProps = {
   showBasicProfileFields?: boolean;
   showPublicProfileFields?: boolean;
   showLinkedGmailField?: boolean;
+  basicProfileRequiredMode?: "all" | "nameOnly";
   onSuccess?: () => void;
   redirectOnSuccess?: string;
 };
@@ -317,6 +318,7 @@ export function AccountProfileForm({
   showBasicProfileFields = true,
   showPublicProfileFields = true,
   showLinkedGmailField = true,
+  basicProfileRequiredMode = "all",
   onSuccess,
   redirectOnSuccess,
 }: AccountProfileFormProps) {
@@ -421,6 +423,10 @@ export function AccountProfileForm({
     : "画像を選択するとアップロードできます";
 
   const canSubmitInitial = useMemo(() => {
+    if (basicProfileRequiredMode === "nameOnly") {
+      return Boolean(state.name.trim());
+    }
+
     const enrollmentYear = Number(state.enrollmentYear);
     return (
       Boolean(state.name.trim()) &&
@@ -431,7 +437,7 @@ export function AccountProfileForm({
       ["1", "2", "3", "4"].includes(state.durationYears) &&
       Boolean(state.department)
     );
-  }, [state]);
+  }, [state, basicProfileRequiredMode]);
 
   const canEditAlumniProfile = state.isPublic;
 
@@ -560,7 +566,10 @@ export function AccountProfileForm({
     const forcePrivate = options?.forcePrivate ?? false;
 
     if (!canSubmitInitial) {
-      const msg = "名前・学籍番号・入学年度・学科は必須です。";
+      const msg =
+        basicProfileRequiredMode === "nameOnly"
+          ? "名前は必須です。"
+          : "名前・学籍番号・入学年度・学科は必須です。";
       showErrorToast(msg);
       return false;
     }
@@ -676,6 +685,7 @@ export function AccountProfileForm({
           portfolioUrl: state.portfolioUrl.trim(),
           gakuchika: state.gakuchika.trim(),
           usefulCoursework: state.usefulCoursework.trim(),
+          basicProfileRequiredMode,
         }),
       });
 
@@ -884,6 +894,7 @@ export function AccountProfileForm({
               setField("durationYears", "");
             }
           }}
+          requiredMode={basicProfileRequiredMode}
         />
       ) : null}
 

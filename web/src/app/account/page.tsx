@@ -125,10 +125,22 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
 
           <div className="mt-6 border-t border-stone-200/80 pt-6 dark:border-stone-800/70">
             {role === "ADMIN" ? (
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
-                <p className="font-bold">教員アカウント</p>
-                <p className="mt-1 text-xs opacity-80">{email}</p>
-              </div>
+              <>
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+                  <p className="font-bold">教員アカウント</p>
+                  <p className="mt-1 text-xs opacity-80">{email}</p>
+                </div>
+                <AccountProfileForm
+                  initialProfile={profile}
+                  initialName={profile?.name ?? session?.user?.name}
+                  initialEmail={profile?.email ?? session?.user?.email}
+                  title="プロフィール"
+                  description="管理者アカウントで表示する名前を更新できます。"
+                  showPublicProfileFields={false}
+                  showLinkedGmailField={false}
+                  basicProfileRequiredMode="nameOnly"
+                />
+              </>
             ) : (
               <AccountProfileForm
                 initialProfile={profile}

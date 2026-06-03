@@ -398,6 +398,16 @@ export class AlumniRepository implements AlumniRepositoryPort {
     }
   }
 
+  async updateAdminName(userId: string, name: string): Promise<UserDto> {
+    const record = await this.prisma.user.update({
+      where: { id: userId },
+      data: { name },
+      select: userSelect,
+    });
+
+    return this.toUserDto(record);
+  }
+
   async deleteUserById(userId: string): Promise<boolean> {
     const result = await this.prisma.user.deleteMany({
       where: { id: userId },

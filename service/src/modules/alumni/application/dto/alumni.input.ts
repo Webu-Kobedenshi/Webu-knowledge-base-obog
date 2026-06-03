@@ -12,6 +12,10 @@ export type InitialSettingsInput = {
   department: Department;
 };
 
+export type AdminNameInput = {
+  name: string;
+};
+
 export type UpdateAlumniProfileInput = {
   nickname?: string;
   graduationYear: number;

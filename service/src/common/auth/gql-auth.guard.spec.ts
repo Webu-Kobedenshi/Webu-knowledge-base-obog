@@ -60,7 +60,7 @@ describe("GqlAuthGuard admin email handling", () => {
     expect(prisma.user.create).toHaveBeenCalledWith({
       data: {
         email: "teacher@example.com",
-        name: "Teacher",
+        name: null,
         role: Role.ADMIN,
         status: UserStatus.ENROLLED,
       },

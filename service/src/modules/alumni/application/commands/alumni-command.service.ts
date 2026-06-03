@@ -6,6 +6,7 @@ import { DomainValidationError } from "../../domain/errors/domain-validation.err
 import { GmailAddress } from "../../domain/value-objects/gmail-address";
 import type { AlumniProfileDto, UserDto } from "../dto/alumni.dto";
 import type {
+  AdminNameInput,
   InitialSettingsInput,
   UpdateAlumniProfileInput,
   UploadUrlResponse,
@@ -62,6 +63,24 @@ export class AlumniCommandService {
       role: normalized.role,
       status: normalized.status,
     });
+  }
+
+  async updateAdminName(userId: string, input: AdminNameInput): Promise<UserDto> {
+    const user = await this.alumniRepository.findUserById(userId);
+    if (!user) {
+      throw new BadRequestException("User not found");
+    }
+
+    if (user.role !== "ADMIN") {
+      throw new BadRequestException("Admin role is required");
+    }
+
+    const name = input.name.trim();
+    if (!name) {
+      throw new BadRequestException("name is required");
+    }
+
+    return this.alumniRepository.updateAdminName(userId, name);
   }
 
   deleteMyAccount(userId: string): Promise<boolean> {

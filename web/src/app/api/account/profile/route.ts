@@ -59,10 +59,10 @@ type CompanyExperienceBody = {
 
 type Body = {
   name: string;
-  studentId: string;
-  enrollmentYear: number;
-  durationYears: number;
-  department: Department;
+  studentId?: string;
+  enrollmentYear?: number;
+  durationYears?: number;
+  department?: Department;
   nickname?: string;
   companyNames?: string[];
   companyExperiences?: CompanyExperienceBody[];
@@ -94,6 +94,16 @@ const updateInitialSettingsMutation = `
       enrollmentYear
       durationYears
       department
+    }
+  }
+`;
+
+const updateAdminNameMutation = `
+  mutation UpdateAdminName($input: AdminNameInput!) {
+    updateAdminName(input: $input) {
+      id
+      name
+      role
     }
   }
 `;
@@ -157,6 +167,41 @@ export async function POST(request: Request) {
     }
 
     const body = (await request.json()) as Body;
+
+    if (session.user?.role === "ADMIN") {
+      if (!body.name?.trim()) {
+        return NextResponse.json(
+          {
+            ok: false,
+            message: "name is required",
+          },
+          { status: 400 },
+        );
+      }
+
+      const adminNameResult = await executeGraphql<{
+        updateAdminName: { id: string };
+      }>(serviceToken, updateAdminNameMutation, {
+        input: {
+          name: body.name.trim(),
+        },
+      });
+
+      if (adminNameResult.errors?.length || !adminNameResult.data?.updateAdminName) {
+        return NextResponse.json(
+          {
+            ok: false,
+            message:
+              adminNameResult.errors?.map((item) => item.message).join(", ") ||
+              "Admin name update failed",
+          },
+          { status: 400 },
+        );
+      }
+
+      return NextResponse.json({ ok: true, alumniUpdated: false, message: "Profile updated" });
+    }
+
     if (
       !body.name ||
       !body.studentId ||

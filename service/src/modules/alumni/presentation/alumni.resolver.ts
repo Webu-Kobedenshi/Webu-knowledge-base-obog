@@ -11,6 +11,7 @@ import type {
   UserDto,
 } from "../application/dto/alumni.dto";
 import type {
+  AdminNameInput,
   InitialSettingsInput,
   UpdateAlumniProfileInput,
   UploadUrlResponse,
@@ -141,6 +142,15 @@ export class AlumniResolver {
     @Args("input") input: InitialSettingsInput,
   ): Promise<UserDto> {
     return this.alumniCommandService.updateInitialSettings(userId, input);
+  }
+
+  @Mutation("updateAdminName")
+  @UseGuards(GqlAuthGuard)
+  updateAdminName(
+    @CurrentUserId() userId: string,
+    @Args("input") input: AdminNameInput,
+  ): Promise<UserDto> {
+    return this.alumniCommandService.updateAdminName(userId, input);
   }
 
   @Mutation("updateAlumniProfile")

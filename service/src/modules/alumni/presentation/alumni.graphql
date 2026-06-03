@@ -210,6 +210,10 @@ input InitialSettingsInput {
   department: Department!
 }
 
+input AdminNameInput {
+  name: String!
+}
+
 extend type Query {
   getAlumniList(
     department: Department
@@ -234,6 +238,7 @@ extend type Query {
 
 extend type Mutation {
   updateInitialSettings(input: InitialSettingsInput!): User!
+  updateAdminName(input: AdminNameInput!): User!
   updateAlumniProfile(input: UpdateAlumniProfileInput!): AlumniProfile!
   updateAvatar(url: String!): AlumniProfile!
   deleteMyAccount: Boolean!
