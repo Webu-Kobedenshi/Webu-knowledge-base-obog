@@ -52,6 +52,7 @@ export type SelectionExperienceInput = {
 
 export type CompanyExperienceInput = {
   companyName: string;
+  isPublic?: boolean;
   selectionExperience?: SelectionExperienceInput | null;
 };
 

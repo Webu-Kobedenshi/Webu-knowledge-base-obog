@@ -61,6 +61,7 @@ const getMyProfileQuery = `
         companyExperiences {
           id
           companyName
+          isPublic
           selectionExperience {
             id
             entryTrigger

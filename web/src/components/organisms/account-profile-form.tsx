@@ -68,6 +68,7 @@ type AccountProfileFormState = {
   department: Department | "";
   nickname: string;
   companyNames: string[];
+  companyPublicFlags: boolean[];
   selectionExperiences: SelectionExperienceFormState[];
   remarks: string;
   contactEmail: string;
@@ -122,6 +123,7 @@ const defaultState: AccountProfileFormState = {
   department: "",
   nickname: "",
   companyNames: [],
+  companyPublicFlags: [],
   selectionExperiences: [],
   remarks: "",
   contactEmail: "",
@@ -328,9 +330,13 @@ export function AccountProfileForm({
     : (initialProfile?.alumniProfile?.companyNames ?? []).map((companyName) => ({
         id: companyName,
         companyName,
+        isPublic: true,
         selectionExperience: null,
       }));
   const initialCompanyNames = initialCompanyExperiences.map((item) => item.companyName);
+  const initialCompanyPublicFlags = initialCompanyExperiences.map(
+    (item) => item.isPublic !== false,
+  );
   const initialSelectionExperiences = initialCompanyExperiences.map((item) => {
     const experience = item.selectionExperience;
     if (!experience) {
@@ -386,6 +392,7 @@ export function AccountProfileForm({
     department: initialProfile?.department ?? "",
     nickname: initialProfile?.alumniProfile?.nickname ?? initialName ?? "",
     companyNames: initialCompanyNames,
+    companyPublicFlags: initialCompanyPublicFlags,
     selectionExperiences: initialSelectionExperiences,
     remarks: initialProfile?.alumniProfile?.remarks ?? "",
     contactEmail: initialProfile?.alumniProfile?.contactEmail ?? initialEmail ?? "",
@@ -456,11 +463,20 @@ export function AccountProfileForm({
     });
   };
 
+  const setCompanyPublicAt = (index: number, value: boolean) => {
+    setState((prev) => {
+      const next = [...prev.companyPublicFlags];
+      next[index] = value;
+      return { ...prev, companyPublicFlags: next };
+    });
+  };
+
   const addCompanyNameField = () => {
     setCompanyRowIds((prev) => [...prev, createRowId()]);
     setState((prev) => ({
       ...prev,
       companyNames: [...prev.companyNames, ""],
+      companyPublicFlags: [...prev.companyPublicFlags, true],
       selectionExperiences: [...prev.selectionExperiences, createBlankSelectionExperience()],
     }));
   };
@@ -471,6 +487,7 @@ export function AccountProfileForm({
     setState((prev) => ({
       ...prev,
       companyNames: prev.companyNames.filter((_, itemIndex) => itemIndex !== index),
+      companyPublicFlags: prev.companyPublicFlags.filter((_, itemIndex) => itemIndex !== index),
       selectionExperiences: prev.selectionExperiences.filter((_, itemIndex) => itemIndex !== index),
       isPublic:
         prev.companyNames.filter((_, itemIndex) => itemIndex !== index).length > 0
@@ -575,12 +592,17 @@ export function AccountProfileForm({
     }
 
     const seenCompanyNames = new Set<string>();
+    let publicCompanyCount = 0;
     const normalizedCompanyExperiences = state.companyNames.flatMap((companyName, index) => {
       const normalizedCompanyName = companyName.trim();
       if (!normalizedCompanyName || seenCompanyNames.has(normalizedCompanyName)) {
         return [];
       }
       seenCompanyNames.add(normalizedCompanyName);
+      const isCompanyPublic = state.companyPublicFlags[index] !== false;
+      if (isCompanyPublic) {
+        publicCompanyCount += 1;
+      }
 
       const experience = state.selectionExperiences[index] ?? createBlankSelectionExperience();
       const selectionExperience =
@@ -626,6 +648,7 @@ export function AccountProfileForm({
       return [
         {
           companyName: normalizedCompanyName,
+          isPublic: isCompanyPublic,
           selectionExperience,
         },
       ];
@@ -634,8 +657,8 @@ export function AccountProfileForm({
     const normalizedContactEmail = state.contactEmail.trim() || (initialEmail?.trim() ?? "");
     const isPublicToSave = forcePrivate ? false : state.isPublic;
 
-    if (showPublicProfileFields && isPublicToSave && normalizedCompanyNames.length === 0) {
-      const msg = "公開する場合は内定先を1件以上入力してください。";
+    if (showPublicProfileFields && isPublicToSave && publicCompanyCount === 0) {
+      const msg = "公開する場合は公開する内定先を1件以上入力してください。";
       showErrorToast(msg);
       return false;
     }
@@ -1187,6 +1210,7 @@ export function AccountProfileForm({
                     {state.companyNames.map((companyName, index) => {
                       const experience =
                         state.selectionExperiences[index] ?? createBlankSelectionExperience();
+                      const isCompanyPublic = state.companyPublicFlags[index] !== false;
 
                       return (
                         <div
@@ -1234,6 +1258,30 @@ export function AccountProfileForm({
                               </svg>
                             </Button>
                           </div>
+
+                          <label className="mt-3 flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-stone-200/70 bg-white px-3 py-2 dark:border-stone-800/80 dark:bg-stone-950/40">
+                            <span>
+                              <span className="block text-[12px] font-bold text-stone-800 dark:text-stone-100">
+                                この内定先を公開
+                              </span>
+                              <span className="mt-0.5 block text-[10px] font-medium text-stone-400 dark:text-stone-500">
+                                オフにするとカードと詳細ページに表示されません
+                              </span>
+                            </span>
+                            <span className="relative inline-flex">
+                              <input
+                                type="checkbox"
+                                checked={isCompanyPublic}
+                                onChange={(event) =>
+                                  setCompanyPublicAt(index, event.target.checked)
+                                }
+                                disabled={!canEditAlumniProfile}
+                                className="peer sr-only"
+                              />
+                              <span className="block h-6 w-10.5 rounded-full bg-stone-200 transition-colors peer-checked:bg-violet-500 dark:bg-stone-700" />
+                              <span className="absolute left-[3px] top-[3px] h-4.5 w-4.5 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-[18px]" />
+                            </span>
+                          </label>
 
                           <label className="mt-3 flex cursor-pointer items-center justify-between gap-3 rounded-xl bg-stone-50 px-3 py-2 dark:bg-stone-900/60">
                             <span>

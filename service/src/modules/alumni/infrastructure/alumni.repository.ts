@@ -68,6 +68,7 @@ const alumniProfileSelect = {
     select: {
       id: true,
       companyName: true,
+      isPublic: true,
       selectionExperience: {
         select: {
           id: true,
@@ -124,6 +125,7 @@ const alumniListItemSelect = {
     select: {
       id: true,
       companyName: true,
+      isPublic: true,
       selectionExperience: {
         select: {
           id: true,
@@ -190,17 +192,25 @@ export class AlumniRepository implements AlumniRepositoryPort {
     };
   }
 
-  private toAlumniProfileDto(record: AlumniProfileRecord): AlumniProfileDto {
+  private toAlumniProfileDto(
+    record: AlumniProfileRecord,
+    options?: { publicCompaniesOnly?: boolean },
+  ): AlumniProfileDto {
+    const companies = options?.publicCompaniesOnly
+      ? record.companies.filter((item) => item.isPublic)
+      : record.companies;
+
     return {
       id: record.id,
       userId: record.userId,
       nickname: record.nickname,
       graduationYear: record.graduationYear,
       department: record.department as Department,
-      companyNames: record.companies.map((item) => item.companyName),
-      companyExperiences: record.companies.map((item) => ({
+      companyNames: companies.map((item) => item.companyName),
+      companyExperiences: companies.map((item) => ({
         id: item.id,
         companyName: item.companyName,
+        isPublic: item.isPublic,
         selectionExperience: item.selectionExperience
           ? {
               id: item.selectionExperience.id,
@@ -241,16 +251,19 @@ export class AlumniRepository implements AlumniRepositoryPort {
   }
 
   private toAlumniListItemDto(record: AlumniListItemRecord): AlumniListItemDto {
+    const companies = record.companies.filter((item) => item.isPublic);
+
     return {
       id: record.id,
       userId: record.userId,
       nickname: record.nickname,
       graduationYear: record.graduationYear,
       department: record.department as Department,
-      companyNames: record.companies.map((item) => item.companyName),
-      companyExperiences: record.companies.map((item) => ({
+      companyNames: companies.map((item) => item.companyName),
+      companyExperiences: companies.map((item) => ({
         id: item.id,
         companyName: item.companyName,
+        isPublic: item.isPublic,
         selectionExperience: item.selectionExperience
           ? {
               id: item.selectionExperience.id,
@@ -279,20 +292,21 @@ export class AlumniRepository implements AlumniRepositoryPort {
 
     return {
       isPublic: true,
-      ...(department ? { department: this.toPrismaDepartment(department) } : {}),
-      ...(graduationYear ? { graduationYear } : {}),
-      ...(company
-        ? {
-            companies: {
-              some: {
+      companies: {
+        some: {
+          isPublic: true,
+          ...(company
+            ? {
                 companyName: {
                   contains: company,
                   mode: "insensitive",
                 },
-              },
-            },
-          }
-        : {}),
+              }
+            : {}),
+        },
+      },
+      ...(department ? { department: this.toPrismaDepartment(department) } : {}),
+      ...(graduationYear ? { graduationYear } : {}),
     } satisfies Prisma.AlumniProfileWhereInput;
   }
 
@@ -312,7 +326,7 @@ export class AlumniRepository implements AlumniRepositoryPort {
     ]);
 
     return {
-      items: items.map((item) => this.toAlumniProfileDto(item)),
+      items: items.map((item) => this.toAlumniProfileDto(item, { publicCompaniesOnly: true })),
       totalCount,
       hasNextPage: offset + items.length < totalCount,
     };
@@ -345,11 +359,16 @@ export class AlumniRepository implements AlumniRepositoryPort {
       where: {
         id,
         isPublic: true,
+        companies: {
+          some: {
+            isPublic: true,
+          },
+        },
       },
       select: alumniProfileSelect,
     });
 
-    return record ? this.toAlumniProfileDto(record) : null;
+    return record ? this.toAlumniProfileDto(record, { publicCompaniesOnly: true }) : null;
   }
 
   async findUserById(userId: string): Promise<UserDto | null> {
@@ -481,8 +500,11 @@ export class AlumniRepository implements AlumniRepositoryPort {
               create: {
                 alumniProfileId: profile.id,
                 companyName: company.companyName,
+                isPublic: company.isPublic,
               },
-              update: {},
+              update: {
+                isPublic: company.isPublic,
+              },
               select: { id: true },
             });
 
@@ -532,6 +554,7 @@ export class AlumniRepository implements AlumniRepositoryPort {
             data: input.companyNames.map((companyName) => ({
               alumniProfileId: profile.id,
               companyName,
+              isPublic: true,
             })),
             skipDuplicates: true,
           });

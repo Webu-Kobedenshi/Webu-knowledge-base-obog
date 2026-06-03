@@ -119,6 +119,7 @@ describe("AlumniQueryService", () => {
           {
             id: "c1",
             companyName: "ACME",
+            isPublic: true,
             selectionExperience: null,
           },
         ],

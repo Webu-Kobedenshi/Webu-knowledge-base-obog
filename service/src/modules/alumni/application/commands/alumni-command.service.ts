@@ -112,7 +112,10 @@ export class AlumniCommandService {
       ...input,
       nickname: normalized.nickname,
       companyNames: normalized.companyNames,
-      companyExperiences: normalized.companyExperiences,
+      companyExperiences: normalized.companyExperiences?.map((company) => ({
+        ...company,
+        isPublic: company.isPublic ?? true,
+      })),
       contactEmail: normalized.contactEmail,
       xUrl: normalized.xUrl,
       instagramUrl: normalized.instagramUrl,

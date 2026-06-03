@@ -51,6 +51,7 @@ export type SelectionExperienceDraftInput = {
 
 export type CompanyExperienceDraftInput = {
   companyName: string;
+  isPublic?: boolean;
   selectionExperience?: SelectionExperienceDraftInput | null;
 };
 
@@ -134,6 +135,16 @@ export class AlumniProfileDraft {
       );
     }
 
+    if (
+      this.data.isPublic &&
+      this.data.companyExperiences &&
+      !this.data.companyExperiences.some((company) => company.isPublic !== false)
+    ) {
+      throw new DomainValidationError(
+        "companyExperiences must contain at least one public item when isPublic is true",
+      );
+    }
+
     if (this.data.isPublic && !this.data.nickname) {
       throw new DomainValidationError("nickname is required when isPublic is true");
     }
@@ -180,6 +191,7 @@ function normalizeCompanyExperiences(
 
     normalized.push({
       companyName,
+      isPublic: item.isPublic ?? true,
       selectionExperience: item.selectionExperience
         ? normalizeSelectionExperience(item.selectionExperience)
         : null,

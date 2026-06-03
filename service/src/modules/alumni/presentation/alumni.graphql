@@ -97,6 +97,7 @@ type AlumniProfile {
 type CompanyExperience {
   id: ID!
   companyName: String!
+  isPublic: Boolean!
   selectionExperience: SelectionExperience
 }
 
@@ -150,6 +151,7 @@ type AlumniListItem {
 type AlumniListCompanyExperience {
   id: ID!
   companyName: String!
+  isPublic: Boolean!
   selectionExperience: AlumniListSelectionExperience
 }
 
@@ -183,6 +185,7 @@ input UpdateAlumniProfileInput {
 
 input CompanyExperienceInput {
   companyName: String!
+  isPublic: Boolean
   selectionExperience: SelectionExperienceInput
 }
 

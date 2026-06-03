@@ -42,6 +42,7 @@ type SelectionFormat = "ONLINE" | "IN_PERSON" | "UNKNOWN";
 
 type CompanyExperienceBody = {
   companyName: string;
+  isPublic?: boolean;
   selectionExperience?: {
     entryTrigger?: string;
     overallTip?: string;
@@ -116,6 +117,7 @@ const updateAlumniProfileMutation = `
       companyExperiences {
         id
         companyName
+        isPublic
         selectionExperience {
           id
         }
@@ -253,12 +255,16 @@ export async function POST(request: Request) {
     const xUrl = body.xUrl?.trim() || undefined;
     const instagramUrl = body.instagramUrl?.trim() || undefined;
     const isPublic = body.isPublic ?? false;
+    const publicCompanyCount =
+      body.companyExperiences?.filter(
+        (item) => item.companyName.trim().length > 0 && item.isPublic !== false,
+      ).length ?? companyNames.length;
 
-    if (isPublic && companyNames.length === 0) {
+    if (isPublic && publicCompanyCount === 0) {
       return NextResponse.json(
         {
           ok: false,
-          message: "公開する場合は companyNames を1件以上指定してください",
+          message: "公開する場合は公開する内定先を1件以上指定してください",
         },
         { status: 400 },
       );

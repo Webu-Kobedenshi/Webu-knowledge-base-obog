@@ -44,6 +44,7 @@ export type AlumniProfileDto = {
 export type AlumniListCompanyExperienceDto = {
   id: string;
   companyName: string;
+  isPublic: boolean;
   selectionExperience: { id: string } | null;
 };
 
@@ -105,6 +106,7 @@ export type SelectionExperienceDto = {
 export type CompanyExperienceDto = {
   id: string;
   companyName: string;
+  isPublic: boolean;
   selectionExperience: SelectionExperienceDto | null;
 };
 

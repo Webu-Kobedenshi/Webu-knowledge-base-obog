@@ -60,6 +60,7 @@ export type SelectionExperience = {
 export type CompanyExperience = {
   id: string;
   companyName: string;
+  isPublic: boolean;
   selectionExperience: SelectionExperience | null;
 };
 
@@ -102,6 +103,7 @@ export type AlumniListItem = {
   companyExperiences: Array<{
     id: string;
     companyName: string;
+    isPublic: boolean;
     selectionExperience: { id: string } | null;
   }>;
   remarks: string | null;

@@ -44,6 +44,7 @@ const alumniListQuery = `
         companyExperiences {
           id
           companyName
+          isPublic
           selectionExperience {
             id
           }
@@ -154,6 +155,7 @@ const alumniDetailQuery = `
       companyExperiences {
         id
         companyName
+        isPublic
         selectionExperience {
           id
           entryTrigger
