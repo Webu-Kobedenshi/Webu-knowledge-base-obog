@@ -7,6 +7,7 @@ import Link from "next/link";
 
 type AlumniCardProps = {
   alumni: AlumniListItem;
+  returnTo?: string;
 };
 
 const departmentLabel: Record<AlumniListItem["department"], string> = {
@@ -34,7 +35,7 @@ const departmentLabel: Record<AlumniListItem["department"], string> = {
   OTHERS: "その他",
 };
 
-export function AlumniCard({ alumni }: AlumniCardProps) {
+export function AlumniCard({ alumni, returnTo }: AlumniCardProps) {
   const initial = (alumni.nickname ?? "匿")[0];
   const gradient = departmentGradient[alumni.department];
   const companyNames = alumni.companyNames.length > 0 ? alumni.companyNames : ["未設定"];
@@ -45,11 +46,24 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
   const contactLinks = getAlumniContactLinks(alumni);
   const canContact = alumni.acceptContact && contactLinks.length > 0;
   const displayName = alumni.nickname ?? "匿名";
-  const detailHref = `/alumni/${alumni.id}`;
+  const detailPath = `/alumni/${alumni.id}`;
+  const createDetailHref = (companyExperienceId?: string, hash?: string) => {
+    const query = new URLSearchParams();
+
+    if (companyExperienceId) {
+      query.set("companyExperienceId", companyExperienceId);
+    }
+
+    if (returnTo && returnTo !== "/") {
+      query.set("returnTo", returnTo);
+    }
+
+    const serialized = query.toString();
+    return `${detailPath}${serialized ? `?${serialized}` : ""}${hash ? `#${hash}` : ""}`;
+  };
+  const detailHref = createDetailHref();
   const createCompanyDetailHref = (companyExperienceId?: string) =>
-    companyExperienceId
-      ? `${detailHref}?companyExperienceId=${encodeURIComponent(companyExperienceId)}#selection-flow`
-      : `${detailHref}#selection-flow`;
+    createDetailHref(companyExperienceId, "selection-flow");
   const getCompanyExperience = (companyName: string, companyIndex: number) =>
     alumni.companyExperiences[companyIndex] ??
     alumni.companyExperiences.find((company) => company.companyName === companyName);

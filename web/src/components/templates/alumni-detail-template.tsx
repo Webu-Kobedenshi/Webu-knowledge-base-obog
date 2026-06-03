@@ -11,12 +11,14 @@ import {
   getWebTestTimeAssessmentLabel,
   getWebTestTypeLabel,
 } from "@/lib/selection-step-meta";
+import { MousePointerClick } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 type AlumniDetailTemplateProps = {
   alumni: AlumniProfile;
   selectedCompanyExperienceId?: string;
+  returnHref?: string;
 };
 
 const departmentLabel: Record<AlumniProfile["department"], string> = {
@@ -66,6 +68,7 @@ const selectionFormatLabel: Record<string, string> = {
 export function AlumniDetailTemplate({
   alumni,
   selectedCompanyExperienceId,
+  returnHref = "/",
 }: AlumniDetailTemplateProps) {
   const gradient = departmentGradient[alumni.department];
   const displayName = alumni.nickname ?? "匿名";
@@ -115,7 +118,7 @@ export function AlumniDetailTemplate({
       {/* ── Navigation ── */}
       <nav className="mb-6">
         <Link
-          href="/"
+          href={returnHref}
           className="group inline-flex items-center gap-1.5 text-[13px] font-medium text-stone-500 transition-colors hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
         >
           <svg
@@ -267,14 +270,22 @@ export function AlumniDetailTemplate({
 
         {selectedCompany ? (
           <div className="mt-4">
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="break-words text-lg font-extrabold text-stone-900 dark:text-stone-100">
+            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+              <h3 className="min-w-0 flex-1 break-words text-lg font-extrabold text-stone-900 dark:text-stone-100">
                 {selectedCompany.companyName}
               </h3>
               {selectedExperience?.entryTrigger ? (
-                <span className="shrink-0 rounded-lg border border-stone-200 bg-stone-100 px-2 py-1 text-[10px] font-semibold text-stone-600 shadow-sm dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300">
-                  {selectedExperience.entryTrigger}
-                </span>
+                <div className="inline-flex max-w-full shrink-0 items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-amber-950 shadow-sm dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-100">
+                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/70 dark:text-amber-200">
+                    <MousePointerClick aria-hidden="true" className="size-3.5" />
+                  </span>
+                  <span className="text-[10px] font-bold leading-none text-amber-700 dark:text-amber-300">
+                    エントリーのきっかけ
+                  </span>
+                  <span className="min-w-0 truncate text-[12px] font-extrabold leading-none">
+                    {selectedExperience.entryTrigger}
+                  </span>
+                </div>
               ) : null}
             </div>
 

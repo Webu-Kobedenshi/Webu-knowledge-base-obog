@@ -6,8 +6,18 @@ import { notFound, redirect } from "next/navigation";
 
 type PageProps = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ companyExperienceId?: string | string[] }>;
+  searchParams: Promise<{ companyExperienceId?: string | string[]; returnTo?: string | string[] }>;
 };
+
+function normalizeReturnHref(value: string | string[] | undefined) {
+  const returnTo = (Array.isArray(value) ? value[0] : value)?.trim();
+
+  if (!returnTo || !returnTo.startsWith("/") || returnTo.startsWith("//")) {
+    return "/";
+  }
+
+  return returnTo;
+}
 
 export default async function AlumniDetailPage({ params, searchParams }: PageProps) {
   const { id } = await params;
@@ -16,6 +26,7 @@ export default async function AlumniDetailPage({ params, searchParams }: PagePro
   const selectedCompanyExperienceId = Array.isArray(companyExperienceIdParam)
     ? companyExperienceIdParam[0]
     : companyExperienceIdParam;
+  const returnHref = normalizeReturnHref(resolvedSearchParams.returnTo);
 
   const { profile, error: profileError } = await fetchMyProfileSummary();
 
@@ -43,7 +54,7 @@ export default async function AlumniDetailPage({ params, searchParams }: PagePro
           <p>OB/OGの情報を取得できませんでした。</p>
           <p className="mt-2 text-xs opacity-80">詳細: {error}</p>
           <Link
-            href="/"
+            href={returnHref}
             className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-rose-700 underline underline-offset-2 hover:text-rose-900 dark:text-rose-300"
           >
             一覧に戻る
@@ -61,6 +72,7 @@ export default async function AlumniDetailPage({ params, searchParams }: PagePro
     <AlumniDetailTemplate
       alumni={alumni}
       selectedCompanyExperienceId={selectedCompanyExperienceId}
+      returnHref={returnHref}
     />
   );
 }

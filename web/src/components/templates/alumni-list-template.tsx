@@ -172,6 +172,7 @@ export function AlumniListResults({
     const serialized = query.toString();
     return serialized ? `/?${serialized}` : "/";
   };
+  const currentListHref = buildPageHref(currentPage);
 
   return (
     <>
@@ -206,7 +207,9 @@ export function AlumniListResults({
 
       <section className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {alumni.length > 0 ? (
-          alumni.map((item) => <AlumniCard key={item.id} alumni={item} />)
+          alumni.map((item) => (
+            <AlumniCard key={item.id} alumni={item} returnTo={currentListHref} />
+          ))
         ) : (
           <div className="col-span-full flex flex-col items-center justify-center rounded-2xl border border-dashed border-stone-300/80 py-16 dark:border-stone-700/60">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-stone-100 dark:bg-stone-800" />
