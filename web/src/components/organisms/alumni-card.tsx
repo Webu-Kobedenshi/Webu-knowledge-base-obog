@@ -3,6 +3,7 @@ import { AlumniDetailLink } from "@/components/molecules/alumni-detail-link";
 import type { AlumniListItem } from "@/graphql/types";
 import { getAlumniContactClassName, getAlumniContactLinks } from "@/lib/alumni-contact";
 import { departmentGradient } from "@/lib/department-theme";
+import Link from "next/link";
 
 type AlumniCardProps = {
   alumni: AlumniListItem;
@@ -44,6 +45,14 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
   const contactLinks = getAlumniContactLinks(alumni);
   const canContact = alumni.acceptContact && contactLinks.length > 0;
   const displayName = alumni.nickname ?? "匿名";
+  const detailHref = `/alumni/${alumni.id}`;
+  const createCompanyDetailHref = (companyExperienceId?: string) =>
+    companyExperienceId
+      ? `${detailHref}?companyExperienceId=${encodeURIComponent(companyExperienceId)}#selection-flow`
+      : `${detailHref}#selection-flow`;
+  const getCompanyExperience = (companyName: string, companyIndex: number) =>
+    alumni.companyExperiences[companyIndex] ??
+    alumni.companyExperiences.find((company) => company.companyName === companyName);
 
   return (
     <article className="alumni-card group relative isolate flex h-full flex-col overflow-hidden rounded-3xl border border-stone-200 bg-white transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_20px_60px_-12px_rgba(0,0,0,0.15)] dark:border-stone-800 dark:bg-stone-950 dark:hover:shadow-[0_20px_60px_-12px_rgba(0,0,0,0.5)]">
@@ -150,23 +159,32 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
             otherCompanies.length === 0 ? "flex items-center" : ""
           }`}
         >
-          <p
-            className={`line-clamp-2 font-extrabold leading-tight tracking-tight text-stone-900 dark:text-stone-100 ${
+          <Link
+            href={createCompanyDetailHref(getCompanyExperience(primaryCompany, 0)?.id)}
+            className={`line-clamp-2 font-extrabold leading-tight tracking-tight text-stone-900 transition-colors hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 dark:text-stone-100 dark:hover:text-violet-300 dark:focus-visible:ring-offset-stone-950 ${
               otherCompanies.length === 0 ? "text-[26px]" : "text-[20px]"
             }`}
+            aria-label={`${primaryCompany}の詳細を見る`}
           >
             {primaryCompany}
-          </p>
+          </Link>
           {otherCompanies.length > 0 ? (
             <div className="mt-1.5 flex min-h-[1.375rem] flex-wrap gap-1.5">
-              {otherCompanies.slice(0, 2).map((name) => (
-                <span
-                  key={name}
-                  className="rounded-md bg-stone-100 px-1.5 py-0.5 text-[10px] font-semibold text-stone-600 dark:bg-stone-800 dark:text-stone-300"
-                >
-                  ＋ {name}
-                </span>
-              ))}
+              {otherCompanies.slice(0, 2).map((name, index) => {
+                const companyIndex = index + 1;
+                const companyExperience = getCompanyExperience(name, companyIndex);
+
+                return (
+                  <Link
+                    key={`${name}-${companyExperience?.id ?? companyIndex}`}
+                    href={createCompanyDetailHref(companyExperience?.id)}
+                    className="rounded-md bg-stone-100 px-1.5 py-0.5 text-[10px] font-semibold text-stone-600 transition-colors hover:bg-violet-100 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-violet-900/40 dark:hover:text-violet-300 dark:focus-visible:ring-offset-stone-950"
+                    aria-label={`${name}の詳細を見る`}
+                  >
+                    ＋ {name}
+                  </Link>
+                );
+              })}
             </div>
           ) : null}
         </div>
@@ -187,7 +205,7 @@ export function AlumniCard({ alumni }: AlumniCardProps) {
           alumni.hasUsefulCoursework ||
           alumni.hasPortfolio ||
           selectionExperienceCount > 0 ? (
-            <AlumniDetailLink href={`/alumni/${alumni.id}`} />
+            <AlumniDetailLink href={detailHref} />
           ) : null}
         </div>
 

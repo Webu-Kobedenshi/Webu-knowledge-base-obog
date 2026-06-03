@@ -12,10 +12,11 @@ import {
   getWebTestTypeLabel,
 } from "@/lib/selection-step-meta";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type AlumniDetailTemplateProps = {
   alumni: AlumniProfile;
+  selectedCompanyExperienceId?: string;
 };
 
 const departmentLabel: Record<AlumniProfile["department"], string> = {
@@ -62,7 +63,10 @@ const selectionFormatLabel: Record<string, string> = {
   UNKNOWN: "不明",
 };
 
-export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
+export function AlumniDetailTemplate({
+  alumni,
+  selectedCompanyExperienceId,
+}: AlumniDetailTemplateProps) {
   const gradient = departmentGradient[alumni.department];
   const displayName = alumni.nickname ?? "匿名";
   const initial = (displayName || "匿")[0];
@@ -78,7 +82,12 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
       selectionExperience: null,
     }));
   }, [alumni.companyExperiences, companyNames]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState(companyExperiences[0]?.id ?? "");
+  const initialSelectedCompanyId = companyExperiences.some(
+    (company) => company.id === selectedCompanyExperienceId,
+  )
+    ? (selectedCompanyExperienceId ?? "")
+    : (companyExperiences[0]?.id ?? "");
+  const [selectedCompanyId, setSelectedCompanyId] = useState(initialSelectedCompanyId);
   const selectedCompany =
     companyExperiences.find((company) => company.id === selectedCompanyId) ?? companyExperiences[0];
   const selectedExperience = selectedCompany?.selectionExperience ?? null;
@@ -91,6 +100,15 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
   const canContact = alumni.acceptContact && contactLinks.length > 0;
   const hasDeepDive =
     alumni.skills.length > 0 || alumni.portfolioUrl || alumni.gakuchika || alumni.usefulCoursework;
+
+  useEffect(() => {
+    if (
+      selectedCompanyExperienceId &&
+      companyExperiences.some((company) => company.id === selectedCompanyExperienceId)
+    ) {
+      setSelectedCompanyId(selectedCompanyExperienceId);
+    }
+  }, [companyExperiences, selectedCompanyExperienceId]);
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-2xl px-4 py-6 md:px-6 md:py-10">
@@ -191,7 +209,10 @@ export function AlumniDetailTemplate({ alumni }: AlumniDetailTemplateProps) {
       </section>
 
       {/* ── Company Selection Experience ── */}
-      <section className="mt-4 rounded-2xl border border-stone-200/90 bg-white p-5 shadow-[0_8px_24px_-18px_rgba(0,0,0,0.15)] dark:border-stone-800/80 dark:bg-stone-900/40">
+      <section
+        id="selection-flow"
+        className="mt-4 scroll-mt-4 rounded-2xl border border-stone-200/90 bg-white p-5 shadow-[0_8px_24px_-18px_rgba(0,0,0,0.15)] dark:border-stone-800/80 dark:bg-stone-900/40"
+      >
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100">

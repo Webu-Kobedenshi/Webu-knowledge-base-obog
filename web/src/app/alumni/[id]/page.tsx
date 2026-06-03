@@ -6,10 +6,16 @@ import { notFound, redirect } from "next/navigation";
 
 type PageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ companyExperienceId?: string | string[] }>;
 };
 
-export default async function AlumniDetailPage({ params }: PageProps) {
+export default async function AlumniDetailPage({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const resolvedSearchParams = await searchParams;
+  const companyExperienceIdParam = resolvedSearchParams.companyExperienceId;
+  const selectedCompanyExperienceId = Array.isArray(companyExperienceIdParam)
+    ? companyExperienceIdParam[0]
+    : companyExperienceIdParam;
 
   const { profile, error: profileError } = await fetchMyProfileSummary();
 
@@ -51,5 +57,10 @@ export default async function AlumniDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  return <AlumniDetailTemplate alumni={alumni} />;
+  return (
+    <AlumniDetailTemplate
+      alumni={alumni}
+      selectedCompanyExperienceId={selectedCompanyExperienceId}
+    />
+  );
 }
