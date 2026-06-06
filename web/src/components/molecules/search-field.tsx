@@ -28,6 +28,7 @@ export function SearchField({
 }: SearchFieldProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const currentYear = new Date().getFullYear();
 
   const [department, setDepartment] = useState(initialDepartment || "");
   const [graduationYear, setGraduationYear] = useState(initialGraduationYear || "");
@@ -87,6 +88,15 @@ export function SearchField({
     setPageSize("12");
     setIsExpandedOnMobile(false);
     router.replace(pathname, { scroll: false });
+  };
+
+  const startGraduationYearFromCurrentYear = (input: HTMLInputElement) => {
+    if (input.value) return false;
+
+    const year = String(currentYear);
+    input.value = year;
+    setGraduationYear(year);
+    return true;
   };
 
   return (
@@ -185,6 +195,22 @@ export function SearchField({
             max={2100}
             value={graduationYear}
             onChange={(event) => setGraduationYear(event.target.value.trim())}
+            onKeyDown={(event) => {
+              if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+              if (startGraduationYearFromCurrentYear(event.currentTarget)) {
+                event.preventDefault();
+              }
+            }}
+            onPointerDown={(event) => {
+              const input = event.currentTarget;
+              const spinButtonWidth = 44;
+              const isSpinButtonArea =
+                input.getBoundingClientRect().right - event.clientX <= spinButtonWidth;
+
+              if (isSpinButtonArea && startGraduationYearFromCurrentYear(input)) {
+                event.preventDefault();
+              }
+            }}
             placeholder="例: 2026"
           />
         </label>
