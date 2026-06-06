@@ -74,6 +74,7 @@ export type FindPublicAlumniListParams = {
 export interface AlumniRepositoryPort {
   findPublicList(params: FindPublicAlumniListParams): Promise<AlumniConnectionDto>;
   findPublicListItems(params: FindPublicAlumniListParams): Promise<AlumniListConnectionDto>;
+  findPublicCompanyNameSuggestions(query: string, limit: number): Promise<string[]>;
   findPublicById(id: string): Promise<AlumniProfileDto | null>;
   findUserById(userId: string): Promise<UserDto | null>;
   findUserByEmail(email: string): Promise<UserDto | null>;

@@ -33,6 +33,15 @@ export class AlumniQueryService {
     return this.alumniRepository.findPublicListItems(params);
   }
 
+  getCompanyNameSuggestions(query: string, limit = 8): Promise<string[]> {
+    const normalizedQuery = query.trim();
+    if (!normalizedQuery) {
+      return Promise.resolve([]);
+    }
+
+    return this.alumniRepository.findPublicCompanyNameSuggestions(normalizedQuery, limit);
+  }
+
   getAlumniDetail(id: string): Promise<AlumniProfileDto | null> {
     return this.alumniRepository.findPublicById(id);
   }

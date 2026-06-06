@@ -77,6 +77,15 @@ export class AlumniResolver {
     });
   }
 
+  @Query("getCompanyNameSuggestions")
+  @UseGuards(GqlAuthGuard)
+  getCompanyNameSuggestions(
+    @Args("query") query: string,
+    @Args("limit", { nullable: true }) limit?: number,
+  ): Promise<string[]> {
+    return this.alumniQueryService.getCompanyNameSuggestions(query, limit ?? 8);
+  }
+
   @Query("getAlumniDetail")
   @UseGuards(GqlAuthGuard)
   getAlumniDetail(@Args("id") id: string): Promise<AlumniProfileDto | null> {

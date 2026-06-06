@@ -232,6 +232,7 @@ extend type Query {
     limit: Int!
     offset: Int!
   ): AlumniListConnection!
+  getCompanyNameSuggestions(query: String!, limit: Int): [String!]!
   getMyProfile: User!
   getMyProfileSummary: User!
   getAlumniDetail(id: ID!): AlumniProfile

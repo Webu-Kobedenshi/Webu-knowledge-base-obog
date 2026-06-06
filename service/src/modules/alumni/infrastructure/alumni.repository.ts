@@ -14,6 +14,7 @@ import type {
   InitialSettingsPersistenceInput,
   UpdateAlumniProfilePersistenceInput,
 } from "../application/ports/alumni-repository.port";
+import { normalizeCompanyNameForSearch } from "../domain/company-search-normalization";
 import type {
   AlumniListConnectionDto,
   AlumniListItemDto,
@@ -289,17 +290,17 @@ export class AlumniRepository implements AlumniRepositoryPort {
     params: Pick<FindPublicAlumniListParams, "company" | "department" | "graduationYear">,
   ) {
     const { department, company, graduationYear } = params;
+    const companySearch = company ? normalizeCompanyNameForSearch(company) : "";
 
     return {
       isPublic: true,
       companies: {
         some: {
           isPublic: true,
-          ...(company
+          ...(companySearch
             ? {
-                companyName: {
-                  contains: company,
-                  mode: "insensitive",
+                companyNameSearch: {
+                  contains: companySearch,
                 },
               }
             : {}),
@@ -352,6 +353,60 @@ export class AlumniRepository implements AlumniRepositoryPort {
       totalCount,
       hasNextPage: offset + items.length < totalCount,
     };
+  }
+
+  async findPublicCompanyNameSuggestions(query: string, limit: number): Promise<string[]> {
+    const take = Math.min(Math.max(limit, 1), 12);
+    const normalizedQuery = normalizeCompanyNameForSearch(query);
+    if (!normalizedQuery) {
+      return [];
+    }
+
+    const prefixRecords = await this.prisma.alumniCompany.findMany({
+      where: {
+        isPublic: true,
+        companyNameSearch: {
+          startsWith: normalizedQuery,
+        },
+        alumniProfile: {
+          isPublic: true,
+        },
+      },
+      distinct: ["companyName"],
+      orderBy: [{ companyNameSearch: "asc" }, { companyName: "asc" }],
+      take,
+      select: {
+        companyName: true,
+      },
+    });
+
+    if (prefixRecords.length >= take) {
+      return prefixRecords.map((record) => record.companyName);
+    }
+
+    const remainingTake = take - prefixRecords.length;
+    const containsRecords = await this.prisma.alumniCompany.findMany({
+      where: {
+        isPublic: true,
+        companyNameSearch: {
+          contains: normalizedQuery,
+          not: {
+            startsWith: normalizedQuery,
+          },
+        },
+        alumniProfile: {
+          isPublic: true,
+        },
+      },
+      distinct: ["companyName"],
+      orderBy: [{ companyNameSearch: "asc" }, { companyName: "asc" }],
+      take: remainingTake,
+      select: {
+        companyName: true,
+      },
+    });
+
+    return [...prefixRecords, ...containsRecords].map((record) => record.companyName);
   }
 
   async findPublicById(id: string): Promise<AlumniProfileDto | null> {
@@ -500,9 +555,11 @@ export class AlumniRepository implements AlumniRepositoryPort {
               create: {
                 alumniProfileId: profile.id,
                 companyName: company.companyName,
+                companyNameSearch: normalizeCompanyNameForSearch(company.companyName),
                 isPublic: company.isPublic,
               },
               update: {
+                companyNameSearch: normalizeCompanyNameForSearch(company.companyName),
                 isPublic: company.isPublic,
               },
               select: { id: true },
@@ -554,6 +611,7 @@ export class AlumniRepository implements AlumniRepositoryPort {
             data: input.companyNames.map((companyName) => ({
               alumniProfileId: profile.id,
               companyName,
+              companyNameSearch: normalizeCompanyNameForSearch(companyName),
               isPublic: true,
             })),
             skipDuplicates: true,

@@ -35,6 +35,7 @@ describe("AlumniQueryService", () => {
     const repo = {
       findPublicList: jest.fn(),
       findPublicListItems: jest.fn(),
+      findPublicCompanyNameSuggestions: jest.fn(),
       findPublicById: jest.fn(),
       findUserById: jest.fn(),
       findUserByLinkedGmail: jest.fn(),
@@ -92,6 +93,28 @@ describe("AlumniQueryService", () => {
         offset: 5,
       });
       expect(result).toEqual(expected);
+    });
+  });
+
+  describe("getCompanyNameSuggestions", () => {
+    it("delegates trimmed query to repository", async () => {
+      const { service, repo } = createService();
+      const expected = ["ACME", "ACME Japan"];
+      (repo.findPublicCompanyNameSuggestions as jest.Mock).mockResolvedValue(expected);
+
+      const result = await service.getCompanyNameSuggestions(" AC ", 5);
+
+      expect(repo.findPublicCompanyNameSuggestions).toHaveBeenCalledWith("AC", 5);
+      expect(result).toEqual(expected);
+    });
+
+    it("returns empty suggestions without repository call when query is blank", async () => {
+      const { service, repo } = createService();
+
+      const result = await service.getCompanyNameSuggestions("   ");
+
+      expect(repo.findPublicCompanyNameSuggestions).not.toHaveBeenCalled();
+      expect(result).toEqual([]);
     });
   });
 

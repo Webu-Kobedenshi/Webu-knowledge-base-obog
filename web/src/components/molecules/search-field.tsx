@@ -11,7 +11,7 @@ import {
 } from "@/components/atoms/select";
 import { cn } from "@/lib/cn";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type SearchFieldProps = {
   initialDepartment: string;
@@ -29,12 +29,16 @@ export function SearchField({
   const router = useRouter();
   const pathname = usePathname();
   const currentYear = new Date().getFullYear();
+  const companySuggestionCacheRef = useRef(new Map<string, string[]>());
 
   const [department, setDepartment] = useState(initialDepartment || "");
   const [graduationYear, setGraduationYear] = useState(initialGraduationYear || "");
   const [pageSize, setPageSize] = useState(String(initialPageSize));
   const [companyInput, setCompanyInput] = useState(initialCompany);
   const [company, setCompany] = useState(initialCompany);
+  const [companySuggestions, setCompanySuggestions] = useState<string[]>([]);
+  const [isCompanySuggestionsOpen, setIsCompanySuggestionsOpen] = useState(false);
+  const [isCompanySuggestionsLoading, setIsCompanySuggestionsLoading] = useState(false);
   const [isExpandedOnMobile, setIsExpandedOnMobile] = useState(() =>
     Boolean(initialDepartment || initialCompany || initialGraduationYear),
   );
@@ -51,6 +55,63 @@ export function SearchField({
     }, 300);
 
     return () => clearTimeout(timer);
+  }, [companyInput]);
+
+  useEffect(() => {
+    const query = companyInput.trim();
+
+    if (!query) {
+      setCompanySuggestions([]);
+      setIsCompanySuggestionsLoading(false);
+      return;
+    }
+
+    const cacheKey = query.toLowerCase();
+    const cachedSuggestions = companySuggestionCacheRef.current.get(cacheKey);
+    if (cachedSuggestions) {
+      setCompanySuggestions(cachedSuggestions);
+      setIsCompanySuggestionsLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      setIsCompanySuggestionsLoading(true);
+
+      try {
+        const response = await fetch(
+          `/api/alumni/company-suggestions?query=${encodeURIComponent(query)}`,
+          {
+            signal: controller.signal,
+          },
+        );
+
+        if (!response.ok) {
+          setCompanySuggestions([]);
+          return;
+        }
+
+        const data = (await response.json()) as { suggestions?: string[] };
+        const suggestions = data.suggestions ?? [];
+        companySuggestionCacheRef.current.set(cacheKey, suggestions);
+        setCompanySuggestions(suggestions);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
+        setCompanySuggestions([]);
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsCompanySuggestionsLoading(false);
+        }
+      }
+    }, 150);
+
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
   }, [companyInput]);
 
   const nextHref = useMemo(() => {
@@ -99,8 +160,17 @@ export function SearchField({
     return true;
   };
 
+  const handleCompanySuggestionSelect = (suggestion: string) => {
+    setCompanyInput(suggestion);
+    setCompany(suggestion);
+    setIsCompanySuggestionsOpen(false);
+  };
+
   return (
-    <form className="liquid-glass rounded-2xl p-4" onSubmit={(event) => event.preventDefault()}>
+    <form
+      className="liquid-glass relative z-50 rounded-2xl p-4"
+      onSubmit={(event) => event.preventDefault()}
+    >
       <div className="flex items-center justify-between gap-2 md:hidden">
         <p className="text-[12px] font-semibold text-stone-600 dark:text-stone-300">
           絞り込み
@@ -215,18 +285,54 @@ export function SearchField({
           />
         </label>
 
-        <label htmlFor="search-company" className="space-y-1.5">
-          <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
+        <div className="relative space-y-1.5">
+          <label
+            htmlFor="search-company"
+            className="text-[11px] font-semibold text-stone-500 dark:text-stone-400"
+          >
             企業名で検索
-          </span>
+          </label>
           <Input
             id="search-company"
             name="company"
             value={companyInput}
-            onChange={(event) => setCompanyInput(event.target.value)}
+            onChange={(event) => {
+              setCompanyInput(event.target.value);
+              setIsCompanySuggestionsOpen(true);
+            }}
+            onFocus={() => setIsCompanySuggestionsOpen(true)}
+            onBlur={() => {
+              window.setTimeout(() => setIsCompanySuggestionsOpen(false), 120);
+            }}
+            autoComplete="off"
+            aria-expanded={isCompanySuggestionsOpen && companyInput.trim().length > 0}
             placeholder="例: 株式会社○○"
           />
-        </label>
+          {isCompanySuggestionsOpen && companyInput.trim().length > 0 ? (
+            <div
+              id="company-suggestion-list"
+              className="absolute top-full right-0 left-0 z-[60] mt-2 overflow-hidden rounded-xl border border-stone-200/80 bg-white shadow-lg shadow-stone-900/10 dark:border-stone-700 dark:bg-stone-900"
+            >
+              {companySuggestions.length > 0 ? (
+                companySuggestions.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    className="block w-full px-3.5 py-2.5 text-left text-sm text-stone-800 transition-colors hover:bg-violet-50 focus:bg-violet-50 focus:outline-none dark:text-stone-100 dark:hover:bg-violet-950/40 dark:focus:bg-violet-950/40"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => handleCompanySuggestionSelect(suggestion)}
+                  >
+                    {suggestion}
+                  </button>
+                ))
+              ) : (
+                <p className="px-3.5 py-2.5 text-sm text-stone-400">
+                  {isCompanySuggestionsLoading ? "候補を検索中..." : "候補なし"}
+                </p>
+              )}
+            </div>
+          ) : null}
+        </div>
 
         <label htmlFor="search-page-size" className="space-y-1.5">
           <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">

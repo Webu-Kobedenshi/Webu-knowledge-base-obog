@@ -155,6 +155,7 @@ model AlumniCompany {
   alumniProfileId     String
   alumniProfile       AlumniProfile        @relation(fields: [alumniProfileId], references: [id], onDelete: Cascade)
   companyName         String
+  companyNameSearch   String               @default("")
   isPublic            Boolean              @default(true)
   selectionExperience SelectionExperience?
   createdAt           DateTime             @default(now())

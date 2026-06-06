@@ -11,6 +11,8 @@ import { Pool } from "pg";
 
 const SEED_EMAIL_DOMAIN = "seed.kobedenshi.ac.jp";
 const GRADUATION_YEARS = [2023, 2024, 2025, 2026] as const;
+const COMPANY_SEARCH_SEPARATOR_PATTERN =
+  /[\s\u3000・･.．,，、。_＿/／\\＼()[\]（）［］【】「」『』]/g;
 
 type SeedStep = {
   stepKind: SelectionStepKind;
@@ -47,6 +49,19 @@ type SeedAlumni = {
   xUrl?: string;
   instagramUrl?: string;
 };
+
+function hiraganaToKatakana(value: string): string {
+  return value.replace(/[\u3041-\u3096]/g, (char) =>
+    String.fromCharCode(char.charCodeAt(0) + 0x60),
+  );
+}
+
+function normalizeCompanyNameForSearch(value: string): string {
+  return hiraganaToKatakana(value.normalize("NFKC"))
+    .toLocaleLowerCase("ja-JP")
+    .replace(COMPANY_SEARCH_SEPARATOR_PATTERN, "")
+    .trim();
+}
 
 type SeedTrack = "engineering" | "game" | "creative" | "sound" | "construction" | "business";
 
@@ -866,6 +881,7 @@ async function main() {
               companies: {
                 create: alumni.companies.map((company) => ({
                   companyName: company.companyName,
+                  companyNameSearch: normalizeCompanyNameForSearch(company.companyName),
                   selectionExperience: company.selectionExperience
                     ? {
                         create: {
