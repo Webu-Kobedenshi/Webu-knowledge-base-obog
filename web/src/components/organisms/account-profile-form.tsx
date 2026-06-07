@@ -2,6 +2,17 @@
 
 import { Button } from "@/components/atoms/button";
 import { Card } from "@/components/atoms/card";
+import {
+  BanIcon,
+  ChevronDownIcon,
+  ImagePlusIcon,
+  LoaderCircleIcon,
+  LockIcon,
+  PlusIcon,
+  Trash2Icon,
+  UploadIcon,
+  UserIcon,
+} from "@/components/atoms/icons";
 import { Input } from "@/components/atoms/input";
 import {
   Select,
@@ -25,7 +36,6 @@ import {
   webTestTimeAssessmentOptions,
   webTestTypeOptions,
 } from "@/lib/selection-step-meta";
-import { Ban, ImagePlus, LoaderCircle, Upload } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
@@ -940,21 +950,12 @@ export function AccountProfileForm({
             <div className="flex flex-col gap-4 border-b border-stone-100 bg-stone-50/50 p-5 dark:border-stone-800/60 dark:bg-stone-900/20 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-3 sm:items-center">
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-violet-100/80 text-sm dark:bg-violet-900/30">
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                  <UserIcon
+                    size={16}
+                    strokeWidth={2.5}
                     className="text-violet-600 dark:text-violet-400"
-                  >
-                    <title>公開設定</title>
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
+                    title="公開設定"
+                  />
                 </span>
                 <div>
                   <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
@@ -998,21 +999,7 @@ export function AccountProfileForm({
                 <div className="absolute inset-x-0 bottom-0 top-0 z-10 flex flex-col items-center justify-center rounded-b-2xl bg-white/60 p-6 backdrop-blur-[2px] dark:bg-stone-950/60 transition-all duration-300">
                   <div className="flex max-w-[280px] flex-col items-center gap-3 rounded-2xl border border-stone-200/80 bg-white/90 p-5 text-center shadow-lg backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/90">
                     <span className="flex h-10 w-10 items-center justify-center rounded-full bg-stone-100 dark:bg-stone-800">
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="text-stone-400"
-                      >
-                        <title>非公開ロック</title>
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                      </svg>
+                      <LockIcon size={20} className="text-stone-400" title="非公開ロック" />
                     </span>
                     <p className="text-[12px] font-medium leading-relaxed text-stone-600 dark:text-stone-300">
                       公開設定をオンにすると、お世話になった母校の後輩たちに
@@ -1062,7 +1049,7 @@ export function AccountProfileForm({
                           htmlFor="profile-avatar-file"
                           className="inline-flex h-9 w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-stone-300 px-3 text-xs font-semibold text-stone-700 transition-colors hover:bg-stone-50 dark:border-stone-700 dark:text-stone-200 dark:hover:bg-stone-800"
                         >
-                          <ImagePlus className="size-3.5" aria-hidden="true" />
+                          <ImagePlusIcon className="size-3.5" aria-hidden="true" />
                           写真を選択
                         </label>
 
@@ -1081,17 +1068,20 @@ export function AccountProfileForm({
                         >
                           {isUploadingAvatar ? (
                             <>
-                              <LoaderCircle className="size-3.5 animate-spin" aria-hidden="true" />
+                              <LoaderCircleIcon
+                                className="size-3.5 animate-spin"
+                                aria-hidden="true"
+                              />
                               アップロード中…
                             </>
                           ) : canUploadAvatar ? (
                             <>
-                              <Upload className="size-3.5" aria-hidden="true" />
+                              <UploadIcon className="size-3.5" aria-hidden="true" />
                               アップロード
                             </>
                           ) : (
                             <>
-                              <Ban className="size-3.5" aria-hidden="true" />
+                              <BanIcon className="size-3.5" aria-hidden="true" />
                               未選択
                             </>
                           )}
@@ -1241,21 +1231,7 @@ export function AccountProfileForm({
                               className="h-9 w-9 shrink-0 text-stone-400 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-40 dark:hover:bg-rose-900/20 dark:hover:text-rose-400"
                               title="削除"
                             >
-                              <svg
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <title>削除</title>
-                                <path d="M3 6h18" />
-                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                              </svg>
+                              <Trash2Icon size={16} title="削除" />
                             </Button>
                           </div>
 
@@ -1775,20 +1751,7 @@ export function AccountProfileForm({
                     variant="outline"
                     className="mt-2 h-9 gap-1.5 border-dashed border-stone-300 px-4 text-xs font-semibold text-stone-600 hover:border-stone-400 disabled:opacity-40 dark:border-stone-600 dark:text-stone-400 dark:hover:border-stone-500"
                   >
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <title>追加</title>
-                      <path d="M12 5v14" />
-                      <path d="M5 12h14" />
-                    </svg>
+                    <PlusIcon size={14} strokeWidth={2.5} title="追加" />
                     内定先を追加
                   </Button>
                 </div>
@@ -1838,20 +1801,11 @@ export function AccountProfileForm({
                         任意 · 書くほど後輩の参考になります
                       </p>
                     </div>
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                    <ChevronDownIcon
+                      size={18}
                       className={`shrink-0 text-stone-400 transition-transform duration-200 ${deepDiveOpen ? "rotate-180" : ""}`}
-                    >
-                      <title>{deepDiveOpen ? "閉じる" : "開く"}</title>
-                      <path d="m6 9 6 6 6-6" />
-                    </svg>
+                      title={deepDiveOpen ? "閉じる" : "開く"}
+                    />
                   </Button>
 
                   {/* Collapsible content */}

@@ -1,6 +1,6 @@
 import { Button } from "@/components/atoms/button";
 import { Card } from "@/components/atoms/card";
-import { ArrowRight, Mail } from "lucide-react";
+import { ArrowRightIcon, ChevronDownIcon, LinkIcon, MailIcon } from "@/components/atoms/icons";
 
 type LinkedGmailSectionProps = {
   loginInfoOpen: boolean;
@@ -31,21 +31,12 @@ export function LinkedGmailSection({
       >
         <div className="flex items-center gap-2">
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-sm dark:bg-emerald-900/40">
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            <LinkIcon
+              size={14}
+              strokeWidth={2.5}
               className="text-emerald-600 dark:text-emerald-400"
-            >
-              <title>アカウント連携</title>
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-            </svg>
+              title="アカウント連携"
+            />
           </span>
           <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
             卒業後のログイン情報
@@ -60,20 +51,11 @@ export function LinkedGmailSection({
             {isLinked ? "設定済み" : "未設定"}
           </span>
         </div>
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+        <ChevronDownIcon
+          size={18}
           className={`shrink-0 text-stone-400 transition-transform duration-200 ${loginInfoOpen ? "rotate-180" : ""}`}
-        >
-          <title>{loginInfoOpen ? "閉じる" : "開く"}</title>
-          <path d="m6 9 6 6 6-6" />
-        </svg>
+          title={loginInfoOpen ? "閉じる" : "開く"}
+        />
       </Button>
 
       <div
@@ -97,7 +79,7 @@ export function LinkedGmailSection({
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0 space-y-1">
                     <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
-                      <Mail size={12} />
+                      <MailIcon size={12} />
                       登録済み
                     </span>
                     <strong className="block break-all text-sm text-stone-900 dark:text-stone-100">
@@ -123,7 +105,7 @@ export function LinkedGmailSection({
               <div className="rounded-xl border border-dashed border-stone-300 bg-white/80 p-4 dark:border-stone-700 dark:bg-stone-950/20">
                 <div className="flex items-start gap-3">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300">
-                    <Mail size={18} />
+                    <MailIcon size={18} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold text-stone-900 dark:text-stone-100">未登録</p>
@@ -141,7 +123,7 @@ export function LinkedGmailSection({
                   className="mt-4 h-11 w-full justify-center gap-2 rounded-xl bg-neutral-900 px-4 text-xs font-bold text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-100 disabled:opacity-50"
                 >
                   {isLinkingGmail ? "Google確認へ移動中…" : "Gmailを登録する"}
-                  {!isLinkingGmail ? <ArrowRight size={14} /> : null}
+                  {!isLinkingGmail ? <ArrowRightIcon size={14} /> : null}
                 </Button>
               </div>
             )}

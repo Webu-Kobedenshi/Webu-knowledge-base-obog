@@ -1,4 +1,9 @@
-import { ArrowRight, GraduationCap, MailCheck, ShieldCheck } from "lucide-react";
+import {
+  ArrowRightIcon,
+  GraduationCapIcon,
+  MailCheckIcon,
+  ShieldCheckIcon,
+} from "@/components/atoms/icons";
 import type { ReactNode } from "react";
 
 export function LoginPageContent({ loginButton }: { loginButton: ReactNode }) {
@@ -20,7 +25,7 @@ export function LoginPageContent({ loginButton }: { loginButton: ReactNode }) {
           </p>
           <div className="mt-3 space-y-3">
             <div className="flex gap-3">
-              <GraduationCap
+              <GraduationCapIcon
                 aria-hidden="true"
                 className="mt-0.5 size-5 shrink-0 text-violet-600 dark:text-violet-300"
               />
@@ -32,7 +37,7 @@ export function LoginPageContent({ loginButton }: { loginButton: ReactNode }) {
               </div>
             </div>
             <div className="flex gap-3">
-              <MailCheck
+              <MailCheckIcon
                 aria-hidden="true"
                 className="mt-0.5 size-5 shrink-0 text-sky-600 dark:text-sky-300"
               />
@@ -44,7 +49,7 @@ export function LoginPageContent({ loginButton }: { loginButton: ReactNode }) {
               </div>
             </div>
             <div className="flex gap-3">
-              <ShieldCheck
+              <ShieldCheckIcon
                 aria-hidden="true"
                 className="mt-0.5 size-5 shrink-0 text-emerald-600 dark:text-emerald-300"
               />
@@ -75,7 +80,7 @@ export function LoginButtonContent() {
   return (
     <>
       Googleでログインへ進む
-      <ArrowRight aria-hidden="true" className="size-4" />
+      <ArrowRightIcon aria-hidden="true" className="size-4" />
     </>
   );
 }

@@ -1,4 +1,5 @@
 import { Card } from "@/components/atoms/card";
+import { UserIcon } from "@/components/atoms/icons";
 import { Input } from "@/components/atoms/input";
 import {
   Select,
@@ -47,21 +48,12 @@ export function BasicProfileSection({
     <Card className="gap-0 border-stone-200/90 bg-white shadow-[0_8px_24px_-18px_rgba(0,0,0,0.25)] dark:border-stone-800/80 dark:bg-stone-900/40">
       <div className="flex items-center gap-2">
         <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-100 text-sm dark:bg-violet-900/40">
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          <UserIcon
+            size={14}
+            strokeWidth={2.5}
             className="text-violet-600 dark:text-violet-400"
-          >
-            <title>基本情報</title>
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
+            title="基本情報"
+          />
         </span>
         <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">基本情報</h3>
         <span className="ml-auto rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">

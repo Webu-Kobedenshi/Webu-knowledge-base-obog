@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/atoms/button";
+import { ChevronDownIcon } from "@/components/atoms/icons";
 import { Input } from "@/components/atoms/input";
 import {
   Select,
@@ -185,24 +186,15 @@ export function SearchField({
           aria-controls="search-filter-panel"
           variant="outline"
           size="icon-sm"
+          aria-label={isExpandedOnMobile ? "絞り込みを閉じる" : "絞り込みを開く"}
         >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          <ChevronDownIcon
+            size={18}
             className={cn(
               "shrink-0 transition-transform duration-200",
               isExpandedOnMobile && "rotate-180",
             )}
-          >
-            <title>{isExpandedOnMobile ? "閉じる" : "開く"}</title>
-            <path d="m6 9 6 6 6-6" />
-          </svg>
+          />
         </Button>
       </div>
 

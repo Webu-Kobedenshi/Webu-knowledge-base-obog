@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/atoms/button";
+import { ChevronLeftIcon, ExternalLinkIcon, MousePointerClickIcon } from "@/components/atoms/icons";
 import { SocialContactIcon } from "@/components/atoms/social-contact-icon";
 import type { AlumniProfile } from "@/graphql/types";
 import { getAlumniContactClassName, getAlumniContactLinks } from "@/lib/alumni-contact";
@@ -11,7 +12,6 @@ import {
   getWebTestTimeAssessmentLabel,
   getWebTestTypeLabel,
 } from "@/lib/selection-step-meta";
-import { MousePointerClick } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -121,20 +121,11 @@ export function AlumniDetailTemplate({
           href={returnHref}
           className="group inline-flex items-center gap-1.5 text-[13px] font-medium text-stone-500 transition-colors hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          <ChevronLeftIcon
+            size={16}
             className="transition-transform group-hover:-translate-x-0.5"
-          >
-            <title>戻る</title>
-            <path d="m15 18-6-6 6-6" />
-          </svg>
+            title="戻る"
+          />
           一覧に戻る
         </Link>
       </nav>
@@ -277,7 +268,7 @@ export function AlumniDetailTemplate({
               {selectedExperience?.entryTrigger ? (
                 <div className="inline-flex max-w-full shrink-0 items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-amber-950 shadow-sm dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-100">
                   <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/70 dark:text-amber-200">
-                    <MousePointerClick aria-hidden="true" className="size-3.5" />
+                    <MousePointerClickIcon aria-hidden="true" className="size-3.5" />
                   </span>
                   <span className="text-[10px] font-bold leading-none text-amber-700 dark:text-amber-300">
                     エントリーのきっかけ
@@ -466,21 +457,7 @@ export function AlumniDetailTemplate({
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 rounded-lg border border-stone-200/80 bg-stone-50/80 px-3 py-1.5 text-[12px] font-semibold text-stone-700 transition-colors hover:bg-stone-100 dark:border-stone-700/60 dark:bg-stone-800/60 dark:text-stone-300 dark:hover:bg-stone-800"
                   >
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <title>ポートフォリオ</title>
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                      <polyline points="15 3 21 3 21 9" />
-                      <line x1="10" y1="14" x2="21" y2="3" />
-                    </svg>
+                    <ExternalLinkIcon size={14} title="ポートフォリオ" />
                     ポートフォリオを見る
                   </a>
                 </div>

@@ -1,3 +1,4 @@
+import { ChevronRightIcon } from "@/components/atoms/icons";
 import type { MyAccountProfile } from "@/graphql/types";
 import Link from "next/link";
 
@@ -40,20 +41,12 @@ export function AccountBadge({ account }: AccountBadgeProps) {
       {/* CTA Label & Icon */}
       <div className="flex items-center gap-1 text-stone-400 transition-colors group-hover:text-violet-600 dark:text-stone-500 dark:group-hover:text-violet-400">
         <span className="text-[11px] font-bold">マイページ</span>
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+        <ChevronRightIcon
+          size={16}
+          strokeWidth={2.5}
           className="transition-transform group-hover:translate-x-0.5"
-        >
-          <path d="m9 18 6-6-6-6" />
-          <title>マイページへ</title>
-        </svg>
+          title="マイページへ"
+        />
       </div>
     </Link>
   );

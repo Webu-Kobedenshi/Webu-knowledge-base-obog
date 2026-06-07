@@ -1,3 +1,4 @@
+import { CheckIcon } from "@/components/atoms/icons";
 import { SocialContactIcon } from "@/components/atoms/social-contact-icon";
 import { AlumniDetailLink } from "@/components/molecules/alumni-detail-link";
 import type { AlumniListItem } from "@/graphql/types";
@@ -116,19 +117,7 @@ export function AlumniCard({ alumni, returnTo }: AlumniCardProps) {
           )}
           {canContact ? (
             <span className="absolute -bottom-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 shadow-sm ring-2 ring-white dark:ring-stone-900">
-              <svg
-                width="10"
-                height="10"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <title>連絡受付中</title>
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
+              <CheckIcon size={10} color="white" strokeWidth={3} title="連絡受付中" />
             </span>
           ) : null}
         </div>

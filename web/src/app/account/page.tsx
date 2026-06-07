@@ -1,4 +1,5 @@
 import { AccountActions } from "@/app/account/account-actions";
+import { ChevronLeftIcon } from "@/components/atoms/icons";
 import { ToastOnMount } from "@/components/atoms/toast-on-mount";
 import { AccountProfileForm } from "@/components/organisms/account-profile-form";
 import { fetchMyProfile } from "@/graphql/account";
@@ -50,20 +51,11 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
           href="/"
           className="group inline-flex items-center gap-1.5 text-[13px] font-medium text-stone-500 transition-colors hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          <ChevronLeftIcon
+            size={16}
             className="transition-transform group-hover:-translate-x-0.5"
-          >
-            <title>戻る</title>
-            <path d="m15 18-6-6 6-6" />
-          </svg>
+            title="戻る"
+          />
           一覧に戻る
         </Link>
       </nav>
