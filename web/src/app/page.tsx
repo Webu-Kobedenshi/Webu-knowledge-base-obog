@@ -13,7 +13,10 @@ type PageProps = {
 };
 
 export default async function Home({ searchParams }: PageProps) {
-  const { profile, error: profileError } = await fetchMyProfileSummary();
+  const [{ profile, error: profileError }, params] = await Promise.all([
+    fetchMyProfileSummary(),
+    searchParams,
+  ]);
 
   if (profileError === "Authentication required") {
     redirect("/login?callbackUrl=/");
@@ -45,12 +48,12 @@ export default async function Home({ searchParams }: PageProps) {
     redirect("/initial-setup");
   }
 
-  const params: Record<string, string | string[] | undefined> = (await searchParams) ?? {};
-  const departmentParam = params.department;
-  const companyParam = params.company;
-  const graduationYearParam = params.graduationYear;
-  const pageParam = params.page;
-  const pageSizeParam = params.pageSize;
+  const resolvedParams: Record<string, string | string[] | undefined> = params ?? {};
+  const departmentParam = resolvedParams.department;
+  const companyParam = resolvedParams.company;
+  const graduationYearParam = resolvedParams.graduationYear;
+  const pageParam = resolvedParams.page;
+  const pageSizeParam = resolvedParams.pageSize;
 
   const department =
     (Array.isArray(departmentParam) ? departmentParam[0] : departmentParam)?.trim() ?? "";

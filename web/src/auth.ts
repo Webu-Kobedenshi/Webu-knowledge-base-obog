@@ -130,12 +130,15 @@ async function isAuthorizedEmail(email?: string | null): Promise<boolean> {
     return false;
   }
 
-  const isAdmin = await isAdminEmail(email);
   if (isTeacherEmailFormat(email)) {
-    return isAdmin;
+    return isAdminEmail(email);
   }
 
-  return isAllowedDomainEmail(email) || isAdmin || (await isLinkedGmail(email));
+  if (isAllowedDomainEmail(email)) {
+    return true;
+  }
+
+  return (await isAdminEmail(email)) || (await isLinkedGmail(email));
 }
 
 async function createAuthCheckToken(email: string) {
@@ -156,7 +159,8 @@ async function createServiceToken(payload: {
   role: Role;
   name?: string;
 }) {
-  return new SignJWT({
+  const expiresAt = Math.floor(Date.now() / 1000) + 60 * 60;
+  const token = await new SignJWT({
     email: payload.email,
     role: payload.role,
     name: payload.name,
@@ -164,8 +168,10 @@ async function createServiceToken(payload: {
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(payload.userId)
     .setIssuedAt()
-    .setExpirationTime("1h")
+    .setExpirationTime(expiresAt)
     .sign(getJwtSecret());
+
+  return { token, expiresAt };
 }
 
 export const authOptions: NextAuthOptions = {
@@ -205,12 +211,11 @@ export const authOptions: NextAuthOptions = {
 
       const email = typeof token.email === "string" ? token.email : null;
       const tokenRole = token.role as Role | undefined;
+      const shouldResolveRole = Boolean(email && (user?.email || !tokenRole));
       const role =
-        email && (await isAdminEmail(email))
+        shouldResolveRole && email && (await isAdminEmail(email))
           ? "ADMIN"
-          : tokenRole === "ADMIN"
-            ? "STUDENT"
-            : (tokenRole ?? "STUDENT");
+          : (tokenRole ?? "STUDENT");
       token.role = role;
 
       const userId = (token.userId as string | undefined) ?? token.sub;
@@ -219,12 +224,26 @@ export const authOptions: NextAuthOptions = {
       }
 
       token.userId = userId;
-      token.serviceToken = await createServiceToken({
+      const existingServiceToken = typeof token.serviceToken === "string" ? token.serviceToken : "";
+      const existingServiceTokenExpiresAt =
+        typeof token.serviceTokenExpiresAt === "number" ? token.serviceTokenExpiresAt : 0;
+      const canReuseServiceToken =
+        !user &&
+        existingServiceToken &&
+        existingServiceTokenExpiresAt > Math.floor(Date.now() / 1000) + 5 * 60;
+
+      if (canReuseServiceToken) {
+        return token;
+      }
+
+      const serviceToken = await createServiceToken({
         userId,
         email: token.email,
         role,
         name: typeof token.name === "string" ? token.name : undefined,
       });
+      token.serviceToken = serviceToken.token;
+      token.serviceTokenExpiresAt = serviceToken.expiresAt;
 
       return token;
     },
