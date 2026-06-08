@@ -11,19 +11,68 @@
 
 ## Requirements
 
-- Node.js `22 LTS`
-- pnpm `10.x`
+- mise
+- Node.js `22.22.3`（mise で管理）
+- pnpm `10.8.1`（mise で管理）
 - Docker / Docker Compose
 
 ## Setup
 
-### 1. Install dependencies
+### 1. Install mise
+
+mise を使って Node.js と pnpm のバージョンを固定します。
+
+macOS:
+
+```bash
+brew install mise
+```
+
+Windows:
+
+```bash
+scoop install mise
+# or
+winget install jdx.mise
+```
+
+使っている shell に合わせて Shell integration を有効にしてください。
+
+zsh:
+
+```bash
+echo 'eval "$(mise activate zsh)"' >> "${ZDOTDIR-$HOME}/.zshrc"
+```
+
+bash:
+
+```bash
+echo 'eval "$(mise activate bash)"' >> ~/.bashrc
+```
+
+PowerShell:
+
+```powershell
+echo '(&mise activate pwsh) | Out-String | Invoke-Expression' >> $HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1
+```
+
+設定後にシェルを開き直してから、以下を実行してください。
+
+```bash
+mise trust
+mise install
+```
+
+### 2. Install dependencies
 
 ```bash
 pnpm install
 ```
 
-### 2. Create environment file
+依存関係の追加や lockfile 更新は必ずリポジトリルートで実行してください。
+このリポジトリではルートの `pnpm-lock.yaml` を正とし、`web/pnpm-lock.yaml` と `service/pnpm-lock.yaml` は管理対象外です。
+
+### 3. Create environment file
 
 ```bash
 cp .env.example .env
@@ -42,7 +91,7 @@ ADMIN_SEED_EMAILS="admin@example.com"
 `NEXTAUTH_SECRET` と `AUTH_JWT_SECRET` はローカル開発では同じ値でも問題ありません。
 管理者としてログインするメールアドレスは `ADMIN_SEED_EMAILS` に設定します。
 
-### 3. Configure Google OAuth
+### 4. Configure Google OAuth
 
 Google Cloud Console の OAuth Client に以下を登録してください。
 
@@ -59,7 +108,7 @@ http://localhost:3000/api/auth/callback/google
 http://localhost:3000/api/account/gmail/verify/callback
 ```
 
-### 4. Start local services
+### 5. Start local services
 
 ```bash
 pnpm dev
@@ -67,7 +116,7 @@ pnpm dev
 
 初回起動時に Docker イメージのビルド、依存関係のインストール、Prisma migration の適用が実行されます。
 
-### 5. Seed local data
+### 6. Seed local data
 
 別ターミナルで実行してください。
 
@@ -92,6 +141,9 @@ Password: minioadmin
 ## Common Commands
 
 ```bash
+# Install pinned tools
+mise install
+
 # Start local environment
 pnpm dev
 

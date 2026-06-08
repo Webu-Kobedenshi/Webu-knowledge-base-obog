@@ -31,11 +31,16 @@
 
 ## Tooling
 
-- Node.js `22 LTS`
+- mise
+- Node.js `22.22.3`
 - pnpm `10.8.1`
 - Docker / Docker Compose
 - Biome
 - Jest
+
+Node.js と pnpm はルートの `mise.toml` で固定します。
+npm package dependencies は `package.json` とルートの `pnpm-lock.yaml` で管理します。
+PostgreSQL と MinIO は Docker Compose で管理し、Docker / Docker Compose 本体は各 OS の通常手順で導入します。
 
 ## Architecture Policy
 
