@@ -14,17 +14,31 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const shouldRenderSpeedInsights = process.env.VERCEL === "1";
+
 export const metadata: Metadata = {
   title: "We部 | ナレッジベース ver.就活",
-  description: "先輩がどんな企業に内定をもらい、どんなスキルやガクチカを活かしたのか？",
+  description: "先輩が受けた企業の選考フローや面接内容を共有するナレッジベース",
   icons: {
     icon: [
       {
-        url: "/webclub.png",
-        sizes: "any",
+        url: "/favicon.png",
+        sizes: "32x32",
+        type: "image/png",
+      },
+      {
+        url: "/icon.png",
+        sizes: "512x512",
+        type: "image/png",
       },
     ],
-    apple: "/webclub.png",
+    apple: [
+      {
+        url: "/apple-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
   },
 };
 
@@ -37,7 +51,7 @@ export default function RootLayout({
     <html lang="ja">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
-        <SpeedInsights />
+        {shouldRenderSpeedInsights ? <SpeedInsights /> : null}
         <Toaster />
       </body>
     </html>
