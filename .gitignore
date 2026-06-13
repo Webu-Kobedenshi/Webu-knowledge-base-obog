@@ -25,6 +25,7 @@ Thumbs.db
 
 # environment files
 .env
+.env.xserver
 **/.env.local
 **/.env.development.local
 **/.env.test.local

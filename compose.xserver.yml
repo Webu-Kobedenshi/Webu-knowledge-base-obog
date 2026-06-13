@@ -1,0 +1,62 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: webu-portal-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/xserver/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+    networks:
+      - webu-portal-network
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile.xserver
+    container_name: webu-portal-web
+    restart: unless-stopped
+    env_file:
+      - ${XSERVER_ENV_FILE:-.env.xserver}
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      PORT: 3000
+      NEXTAUTH_URL: https://web-u.dev
+      GRAPHQL_ENDPOINT: http://service:4000/graphql
+    expose:
+      - "3000"
+    depends_on:
+      - service
+    networks:
+      - webu-portal-network
+
+  service:
+    build:
+      context: .
+      dockerfile: service/Dockerfile.xserver
+    container_name: webu-portal-service
+    restart: unless-stopped
+    env_file:
+      - ${XSERVER_ENV_FILE:-.env.xserver}
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      CORS_ORIGINS: https://web-u.dev
+    expose:
+      - "4000"
+    networks:
+      - webu-portal-network
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  webu-portal-network:

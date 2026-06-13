@@ -1,0 +1,8 @@
+web-u.dev {
+	encode zstd gzip
+	reverse_proxy web:3000
+}
+
+www.web-u.dev {
+	redir https://web-u.dev{uri} permanent
+}

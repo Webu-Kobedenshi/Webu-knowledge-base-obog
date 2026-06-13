@@ -10,7 +10,7 @@ import { AlumniModule } from "./modules/alumni/alumni.module";
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       typePaths: [join(process.cwd(), "src/**/*.graphql")],
-      playground: true,
+      playground: process.env.NODE_ENV !== "production",
     }),
     AlumniModule,
   ],
