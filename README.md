@@ -178,6 +178,7 @@ pnpm prisma:seed:admin-emails
 
 - [Architecture](./Docs/Architecture.md)
 - [Tech Stack](./Docs/TECH_STACK.md)
+- [Xserver Deploy Runbook](./Docs/XSERVER_DEPLOY_RUNBOOK.md)
 - [PRD](./Docs/PRD.md)
 - [Operations Spec](./Docs/OPERATIONS_SPEC.md)
 - [Site Overview](./Docs/SITE_OVERVIEW.md)

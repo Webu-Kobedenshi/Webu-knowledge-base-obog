@@ -2,6 +2,8 @@
 
 `web-u.dev` で `web` と `service` を xサーバー上の Docker にデプロイする手順です。
 
+初回構築、通常リリース、検証、ロールバック、トラブル対応まで含む詳細手順は [XSERVER_DEPLOY_RUNBOOK.md](./XSERVER_DEPLOY_RUNBOOK.md) を参照してください。
+
 ## Prerequisites
 
 - xサーバーの `webu` アカウントで SSH ログインできる
