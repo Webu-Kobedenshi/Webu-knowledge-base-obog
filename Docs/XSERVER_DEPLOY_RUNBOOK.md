@@ -212,11 +212,11 @@ cd ~/apps/Webu-knowledge-base-obog
 git fetch origin
 ```
 
-本番反映は原則 `release` ブランチから行います。
+Xserver 本番反映は `main` ブランチから行います。
 
 ```bash
-git checkout release
-git pull --ff-only origin release
+git checkout main
+git pull --ff-only origin main
 ```
 
 緊急時に特定 commit を反映する場合は、作業ログに commit hash を残してください。
@@ -270,7 +270,7 @@ docker compose -f compose.xserver.yml exec service pnpm db:seed:admin-emails
 
 ## 通常リリース手順
 
-### 1. ローカルで release ブランチを準備する
+### 1. ローカルで main ブランチを準備する
 
 開発フローは [GIT_WORKFLOW.md](./GIT_WORKFLOW.md) に従います。
 
@@ -288,14 +288,14 @@ git status --short
 find service/prisma/migrations -maxdepth 2 -name migration.sql
 ```
 
-### 2. サーバーで最新 release を取得する
+### 2. サーバーで最新 main を取得する
 
 ```bash
 ssh webu@162.43.91.89
 cd ~/apps/Webu-knowledge-base-obog
 git fetch origin
-git checkout release
-git pull --ff-only origin release
+git checkout main
+git pull --ff-only origin main
 ```
 
 反映対象を記録します。
@@ -399,13 +399,13 @@ docker compose -f compose.xserver.yml logs --tail=100 web service caddy
 - `prisma migrate deploy` 済みの DB migration は自動では戻りません。
 - 後方互換のない migration を含むリリースは、単純な `git checkout` だけでは安全に戻せない可能性があります。
 - DB を戻す必要がある場合は、Neon の backup / restore 方針に従います。
-- rollback 後は、原因を修正した forward fix を `release` に入れるのを基本にします。
+- rollback 後は、原因を修正した forward fix を `main` に入れるのを基本にします。
 
-`release` ブランチへ戻す場合:
+`main` ブランチへ戻す場合:
 
 ```bash
-git checkout release
-git pull --ff-only origin release
+git checkout main
+git pull --ff-only origin main
 docker compose -f compose.xserver.yml up -d --build
 ```
 
