@@ -101,7 +101,7 @@ describe("AlumniCommandService", () => {
       companyNames: [" ACME ", "ACME", " Beta "],
       xUrl: " https://x.com/taro ",
       skills: [" React ", "Node", "React", "TypeScript"],
-      isPublic: true,
+      isPublic: false,
       acceptContact: true,
       portfolioUrl: " https://example.com ",
     } satisfies UpdateAlumniProfileInput);

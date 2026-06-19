@@ -38,6 +38,19 @@ export type SelectionStepKind =
 
 export type SelectionFormat = "ONLINE" | "IN_PERSON" | "UNKNOWN";
 
+export type JobHuntingPeriod =
+  | "FIRST_YEAR_FIRST_HALF"
+  | "FIRST_YEAR_SECOND_HALF"
+  | "SECOND_YEAR_FIRST_HALF"
+  | "SUMMER_BREAK"
+  | "PRE_GRADUATION_AUTUMN"
+  | "OTHER";
+
+export type HelpfulReactionSummary = {
+  count: number;
+  reactedByViewer: boolean;
+};
+
 export type SelectionStep = {
   id: string;
   stepKind: SelectionStepKind;
@@ -53,6 +66,9 @@ export type SelectionStep = {
 export type SelectionExperience = {
   id: string;
   entryTrigger: string | null;
+  motivation: string | null;
+  activityPeriod: JobHuntingPeriod | null;
+  activityPeriodNote: string | null;
   overallTip: string | null;
   steps: SelectionStep[];
 };
@@ -61,6 +77,7 @@ export type CompanyExperience = {
   id: string;
   companyName: string;
   isPublic: boolean;
+  motivation: string | null;
   selectionExperience: SelectionExperience | null;
 };
 
@@ -72,6 +89,7 @@ export type AlumniProfile = {
   department: Department;
   companyNames: string[];
   companyExperiences: CompanyExperience[];
+  helpfulReaction: HelpfulReactionSummary;
   remarks: string | null;
   contactEmail: string | null;
   xUrl: string | null;
@@ -81,6 +99,8 @@ export type AlumniProfile = {
   portfolioUrl: string | null;
   gakuchika: string | null;
   usefulCoursework: string | null;
+  activityPeriod: JobHuntingPeriod | null;
+  activityPeriodNote: string | null;
   isPublic: boolean;
   acceptContact: boolean;
   createdAt: string;
@@ -104,8 +124,10 @@ export type AlumniListItem = {
     id: string;
     companyName: string;
     isPublic: boolean;
-    selectionExperience: { id: string } | null;
+    motivation: string | null;
+    selectionExperience: { id: string; hasSelectionFlow: boolean } | null;
   }>;
+  helpfulReaction: HelpfulReactionSummary;
   remarks: string | null;
   xUrl: string | null;
   instagramUrl: string | null;

@@ -25,6 +25,7 @@ export type AlumniProfileDto = {
   department: Department;
   companyNames: string[];
   companyExperiences: CompanyExperienceDto[];
+  helpfulReaction: HelpfulReactionSummaryDto;
   remarks: string | null;
   contactEmail: string | null;
   xUrl: string | null;
@@ -34,6 +35,8 @@ export type AlumniProfileDto = {
   portfolioUrl: string | null;
   gakuchika: string | null;
   usefulCoursework: string | null;
+  activityPeriod: JobHuntingPeriod | null;
+  activityPeriodNote: string | null;
   isPublic: boolean;
   acceptContact: boolean;
   createdAt: Date;
@@ -45,7 +48,8 @@ export type AlumniListCompanyExperienceDto = {
   id: string;
   companyName: string;
   isPublic: boolean;
-  selectionExperience: { id: string } | null;
+  motivation: string | null;
+  selectionExperience: { id: string; hasSelectionFlow: boolean } | null;
 };
 
 export type AlumniListItemDto = {
@@ -56,6 +60,7 @@ export type AlumniListItemDto = {
   department: Department;
   companyNames: string[];
   companyExperiences: AlumniListCompanyExperienceDto[];
+  helpfulReaction: HelpfulReactionSummaryDto;
   remarks: string | null;
   xUrl: string | null;
   instagramUrl: string | null;
@@ -84,6 +89,19 @@ export type SelectionStepKind =
 
 export type SelectionFormat = "ONLINE" | "IN_PERSON" | "UNKNOWN";
 
+export type JobHuntingPeriod =
+  | "FIRST_YEAR_FIRST_HALF"
+  | "FIRST_YEAR_SECOND_HALF"
+  | "SECOND_YEAR_FIRST_HALF"
+  | "SUMMER_BREAK"
+  | "PRE_GRADUATION_AUTUMN"
+  | "OTHER";
+
+export type HelpfulReactionSummaryDto = {
+  count: number;
+  reactedByViewer: boolean;
+};
+
 export type SelectionStepDto = {
   id: string;
   stepKind: SelectionStepKind;
@@ -99,6 +117,9 @@ export type SelectionStepDto = {
 export type SelectionExperienceDto = {
   id: string;
   entryTrigger: string | null;
+  motivation: string | null;
+  activityPeriod: JobHuntingPeriod | null;
+  activityPeriodNote: string | null;
   overallTip: string | null;
   steps: SelectionStepDto[];
 };
@@ -107,6 +128,7 @@ export type CompanyExperienceDto = {
   id: string;
   companyName: string;
   isPublic: boolean;
+  motivation: string | null;
   selectionExperience: SelectionExperienceDto | null;
 };
 

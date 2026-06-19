@@ -58,13 +58,19 @@ const getMyProfileQuery = `
         graduationYear
         department
         companyNames
+        activityPeriod
+        activityPeriodNote
         companyExperiences {
-          id
-          companyName
-          isPublic
-          selectionExperience {
+	          id
+	          companyName
+	          isPublic
+	          motivation
+	          selectionExperience {
             id
             entryTrigger
+            motivation
+            activityPeriod
+            activityPeriodNote
             overallTip
             steps {
               id
@@ -78,6 +84,10 @@ const getMyProfileQuery = `
               sortOrder
             }
           }
+        }
+        helpfulReaction {
+          count
+          reactedByViewer
         }
         remarks
         contactEmail

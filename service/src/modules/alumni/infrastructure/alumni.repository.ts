@@ -2,6 +2,7 @@ import { ConflictException, Inject, Injectable } from "@nestjs/common";
 import type {
   Prisma,
   Department as PrismaDepartment,
+  JobHuntingPeriod as PrismaJobHuntingPeriod,
   Role as PrismaRole,
   SelectionFormat as PrismaSelectionFormat,
   SelectionStepKind as PrismaSelectionStepKind,
@@ -19,6 +20,7 @@ import type {
   AlumniListConnectionDto,
   AlumniListItemDto,
   AlumniProfileDto,
+  HelpfulReactionSummaryDto,
   UserDto,
 } from "../domain/read-models/alumni.read-model";
 import type { Department } from "../domain/types/department";
@@ -37,6 +39,14 @@ type SelectionStepKind =
   | "OTHER";
 
 type SelectionFormat = "ONLINE" | "IN_PERSON" | "UNKNOWN";
+
+type JobHuntingPeriod =
+  | "FIRST_YEAR_FIRST_HALF"
+  | "FIRST_YEAR_SECOND_HALF"
+  | "SECOND_YEAR_FIRST_HALF"
+  | "SUMMER_BREAK"
+  | "PRE_GRADUATION_AUTUMN"
+  | "OTHER";
 
 type AlumniConnection = {
   items: AlumniProfileDto[];
@@ -70,10 +80,14 @@ const alumniProfileSelect = {
       id: true,
       companyName: true,
       isPublic: true,
+      motivation: true,
       selectionExperience: {
         select: {
           id: true,
           entryTrigger: true,
+          motivation: true,
+          activityPeriod: true,
+          activityPeriodNote: true,
           overallTip: true,
           steps: {
             select: {
@@ -107,6 +121,13 @@ const alumniProfileSelect = {
   portfolioUrl: true,
   gakuchika: true,
   usefulCoursework: true,
+  activityPeriod: true,
+  activityPeriodNote: true,
+  helpfulReactions: {
+    select: {
+      userId: true,
+    },
+  },
   isPublic: true,
   acceptContact: true,
   createdAt: true,
@@ -127,9 +148,22 @@ const alumniListItemSelect = {
       id: true,
       companyName: true,
       isPublic: true,
+      motivation: true,
       selectionExperience: {
         select: {
           id: true,
+          entryTrigger: true,
+          steps: {
+            where: {
+              stepKind: {
+                not: "OFFER",
+              },
+            },
+            select: {
+              id: true,
+            },
+            take: 1,
+          },
         },
       },
     },
@@ -145,6 +179,11 @@ const alumniListItemSelect = {
   portfolioUrl: true,
   gakuchika: true,
   usefulCoursework: true,
+  helpfulReactions: {
+    select: {
+      userId: true,
+    },
+  },
   isPublic: true,
   acceptContact: true,
   createdAt: true,
@@ -186,16 +225,36 @@ export class AlumniRepository implements AlumniRepositoryPort {
     return (value ?? "UNKNOWN") as PrismaSelectionFormat;
   }
 
-  private toUserDto(record: UserRecord): UserDto {
+  private toPrismaJobHuntingPeriod(
+    value: JobHuntingPeriod | undefined,
+  ): PrismaJobHuntingPeriod | undefined {
+    return value ? (value as PrismaJobHuntingPeriod) : undefined;
+  }
+
+  private toHelpfulReactionSummary(
+    reactions: Array<{ userId: string }>,
+    viewerUserId?: string,
+  ): HelpfulReactionSummaryDto {
+    return {
+      count: reactions.length,
+      reactedByViewer: viewerUserId
+        ? reactions.some((reaction) => reaction.userId === viewerUserId)
+        : false,
+    };
+  }
+
+  private toUserDto(record: UserRecord, viewerUserId?: string): UserDto {
     return {
       ...record,
-      alumniProfile: record.alumniProfile ? this.toAlumniProfileDto(record.alumniProfile) : null,
+      alumniProfile: record.alumniProfile
+        ? this.toAlumniProfileDto(record.alumniProfile, { viewerUserId })
+        : null,
     };
   }
 
   private toAlumniProfileDto(
     record: AlumniProfileRecord,
-    options?: { publicCompaniesOnly?: boolean },
+    options?: { publicCompaniesOnly?: boolean; viewerUserId?: string },
   ): AlumniProfileDto {
     const companies = options?.publicCompaniesOnly
       ? record.companies.filter((item) => item.isPublic)
@@ -212,10 +271,14 @@ export class AlumniRepository implements AlumniRepositoryPort {
         id: item.id,
         companyName: item.companyName,
         isPublic: item.isPublic,
+        motivation: item.motivation,
         selectionExperience: item.selectionExperience
           ? {
               id: item.selectionExperience.id,
               entryTrigger: item.selectionExperience.entryTrigger,
+              motivation: item.selectionExperience.motivation,
+              activityPeriod: item.selectionExperience.activityPeriod as JobHuntingPeriod | null,
+              activityPeriodNote: item.selectionExperience.activityPeriodNote,
               overallTip: item.selectionExperience.overallTip,
               steps: item.selectionExperience.steps.map((step) => ({
                 id: step.id,
@@ -231,6 +294,10 @@ export class AlumniRepository implements AlumniRepositoryPort {
             }
           : null,
       })),
+      helpfulReaction: this.toHelpfulReactionSummary(
+        record.helpfulReactions,
+        options?.viewerUserId,
+      ),
       remarks: record.remarks,
       contactEmail: record.contactEmail,
       xUrl: record.xUrl,
@@ -240,6 +307,8 @@ export class AlumniRepository implements AlumniRepositoryPort {
       portfolioUrl: (record as { portfolioUrl?: string | null }).portfolioUrl ?? null,
       gakuchika: (record as { gakuchika?: string | null }).gakuchika ?? null,
       usefulCoursework: (record as { usefulCoursework?: string | null }).usefulCoursework ?? null,
+      activityPeriod: record.activityPeriod as JobHuntingPeriod | null,
+      activityPeriodNote: record.activityPeriodNote,
       isPublic: record.isPublic,
       acceptContact: record.acceptContact,
       createdAt: record.createdAt,
@@ -265,12 +334,17 @@ export class AlumniRepository implements AlumniRepositoryPort {
         id: item.id,
         companyName: item.companyName,
         isPublic: item.isPublic,
+        motivation: item.motivation,
         selectionExperience: item.selectionExperience
           ? {
               id: item.selectionExperience.id,
+              hasSelectionFlow: Boolean(
+                item.selectionExperience.entryTrigger || item.selectionExperience.steps.length > 0,
+              ),
             }
           : null,
       })),
+      helpfulReaction: this.toHelpfulReactionSummary(record.helpfulReactions),
       remarks: record.remarks,
       xUrl: record.xUrl,
       instagramUrl: record.instagramUrl,
@@ -409,7 +483,7 @@ export class AlumniRepository implements AlumniRepositoryPort {
     return [...prefixRecords, ...containsRecords].map((record) => record.companyName);
   }
 
-  async findPublicById(id: string): Promise<AlumniProfileDto | null> {
+  async findPublicById(id: string, viewerUserId?: string): Promise<AlumniProfileDto | null> {
     const record = await this.prisma.alumniProfile.findFirst({
       where: {
         id,
@@ -423,7 +497,9 @@ export class AlumniRepository implements AlumniRepositoryPort {
       select: alumniProfileSelect,
     });
 
-    return record ? this.toAlumniProfileDto(record, { publicCompaniesOnly: true }) : null;
+    return record
+      ? this.toAlumniProfileDto(record, { publicCompaniesOnly: true, viewerUserId })
+      : null;
   }
 
   async findUserById(userId: string): Promise<UserDto | null> {
@@ -512,6 +588,8 @@ export class AlumniRepository implements AlumniRepositoryPort {
           portfolioUrl: input.portfolioUrl,
           gakuchika: input.gakuchika,
           usefulCoursework: input.usefulCoursework,
+          activityPeriod: this.toPrismaJobHuntingPeriod(input.activityPeriod),
+          activityPeriodNote: input.activityPeriodNote,
         },
         update: {
           nickname: input.nickname,
@@ -527,6 +605,8 @@ export class AlumniRepository implements AlumniRepositoryPort {
           portfolioUrl: input.portfolioUrl,
           gakuchika: input.gakuchika,
           usefulCoursework: input.usefulCoursework,
+          activityPeriod: this.toPrismaJobHuntingPeriod(input.activityPeriod),
+          activityPeriodNote: input.activityPeriodNote,
         },
         select: {
           id: true,
@@ -557,10 +637,12 @@ export class AlumniRepository implements AlumniRepositoryPort {
                 companyName: company.companyName,
                 companyNameSearch: normalizeCompanyNameForSearch(company.companyName),
                 isPublic: company.isPublic,
+                motivation: company.motivation,
               },
               update: {
                 companyNameSearch: normalizeCompanyNameForSearch(company.companyName),
                 isPublic: company.isPublic,
+                motivation: company.motivation,
               },
               select: { id: true },
             });
@@ -571,10 +653,20 @@ export class AlumniRepository implements AlumniRepositoryPort {
                 create: {
                   alumniCompanyId: record.id,
                   entryTrigger: company.selectionExperience.entryTrigger,
+                  motivation: company.selectionExperience.motivation,
+                  activityPeriod: this.toPrismaJobHuntingPeriod(
+                    company.selectionExperience.activityPeriod,
+                  ),
+                  activityPeriodNote: company.selectionExperience.activityPeriodNote,
                   overallTip: company.selectionExperience.overallTip,
                 },
                 update: {
                   entryTrigger: company.selectionExperience.entryTrigger,
+                  motivation: company.selectionExperience.motivation,
+                  activityPeriod: this.toPrismaJobHuntingPeriod(
+                    company.selectionExperience.activityPeriod,
+                  ),
+                  activityPeriodNote: company.selectionExperience.activityPeriodNote,
                   overallTip: company.selectionExperience.overallTip,
                 },
                 select: { id: true },
@@ -632,6 +724,54 @@ export class AlumniRepository implements AlumniRepositoryPort {
     }
 
     return this.toAlumniProfileDto(record);
+  }
+
+  async toggleHelpfulReaction(
+    alumniProfileId: string,
+    userId: string,
+  ): Promise<AlumniProfileDto | null> {
+    const profile = await this.prisma.alumniProfile.findFirst({
+      where: {
+        id: alumniProfileId,
+        isPublic: true,
+        companies: {
+          some: {
+            isPublic: true,
+          },
+        },
+      },
+      select: { id: true },
+    });
+
+    if (!profile) {
+      return null;
+    }
+
+    await this.prisma.$transaction(async (transaction) => {
+      const existing = await transaction.helpfulReaction.findFirst({
+        where: {
+          alumniProfileId: profile.id,
+          userId,
+        },
+        select: { id: true },
+      });
+
+      if (existing) {
+        await transaction.helpfulReaction.delete({
+          where: { id: existing.id },
+        });
+        return;
+      }
+
+      await transaction.helpfulReaction.create({
+        data: {
+          alumniProfileId: profile.id,
+          userId,
+        },
+      });
+    });
+
+    return this.findPublicById(profile.id, userId);
   }
 
   async updateAvatarUrl(userId: string, avatarUrl: string): Promise<AlumniProfileDto | null> {

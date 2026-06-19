@@ -1,4 +1,5 @@
 import type {
+  JobHuntingPeriod,
   SelectionFormat,
   SelectionStepKind,
 } from "../../domain/entities/alumni-profile.entity";
@@ -35,6 +36,9 @@ export type SelectionStepPersistenceInput = {
 
 export type SelectionExperiencePersistenceInput = {
   entryTrigger?: string;
+  motivation?: string;
+  activityPeriod?: JobHuntingPeriod;
+  activityPeriodNote?: string;
   overallTip?: string;
   steps?: SelectionStepPersistenceInput[];
 };
@@ -42,6 +46,7 @@ export type SelectionExperiencePersistenceInput = {
 export type CompanyExperiencePersistenceInput = {
   companyName: string;
   isPublic: boolean;
+  motivation?: string;
   selectionExperience?: SelectionExperiencePersistenceInput | null;
 };
 
@@ -61,6 +66,8 @@ export type UpdateAlumniProfilePersistenceInput = {
   portfolioUrl?: string;
   gakuchika?: string;
   usefulCoursework?: string;
+  activityPeriod?: JobHuntingPeriod;
+  activityPeriodNote?: string;
 };
 
 export type FindPublicAlumniListParams = {
@@ -75,7 +82,7 @@ export interface AlumniRepositoryPort {
   findPublicList(params: FindPublicAlumniListParams): Promise<AlumniConnectionDto>;
   findPublicListItems(params: FindPublicAlumniListParams): Promise<AlumniListConnectionDto>;
   findPublicCompanyNameSuggestions(query: string, limit: number): Promise<string[]>;
-  findPublicById(id: string): Promise<AlumniProfileDto | null>;
+  findPublicById(id: string, viewerUserId?: string): Promise<AlumniProfileDto | null>;
   findUserById(userId: string): Promise<UserDto | null>;
   findUserByEmail(email: string): Promise<UserDto | null>;
   findUserByLinkedGmail(gmail: string): Promise<UserDto | null>;
@@ -88,5 +95,6 @@ export interface AlumniRepositoryPort {
   ): Promise<AlumniProfileDto>;
   updateAvatarUrl(userId: string, avatarUrl: string): Promise<AlumniProfileDto | null>;
   updateLinkedGmail(userId: string, gmail: string | null): Promise<UserDto>;
+  toggleHelpfulReaction(alumniProfileId: string, userId: string): Promise<AlumniProfileDto | null>;
   deleteUserById(userId: string): Promise<boolean>;
 }

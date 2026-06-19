@@ -1,4 +1,5 @@
 import type {
+  JobHuntingPeriod,
   SelectionFormat,
   SelectionStepKind,
 } from "../../domain/entities/alumni-profile.entity";
@@ -32,6 +33,8 @@ export type UpdateAlumniProfileInput = {
   portfolioUrl?: string;
   gakuchika?: string;
   usefulCoursework?: string;
+  activityPeriod?: JobHuntingPeriod;
+  activityPeriodNote?: string;
 };
 
 export type SelectionStepInput = {
@@ -46,6 +49,9 @@ export type SelectionStepInput = {
 
 export type SelectionExperienceInput = {
   entryTrigger?: string;
+  motivation?: string;
+  activityPeriod?: JobHuntingPeriod;
+  activityPeriodNote?: string;
   overallTip?: string;
   steps?: SelectionStepInput[];
 };
@@ -53,6 +59,7 @@ export type SelectionExperienceInput = {
 export type CompanyExperienceInput = {
   companyName: string;
   isPublic?: boolean;
+  motivation?: string;
   selectionExperience?: SelectionExperienceInput | null;
 };
 

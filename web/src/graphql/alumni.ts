@@ -45,9 +45,15 @@ const alumniListQuery = `
           id
           companyName
           isPublic
+          motivation
           selectionExperience {
             id
+            hasSelectionFlow
           }
+        }
+        helpfulReaction {
+          count
+          reactedByViewer
         }
         remarks
         xUrl
@@ -152,13 +158,19 @@ const alumniDetailQuery = `
       graduationYear
       department
       companyNames
-      companyExperiences {
-        id
-        companyName
-        isPublic
-        selectionExperience {
+      activityPeriod
+      activityPeriodNote
+        companyExperiences {
           id
-          entryTrigger
+          companyName
+          isPublic
+          motivation
+          selectionExperience {
+            id
+            entryTrigger
+          motivation
+          activityPeriod
+          activityPeriodNote
           overallTip
             steps {
               id
@@ -172,6 +184,10 @@ const alumniDetailQuery = `
             sortOrder
           }
         }
+      }
+      helpfulReaction {
+        count
+        reactedByViewer
       }
       remarks
       contactEmail

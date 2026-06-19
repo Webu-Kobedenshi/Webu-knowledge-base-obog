@@ -9,7 +9,7 @@ describe("AlumniProfileDraft", () => {
         contactEmail: "  user@example.com ",
         xUrl: "  https://x.com/example  ",
         instagramUrl: " https://www.instagram.com/example/ ",
-        isPublic: true,
+        isPublic: false,
         acceptContact: true,
         skills: [" React ", "Node", "React", "TypeScript"],
         portfolioUrl: "  https://example.com  ",
@@ -26,8 +26,8 @@ describe("AlumniProfileDraft", () => {
       contactEmail: "user@example.com",
       xUrl: "https://x.com/example",
       instagramUrl: "https://www.instagram.com/example/",
-      isPublic: true,
-      acceptContact: true,
+      isPublic: false,
+      acceptContact: false,
       skills: ["React", "Node", "TypeScript"],
       portfolioUrl: "https://example.com",
       gakuchika: "project",
@@ -43,6 +43,7 @@ describe("AlumniProfileDraft", () => {
         companyExperiences: [
           {
             companyName: " ACME ",
+            motivation: " 事業内容に惹かれた ",
             selectionExperience: {
               entryTrigger: " 学校求人 ",
               overallTip: " 落ち着いて話す ",
@@ -58,6 +59,8 @@ describe("AlumniProfileDraft", () => {
             },
           },
         ],
+        activityPeriod: "SECOND_YEAR_FIRST_HALF",
+        activityPeriodNote: " 4月から説明会に参加 ",
         isPublic: true,
         acceptContact: false,
       },
@@ -69,6 +72,7 @@ describe("AlumniProfileDraft", () => {
       companyExperiences: [
         {
           companyName: "ACME",
+          motivation: "事業内容に惹かれた",
           selectionExperience: {
             entryTrigger: "学校求人",
             overallTip: "落ち着いて話す",
@@ -84,6 +88,8 @@ describe("AlumniProfileDraft", () => {
           },
         },
       ],
+      activityPeriod: "SECOND_YEAR_FIRST_HALF",
+      activityPeriodNote: "4月から説明会に参加",
     });
   });
 
@@ -95,6 +101,7 @@ describe("AlumniProfileDraft", () => {
         companyExperiences: [
           {
             companyName: "ACME",
+            motivation: "事業内容に惹かれた",
             selectionExperience: {
               steps: [
                 {
@@ -110,6 +117,7 @@ describe("AlumniProfileDraft", () => {
             },
           },
         ],
+        activityPeriod: "SECOND_YEAR_FIRST_HALF",
         isPublic: true,
         acceptContact: false,
       },
@@ -138,12 +146,43 @@ describe("AlumniProfileDraft", () => {
     ).toThrow("nickname is required when isPublic is true");
   });
 
+  it("throws when isPublic=true without activity period", () => {
+    expect(() =>
+      AlumniProfileDraft.create(
+        {
+          nickname: "taro",
+          companyNames: [],
+          companyExperiences: [{ companyName: "ACME", motivation: "事業内容に惹かれた" }],
+          isPublic: true,
+        },
+        "fallback@example.com",
+      ),
+    ).toThrow("activityPeriod is required when isPublic is true");
+  });
+
+  it("throws when isPublic=true without at least one public company motivation", () => {
+    expect(() =>
+      AlumniProfileDraft.create(
+        {
+          nickname: "taro",
+          companyNames: [],
+          companyExperiences: [{ companyName: "ACME", motivation: "   " }],
+          activityPeriod: "SECOND_YEAR_FIRST_HALF",
+          isPublic: true,
+        },
+        "fallback@example.com",
+      ),
+    ).toThrow("at least one public company motivation is required when isPublic is true");
+  });
+
   it("throws when social contact URLs point outside the selected platform", () => {
     expect(() =>
       AlumniProfileDraft.create(
         {
           nickname: "taro",
-          companyNames: ["ACME"],
+          companyNames: [],
+          companyExperiences: [{ companyName: "ACME", motivation: "事業内容に惹かれた" }],
+          activityPeriod: "SECOND_YEAR_FIRST_HALF",
           xUrl: "https://example.com/messages",
           isPublic: true,
         },
@@ -157,7 +196,9 @@ describe("AlumniProfileDraft", () => {
       AlumniProfileDraft.create(
         {
           nickname: "taro",
-          companyNames: ["ACME"],
+          companyNames: [],
+          companyExperiences: [{ companyName: "ACME", motivation: "事業内容に惹かれた" }],
+          activityPeriod: "SECOND_YEAR_FIRST_HALF",
           isPublic: true,
           acceptContact: true,
         },

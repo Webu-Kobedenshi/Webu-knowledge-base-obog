@@ -4,6 +4,8 @@ export type {
   AlumniListItemDto,
   AlumniProfileDto,
   CompanyExperienceDto,
+  HelpfulReactionSummaryDto,
+  JobHuntingPeriod,
   SelectionExperienceDto,
   SelectionFormat,
   SelectionStepDto,

@@ -19,13 +19,19 @@ query GetAlumniList(
       graduationYear
       department
       companyNames
+      activityPeriod
+      activityPeriodNote
       companyExperiences {
         id
         companyName
         isPublic
+        motivation
         selectionExperience {
           id
           entryTrigger
+          motivation
+          activityPeriod
+          activityPeriodNote
           overallTip
           steps {
             id
@@ -39,6 +45,10 @@ query GetAlumniList(
             sortOrder
           }
         }
+      }
+      helpfulReaction {
+        count
+        reactedByViewer
       }
       remarks
       contactEmail

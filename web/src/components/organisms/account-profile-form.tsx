@@ -25,7 +25,7 @@ import { Textarea } from "@/components/atoms/textarea";
 import { showErrorToast, showSuccessToast } from "@/components/atoms/toast";
 import { BasicProfileSection } from "@/components/organisms/account-profile/basic-profile-section";
 import { LinkedGmailSection } from "@/components/organisms/account-profile/linked-gmail-section";
-import type { AlumniProfile, Department, UserStatus } from "@/graphql/types";
+import type { AlumniProfile, Department, JobHuntingPeriod, UserStatus } from "@/graphql/types";
 import {
   type WebTestTimeAssessment,
   type WebTestType,
@@ -79,8 +79,10 @@ type AccountProfileFormState = {
   nickname: string;
   companyNames: string[];
   companyPublicFlags: boolean[];
+  companyMotivations: string[];
   selectionExperiences: SelectionExperienceFormState[];
-  remarks: string;
+  activityPeriod: JobHuntingPeriod | "";
+  activityPeriodNote: string;
   contactEmail: string;
   xUrl: string;
   instagramUrl: string;
@@ -121,7 +123,6 @@ type SelectionStepFormState = {
 type SelectionExperienceFormState = {
   enabled: boolean;
   entryTrigger: string;
-  overallTip: string;
   steps: SelectionStepFormState[];
 };
 
@@ -134,8 +135,10 @@ const defaultState: AccountProfileFormState = {
   nickname: "",
   companyNames: [],
   companyPublicFlags: [],
+  companyMotivations: [],
   selectionExperiences: [],
-  remarks: "",
+  activityPeriod: "",
+  activityPeriodNote: "",
   contactEmail: "",
   xUrl: "",
   instagramUrl: "",
@@ -185,6 +188,23 @@ const entryTriggerOptions = [
   "SNS",
   "その他",
 ];
+
+const jobHuntingPeriodOptions: Array<{ value: JobHuntingPeriod; label: string }> = [
+  { value: "FIRST_YEAR_FIRST_HALF", label: "1年前期" },
+  { value: "FIRST_YEAR_SECOND_HALF", label: "1年後期" },
+  { value: "SECOND_YEAR_FIRST_HALF", label: "2年前期" },
+  { value: "SUMMER_BREAK", label: "夏休み" },
+  { value: "PRE_GRADUATION_AUTUMN", label: "卒業前年の秋" },
+  { value: "OTHER", label: "その他" },
+];
+
+const qualityItemLabels = {
+  companyName: "会社名",
+  motivation: "選んだ理由",
+  activityPeriod: "始めた時期",
+  questions: "聞かれたこと",
+  preparation: "準備したこと",
+} as const;
 
 const defaultSelectionStepOrder: SelectionStepKind[] = [
   "DOCUMENT_SCREENING",
@@ -268,7 +288,6 @@ function createBlankSelectionExperience(): SelectionExperienceFormState {
   return {
     enabled: false,
     entryTrigger: "",
-    overallTip: "",
     steps: [createBlankSelectionStep()],
   };
 }
@@ -297,11 +316,36 @@ function hasSelectionStepContent(step: SelectionStepFormState) {
 }
 
 function hasSelectionExperienceContent(experience: SelectionExperienceFormState) {
-  return Boolean(
-    experience.entryTrigger.trim() ||
-      experience.overallTip.trim() ||
-      experience.steps.some(hasSelectionStepContent),
-  );
+  return Boolean(experience.entryTrigger.trim() || experience.steps.some(hasSelectionStepContent));
+}
+
+function getCompanyQualityStatus(
+  companyName: string,
+  companyMotivation: string,
+  experience: SelectionExperienceFormState,
+  activityPeriod: JobHuntingPeriod | "",
+) {
+  const hasQuestions = experience.steps.some((step) => {
+    if (step.stepKind === "WEB_TEST") {
+      return Boolean(step.webTestType || step.webTestTimeAssessment);
+    }
+    return Boolean(step.questions.trim());
+  });
+  const hasPreparation = experience.steps.some((step) => step.preparation.trim());
+  const items = [
+    { key: "companyName", done: Boolean(companyName.trim()) },
+    { key: "motivation", done: Boolean(companyMotivation.trim()) },
+    { key: "activityPeriod", done: Boolean(activityPeriod) },
+    { key: "questions", done: hasQuestions },
+    { key: "preparation", done: hasPreparation },
+  ] as const;
+  const missing = items.filter((item) => !item.done).map((item) => qualityItemLabels[item.key]);
+
+  return {
+    completed: items.length - missing.length,
+    total: items.length,
+    missing,
+  };
 }
 
 function getStepDeleteKey(companyIndex: number, stepIndex: number) {
@@ -341,12 +385,25 @@ export function AccountProfileForm({
         id: companyName,
         companyName,
         isPublic: true,
+        motivation: null,
         selectionExperience: null,
       }));
   const initialCompanyNames = initialCompanyExperiences.map((item) => item.companyName);
   const initialCompanyPublicFlags = initialCompanyExperiences.map(
     (item) => item.isPublic !== false,
   );
+  const initialCompanyMotivations = initialCompanyExperiences.map(
+    (item) => item.motivation ?? item.selectionExperience?.motivation ?? "",
+  );
+  const initialActivitySource = initialCompanyExperiences
+    .map((item) => item.selectionExperience)
+    .find((experience) => experience?.activityPeriod || experience?.activityPeriodNote);
+  const initialActivityPeriod =
+    initialProfile?.alumniProfile?.activityPeriod ?? initialActivitySource?.activityPeriod ?? "";
+  const initialActivityPeriodNote =
+    initialProfile?.alumniProfile?.activityPeriodNote ??
+    initialActivitySource?.activityPeriodNote ??
+    "";
   const initialSelectionExperiences = initialCompanyExperiences.map((item) => {
     const experience = item.selectionExperience;
     if (!experience) {
@@ -354,10 +411,9 @@ export function AccountProfileForm({
     }
     const editableSteps = experience.steps.filter((step) => step.stepKind !== "OFFER");
 
-    return {
+    const formState = {
       enabled: true,
       entryTrigger: experience.entryTrigger ?? "",
-      overallTip: experience.overallTip ?? "",
       steps:
         editableSteps.length > 0
           ? editableSteps.map((step) => ({
@@ -382,6 +438,7 @@ export function AccountProfileForm({
             }))
           : [createBlankSelectionStep()],
     } satisfies SelectionExperienceFormState;
+    return hasSelectionExperienceContent(formState) ? formState : createBlankSelectionExperience();
   });
   const initialAvatarUrl = initialProfile?.alumniProfile?.avatarUrl ?? null;
   const initialIsPublic =
@@ -403,8 +460,10 @@ export function AccountProfileForm({
     nickname: initialProfile?.alumniProfile?.nickname ?? initialName ?? "",
     companyNames: initialCompanyNames,
     companyPublicFlags: initialCompanyPublicFlags,
+    companyMotivations: initialCompanyMotivations,
     selectionExperiences: initialSelectionExperiences,
-    remarks: initialProfile?.alumniProfile?.remarks ?? "",
+    activityPeriod: initialActivityPeriod,
+    activityPeriodNote: initialActivityPeriodNote,
     contactEmail: initialProfile?.alumniProfile?.contactEmail ?? initialEmail ?? "",
     xUrl: initialProfile?.alumniProfile?.xUrl ?? "",
     instagramUrl: initialProfile?.alumniProfile?.instagramUrl ?? "",
@@ -481,12 +540,21 @@ export function AccountProfileForm({
     });
   };
 
+  const setCompanyMotivationAt = (index: number, value: string) => {
+    setState((prev) => {
+      const next = [...prev.companyMotivations];
+      next[index] = value;
+      return { ...prev, companyMotivations: next };
+    });
+  };
+
   const addCompanyNameField = () => {
     setCompanyRowIds((prev) => [...prev, createRowId()]);
     setState((prev) => ({
       ...prev,
       companyNames: [...prev.companyNames, ""],
       companyPublicFlags: [...prev.companyPublicFlags, true],
+      companyMotivations: [...prev.companyMotivations, ""],
       selectionExperiences: [...prev.selectionExperiences, createBlankSelectionExperience()],
     }));
   };
@@ -498,6 +566,7 @@ export function AccountProfileForm({
       ...prev,
       companyNames: prev.companyNames.filter((_, itemIndex) => itemIndex !== index),
       companyPublicFlags: prev.companyPublicFlags.filter((_, itemIndex) => itemIndex !== index),
+      companyMotivations: prev.companyMotivations.filter((_, itemIndex) => itemIndex !== index),
       selectionExperiences: prev.selectionExperiences.filter((_, itemIndex) => itemIndex !== index),
       isPublic:
         prev.companyNames.filter((_, itemIndex) => itemIndex !== index).length > 0
@@ -603,6 +672,7 @@ export function AccountProfileForm({
 
     const seenCompanyNames = new Set<string>();
     let publicCompanyCount = 0;
+    let publicCompanyMotivationCount = 0;
     const normalizedCompanyExperiences = state.companyNames.flatMap((companyName, index) => {
       const normalizedCompanyName = companyName.trim();
       if (!normalizedCompanyName || seenCompanyNames.has(normalizedCompanyName)) {
@@ -610,8 +680,12 @@ export function AccountProfileForm({
       }
       seenCompanyNames.add(normalizedCompanyName);
       const isCompanyPublic = state.companyPublicFlags[index] !== false;
+      const motivation = state.companyMotivations[index]?.trim() ?? "";
       if (isCompanyPublic) {
         publicCompanyCount += 1;
+        if (motivation) {
+          publicCompanyMotivationCount += 1;
+        }
       }
 
       const experience = state.selectionExperiences[index] ?? createBlankSelectionExperience();
@@ -619,7 +693,6 @@ export function AccountProfileForm({
         experience.enabled && hasSelectionExperienceContent(experience)
           ? {
               entryTrigger: experience.entryTrigger.trim() || undefined,
-              overallTip: experience.overallTip.trim() || undefined,
               steps: experience.steps.filter(hasSelectionStepContent).map((step) => {
                 const isDocumentScreeningStep = step.stepKind === "DOCUMENT_SCREENING";
                 const isWebTestStep = step.stepKind === "WEB_TEST";
@@ -659,6 +732,7 @@ export function AccountProfileForm({
         {
           companyName: normalizedCompanyName,
           isPublic: isCompanyPublic,
+          motivation: motivation || undefined,
           selectionExperience,
         },
       ];
@@ -675,6 +749,18 @@ export function AccountProfileForm({
 
     if (showPublicProfileFields && isPublicToSave && !state.nickname.trim()) {
       const msg = "公開する場合は表示名を1文字以上入力してください。";
+      showErrorToast(msg);
+      return false;
+    }
+
+    if (showPublicProfileFields && isPublicToSave && !state.activityPeriod) {
+      const msg = "公開する場合は就活を始めた時期を選択してください。";
+      showErrorToast(msg);
+      return false;
+    }
+
+    if (showPublicProfileFields && isPublicToSave && publicCompanyMotivationCount === 0) {
+      const msg = "公開する場合は公開する内定先のうち1社以上に選んだ理由を入力してください。";
       showErrorToast(msg);
       return false;
     }
@@ -708,7 +794,6 @@ export function AccountProfileForm({
           nickname: state.nickname,
           companyNames: normalizedCompanyNames,
           companyExperiences: normalizedCompanyExperiences,
-          remarks: state.remarks,
           contactEmail: normalizedContactEmail,
           xUrl: state.xUrl.trim(),
           instagramUrl: state.instagramUrl.trim(),
@@ -718,6 +803,8 @@ export function AccountProfileForm({
           portfolioUrl: state.portfolioUrl.trim(),
           gakuchika: state.gakuchika.trim(),
           usefulCoursework: state.usefulCoursework.trim(),
+          activityPeriod: state.activityPeriod || undefined,
+          activityPeriodNote: state.activityPeriodNote.trim(),
           basicProfileRequiredMode,
         }),
       });
@@ -1004,7 +1091,7 @@ export function AccountProfileForm({
                     <p className="text-[12px] font-medium leading-relaxed text-stone-600 dark:text-stone-300">
                       公開設定をオンにすると、お世話になった母校の後輩たちに
                       <strong className="text-stone-900 dark:text-white">内定先</strong>や
-                      <strong className="text-stone-900 dark:text-white">メッセージ</strong>
+                      <strong className="text-stone-900 dark:text-white">選考体験</strong>
                       を共有できます。
                     </p>
                   </div>
@@ -1015,163 +1102,78 @@ export function AccountProfileForm({
               <div
                 className={`space-y-6 transition-all duration-300 ${!state.isPublic ? "opacity-30 blur-[1px] select-none pointer-events-none" : ""}`}
               >
-                {/* ─── Avatar Upload ─── */}
-                <div className="space-y-3">
-                  <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
-                    プロフィール画像
+                <label htmlFor="profile-nickname" className="block space-y-1.5">
+                  <span className="flex items-center justify-between text-[11px] font-semibold text-stone-500 dark:text-stone-400">
+                    <span>
+                      表示名 <span className="text-rose-500">*</span>
+                    </span>
                   </span>
-                  <div className="grid items-start gap-3 sm:grid-cols-[96px_minmax(0,1fr)]">
-                    {avatarUrl ? (
-                      <img
-                        src={avatarUrl}
-                        alt="プロフィール画像"
-                        className="h-24 w-24 rounded-2xl border border-stone-200/80 object-cover dark:border-stone-700/60"
-                      />
-                    ) : (
-                      <div className="flex h-24 w-24 items-center justify-center rounded-2xl border border-dashed border-stone-300 text-[10px] font-medium text-stone-400 dark:border-stone-600 dark:text-stone-500">
-                        No Image
-                      </div>
-                    )}
-
-                    <div className="min-w-0 flex-1 space-y-2">
-                      <input
-                        ref={avatarFileInputRef}
-                        id="profile-avatar-file"
-                        type="file"
-                        accept="image/*"
-                        onChange={(event) => setSelectedAvatarFile(event.target.files?.[0] ?? null)}
-                        disabled={isUploadingAvatar || !state.isPublic}
-                        className="sr-only"
-                      />
-
-                      <div className="grid grid-cols-2 gap-2">
-                        <label
-                          htmlFor="profile-avatar-file"
-                          className="inline-flex h-9 w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-stone-300 px-3 text-xs font-semibold text-stone-700 transition-colors hover:bg-stone-50 dark:border-stone-700 dark:text-stone-200 dark:hover:bg-stone-800"
-                        >
-                          <ImagePlusIcon className="size-3.5" aria-hidden="true" />
-                          写真を選択
-                        </label>
-
-                        <Button
-                          type="button"
-                          onClick={handleAvatarUpload}
-                          disabled={!canUploadAvatar}
-                          aria-disabled={!canUploadAvatar}
-                          title={avatarUploadHint}
-                          variant="secondary"
-                          className={
-                            canUploadAvatar
-                              ? "h-9 w-full gap-1.5 px-3 text-xs font-bold"
-                              : "h-9 w-full gap-1.5 border border-dashed border-stone-300 bg-stone-100 px-3 text-xs font-bold text-stone-400 shadow-none hover:bg-stone-100 disabled:opacity-100 dark:border-stone-700 dark:bg-stone-800/60 dark:text-stone-500 dark:hover:bg-stone-800/60"
-                          }
-                        >
-                          {isUploadingAvatar ? (
-                            <>
-                              <LoaderCircleIcon
-                                className="size-3.5 animate-spin"
-                                aria-hidden="true"
-                              />
-                              アップロード中…
-                            </>
-                          ) : canUploadAvatar ? (
-                            <>
-                              <UploadIcon className="size-3.5" aria-hidden="true" />
-                              アップロード
-                            </>
-                          ) : (
-                            <>
-                              <BanIcon className="size-3.5" aria-hidden="true" />
-                              未選択
-                            </>
-                          )}
-                        </Button>
-                      </div>
-
-                      {selectedAvatarFile ? (
-                        <p className="truncate rounded-lg border border-stone-200/80 bg-stone-50 px-2 py-1 text-[11px] text-stone-500 dark:border-stone-700/60 dark:bg-stone-800/60 dark:text-stone-400">
-                          {selectedAvatarFile.name}
-                        </p>
-                      ) : (
-                        <p className="text-[11px] font-medium text-stone-400 dark:text-stone-500">
-                          画像を選択するとアップロードできます
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                  <Input
+                    id="profile-nickname"
+                    value={state.nickname}
+                    onChange={(event) => setField("nickname", event.target.value)}
+                    placeholder="例: たろう"
+                    disabled={!canEditAlumniProfile}
+                    className={
+                      !state.nickname.trim() && state.isPublic
+                        ? "border-rose-300 focus-visible:ring-rose-400"
+                        : ""
+                    }
+                  />
+                </label>
 
                 <hr className="border-stone-100 dark:border-stone-800/60" />
 
-                {/* Nickname & Contact */}
-                <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-                  <label htmlFor="profile-nickname" className="space-y-1.5">
-                    <span className="flex items-center justify-between text-[11px] font-semibold text-stone-500 dark:text-stone-400">
-                      <span>
-                        表示名 <span className="text-rose-500">*</span>
-                      </span>
+                <div className="space-y-3 rounded-2xl border border-amber-100 bg-amber-50/60 p-3 dark:border-amber-900/40 dark:bg-amber-950/20">
+                  <div>
+                    <span className="text-[12px] font-bold text-stone-900 dark:text-stone-100">
+                      就活を始めた時期
                     </span>
-                    <Input
-                      id="profile-nickname"
-                      value={state.nickname}
-                      onChange={(event) => setField("nickname", event.target.value)}
-                      placeholder="例: たろう"
-                      disabled={!canEditAlumniProfile}
-                      className={
-                        !state.nickname.trim() && state.isPublic
-                          ? "border-rose-300 focus-visible:ring-rose-400"
-                          : ""
-                      }
-                    />
-                  </label>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-[11px] font-semibold text-stone-500 dark:text-stone-400">
-                      <span>SNSリンク</span>
-
-                      {/* Contact Toggle Inline */}
-                      <label className="flex cursor-pointer items-center gap-1.5">
-                        <span className="text-[10px]">受け付ける</span>
-                        <span className="relative inline-flex">
-                          <input
-                            type="checkbox"
-                            checked={state.acceptContact}
-                            onChange={(event) => setField("acceptContact", event.target.checked)}
-                            disabled={!canEditAlumniProfile}
-                            className="peer sr-only"
-                          />
-                          <span className="block h-3.5 w-6 rounded-full bg-stone-300 transition-colors peer-checked:bg-emerald-500 dark:bg-stone-600" />
-                          <span className="absolute left-[2px] top-[2px] h-2.5 w-2.5 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-[10px]" />
-                        </span>
-                      </label>
-                    </div>
-                    <Input
-                      id="profile-x-dm-url"
-                      value={state.xUrl}
-                      onChange={(event) => setField("xUrl", event.target.value)}
-                      placeholder="Xのリンク"
-                      type="url"
-                      aria-label="Xのリンク"
-                      disabled={!canEditAlumniProfile || !state.acceptContact}
-                      className={!state.acceptContact ? "opacity-50" : ""}
-                    />
-                    <Input
-                      id="profile-instagram-dm-url"
-                      value={state.instagramUrl}
-                      onChange={(event) => setField("instagramUrl", event.target.value)}
-                      placeholder="Instagramのリンク"
-                      type="url"
-                      aria-label="Instagramのリンク"
-                      disabled={!canEditAlumniProfile || !state.acceptContact}
-                      className={!state.acceptContact ? "opacity-50" : ""}
-                    />
-                    <p className="text-[10px] leading-relaxed text-stone-400 dark:text-stone-500">
-                      一覧・詳細の連絡ボタンから、設定したSNSリンクへ遷移します。
+                    <p className="mt-1 text-[10px] leading-relaxed text-stone-500 dark:text-stone-400">
+                      企業ごとではなく、あなたの就活全体としていつ動き始めたかを公開します。
                     </p>
                   </div>
+                  <div className="grid gap-3 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)]">
+                    <div className="space-y-1.5">
+                      <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
+                        時期
+                      </span>
+                      <Select
+                        value={state.activityPeriod || "UNSELECTED"}
+                        onValueChange={(value) =>
+                          setField(
+                            "activityPeriod",
+                            value === "UNSELECTED" ? "" : (value as JobHuntingPeriod),
+                          )
+                        }
+                        disabled={!canEditAlumniProfile}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="時期を選択" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="UNSELECTED">時期を選択</SelectItem>
+                          {jobHuntingPeriodOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
+                        その時期にやったこと
+                      </span>
+                      <Input
+                        value={state.activityPeriodNote}
+                        onChange={(event) => setField("activityPeriodNote", event.target.value)}
+                        placeholder="〇月ごろから説明会参加やポートフォリオ整理を始めました"
+                        disabled={!canEditAlumniProfile}
+                      />
+                    </div>
+                  </div>
                 </div>
-
-                <hr className="border-stone-100 dark:border-stone-800/60" />
 
                 {/* Companies */}
                 <div className="space-y-3">
@@ -1201,6 +1203,16 @@ export function AccountProfileForm({
                       const experience =
                         state.selectionExperiences[index] ?? createBlankSelectionExperience();
                       const isCompanyPublic = state.companyPublicFlags[index] !== false;
+                      const companyMotivation = state.companyMotivations[index] ?? "";
+                      const qualityStatus = getCompanyQualityStatus(
+                        companyName,
+                        companyMotivation,
+                        experience,
+                        state.activityPeriod,
+                      );
+                      const qualityPercent = Math.round(
+                        (qualityStatus.completed / qualityStatus.total) * 100,
+                      );
 
                       return (
                         <div
@@ -1259,10 +1271,37 @@ export function AccountProfileForm({
                             </span>
                           </label>
 
+                          <div className="mt-3 space-y-1.5 rounded-xl border border-violet-100 bg-violet-50/50 p-3 dark:border-violet-900/40 dark:bg-violet-950/20">
+                            <span className="text-[11px] font-semibold text-violet-700 dark:text-violet-300">
+                              なぜこの会社を選んだか
+                            </span>
+                            <Textarea
+                              value={companyMotivation}
+                              onChange={(event) =>
+                                setCompanyMotivationAt(index, event.target.value)
+                              }
+                              placeholder="この会社を選んだ理由は、〇〇に惹かれたからです"
+                              disabled={!canEditAlumniProfile}
+                              className={
+                                isCompanyPublic && state.isPublic && !companyMotivation.trim()
+                                  ? "border-rose-300 focus-visible:ring-rose-400"
+                                  : ""
+                              }
+                            />
+                            <p className="text-[10px] leading-relaxed text-stone-400 dark:text-stone-500">
+                              事業内容、働き方、成長できそうな点、先生や先輩から聞いた印象などを書くと後輩が比べやすくなります。
+                            </p>
+                          </div>
+
                           <label className="mt-3 flex cursor-pointer items-center justify-between gap-3 rounded-xl bg-stone-50 px-3 py-2 dark:bg-stone-900/60">
                             <span>
                               <span className="block text-[12px] font-bold text-stone-800 dark:text-stone-100">
-                                選考フロー ・ 体験を書く
+                                選考体験を詳しく書く
+                              </span>
+                              <span className="mt-0.5 block text-[10px] font-medium text-stone-400 dark:text-stone-500">
+                                {qualityStatus.missing.length > 0
+                                  ? `あと${qualityStatus.missing.length}項目で後輩にかなり役立つ投稿になります`
+                                  : "後輩が行動しやすい投稿になっています"}
                               </span>
                             </span>
                             <span className="relative inline-flex">
@@ -1285,9 +1324,31 @@ export function AccountProfileForm({
 
                           {experience.enabled ? (
                             <div className="mt-3 space-y-4 rounded-2xl border border-stone-200/80 bg-stone-50/70 p-3 shadow-inner shadow-white/60 dark:border-stone-800/80 dark:bg-stone-950/30 dark:shadow-black/20">
+                              <div className="rounded-2xl border border-emerald-100 bg-white p-3 dark:border-emerald-900/40 dark:bg-stone-950/60">
+                                <div className="flex items-center justify-between gap-3">
+                                  <span className="text-[11px] font-bold text-stone-700 dark:text-stone-200">
+                                    投稿の充実度
+                                  </span>
+                                  <span className="text-[11px] font-extrabold text-emerald-700 dark:text-emerald-300">
+                                    {qualityStatus.completed}/{qualityStatus.total}
+                                  </span>
+                                </div>
+                                <div className="mt-2 h-2 rounded-full bg-stone-100 dark:bg-stone-800">
+                                  <div
+                                    className="h-full rounded-full bg-emerald-500 transition-all"
+                                    style={{ width: `${qualityPercent}%` }}
+                                  />
+                                </div>
+                                {qualityStatus.missing.length > 0 ? (
+                                  <p className="mt-2 text-[10px] leading-relaxed text-stone-500 dark:text-stone-400">
+                                    足すとよい項目: {qualityStatus.missing.join("、")}
+                                  </p>
+                                ) : null}
+                              </div>
+
                               <div className="block space-y-1.5">
                                 <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
-                                  エントリーのきっかけ
+                                  1. 企業情報: エントリーのきっかけ
                                 </span>
                                 <Select
                                   value={experience.entryTrigger || "UNSELECTED"}
@@ -1319,7 +1380,7 @@ export function AccountProfileForm({
                                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                   <div className="min-w-0">
                                     <span className="text-[12px] font-bold text-stone-900 dark:text-stone-100">
-                                      選考フロー
+                                      2. 選考内容
                                     </span>
                                   </div>
                                   <Button
@@ -1636,10 +1697,10 @@ export function AccountProfileForm({
                                                 }
                                                 placeholder={
                                                   isCodingTestStep
-                                                    ? "出題内容"
+                                                    ? "出題内容。例: 配列操作と簡単なアルゴリズム問題"
                                                     : isDocumentScreeningStep
-                                                      ? "確認される内容"
-                                                      : "聞かれた質問"
+                                                      ? "確認される内容。例: 志望理由、作品、成績、出欠"
+                                                      : "聞かれた質問。例: なぜこの会社を選んだのか、制作物で工夫した点"
                                                 }
                                                 disabled={!canEditAlumniProfile}
                                               />
@@ -1658,8 +1719,8 @@ export function AccountProfileForm({
                                                   }
                                                   placeholder={
                                                     isCodingTestStep
-                                                      ? "使用言語・実行環境"
-                                                      : "面接の雰囲気"
+                                                      ? "使用言語・実行環境。例: JavaScript / ブラウザ上で実装"
+                                                      : "面接の雰囲気。例: 穏やかで、制作物について深掘りされた"
                                                   }
                                                   disabled={!canEditAlumniProfile}
                                                 />
@@ -1677,10 +1738,10 @@ export function AccountProfileForm({
                                               }
                                               placeholder={
                                                 isWebTestStep
-                                                  ? "対策してよかったこと"
+                                                  ? "対策してよかったこと。例: SPIの非言語を1週間解いた"
                                                   : isCodingTestStep
-                                                    ? "解き方や対策で役立ったこと"
-                                                    : "準備してよかったこと"
+                                                    ? "解き方や対策で役立ったこと。例: 標準入力の練習"
+                                                    : "準備してよかったこと。例: 志望理由を自分の言葉で言えるようにした"
                                               }
                                               disabled={!canEditAlumniProfile}
                                             />
@@ -1725,18 +1786,6 @@ export function AccountProfileForm({
                                   </div>
                                 </div>
                               </div>
-
-                              <Textarea
-                                value={experience.overallTip}
-                                onChange={(event) =>
-                                  updateSelectionExperienceAt(index, (prev) => ({
-                                    ...prev,
-                                    overallTip: event.target.value,
-                                  }))
-                                }
-                                placeholder="この企業を受ける後輩に伝えたい全体Tips"
-                                disabled={!canEditAlumniProfile}
-                              />
                             </div>
                           ) : null}
                         </div>
@@ -1758,31 +1807,7 @@ export function AccountProfileForm({
 
                 <hr className="border-stone-100 dark:border-stone-800/60" />
 
-                {/* Remarks / Message */}
-                <div className="space-y-1.5">
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
-                      後輩へひとこと
-                    </span>
-                    <p
-                      className={`text-[10px] ${state.remarks.length >= 50 ? "text-rose-500" : "text-stone-400 dark:text-stone-500"}`}
-                    >
-                      {state.remarks.length}/50
-                    </p>
-                  </div>
-                  <Textarea
-                    value={state.remarks}
-                    onChange={(event) => setField("remarks", event.target.value)}
-                    maxLength={50}
-                    className="min-h-24"
-                    placeholder="就活のアドバイスでも学生生活やるべきことでも！"
-                    disabled={!canEditAlumniProfile}
-                  />
-                </div>
-
-                <hr className="border-stone-100 dark:border-stone-800/60" />
-
-                {/* ── 後輩へのアドバイス (Deep Dive) ── */}
+                {/* ── Optional deep dive ── */}
                 <div className="space-y-5">
                   <Button
                     type="button"
@@ -1795,10 +1820,10 @@ export function AccountProfileForm({
                     </span>
                     <div className="min-w-0 flex-1">
                       <h4 className="text-sm font-bold text-stone-900 dark:text-stone-100">
-                        後輩へのアドバイス
+                        任意の深掘り情報
                       </h4>
                       <p className="text-[10px] text-stone-500 dark:text-stone-400">
-                        任意 · 書くほど後輩の参考になります
+                        任意 · スキルや制作物まで見せたいときに追記できます
                       </p>
                     </div>
                     <ChevronDownIcon
@@ -1811,9 +1836,139 @@ export function AccountProfileForm({
                   {/* Collapsible content */}
                   <div
                     className={`space-y-5 overflow-hidden transition-all duration-300 ease-in-out ${
-                      deepDiveOpen ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
+                      deepDiveOpen ? "max-h-[3200px] opacity-100" : "max-h-0 opacity-0"
                     }`}
                   >
+                    <div className="space-y-3">
+                      <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
+                        プロフィール画像
+                      </span>
+                      <div className="grid items-start gap-3 sm:grid-cols-[96px_minmax(0,1fr)]">
+                        {avatarUrl ? (
+                          <img
+                            src={avatarUrl}
+                            alt="プロフィール画像"
+                            className="h-24 w-24 rounded-2xl border border-stone-200/80 object-cover dark:border-stone-700/60"
+                          />
+                        ) : (
+                          <div className="flex h-24 w-24 items-center justify-center rounded-2xl border border-dashed border-stone-300 text-[10px] font-medium text-stone-400 dark:border-stone-600 dark:text-stone-500">
+                            No Image
+                          </div>
+                        )}
+
+                        <div className="min-w-0 flex-1 space-y-2">
+                          <input
+                            ref={avatarFileInputRef}
+                            id="profile-avatar-file"
+                            type="file"
+                            accept="image/*"
+                            onChange={(event) =>
+                              setSelectedAvatarFile(event.target.files?.[0] ?? null)
+                            }
+                            disabled={isUploadingAvatar || !state.isPublic}
+                            className="sr-only"
+                          />
+
+                          <div className="grid grid-cols-2 gap-2">
+                            <label
+                              htmlFor="profile-avatar-file"
+                              className="inline-flex h-9 w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-stone-300 px-3 text-xs font-semibold text-stone-700 transition-colors hover:bg-stone-50 dark:border-stone-700 dark:text-stone-200 dark:hover:bg-stone-800"
+                            >
+                              <ImagePlusIcon className="size-3.5" aria-hidden="true" />
+                              写真を選択
+                            </label>
+
+                            <Button
+                              type="button"
+                              onClick={handleAvatarUpload}
+                              disabled={!canUploadAvatar}
+                              aria-disabled={!canUploadAvatar}
+                              title={avatarUploadHint}
+                              variant="secondary"
+                              className={
+                                canUploadAvatar
+                                  ? "h-9 w-full gap-1.5 px-3 text-xs font-bold"
+                                  : "h-9 w-full gap-1.5 border border-dashed border-stone-300 bg-stone-100 px-3 text-xs font-bold text-stone-400 shadow-none hover:bg-stone-100 disabled:opacity-100 dark:border-stone-700 dark:bg-stone-800/60 dark:text-stone-500 dark:hover:bg-stone-800/60"
+                              }
+                            >
+                              {isUploadingAvatar ? (
+                                <>
+                                  <LoaderCircleIcon
+                                    className="size-3.5 animate-spin"
+                                    aria-hidden="true"
+                                  />
+                                  アップロード中…
+                                </>
+                              ) : canUploadAvatar ? (
+                                <>
+                                  <UploadIcon className="size-3.5" aria-hidden="true" />
+                                  アップロード
+                                </>
+                              ) : (
+                                <>
+                                  <BanIcon className="size-3.5" aria-hidden="true" />
+                                  未選択
+                                </>
+                              )}
+                            </Button>
+                          </div>
+
+                          {selectedAvatarFile ? (
+                            <p className="truncate rounded-lg border border-stone-200/80 bg-stone-50 px-2 py-1 text-[11px] text-stone-500 dark:border-stone-700/60 dark:bg-stone-800/60 dark:text-stone-400">
+                              {selectedAvatarFile.name}
+                            </p>
+                          ) : (
+                            <p className="text-[11px] font-medium text-stone-400 dark:text-stone-500">
+                              画像を選択するとアップロードできます
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-[11px] font-semibold text-stone-500 dark:text-stone-400">
+                        <span>SNSリンク</span>
+                        <label className="flex cursor-pointer items-center gap-1.5">
+                          <span className="text-[10px]">受け付ける</span>
+                          <span className="relative inline-flex">
+                            <input
+                              type="checkbox"
+                              checked={state.acceptContact}
+                              onChange={(event) => setField("acceptContact", event.target.checked)}
+                              disabled={!canEditAlumniProfile}
+                              className="peer sr-only"
+                            />
+                            <span className="block h-3.5 w-6 rounded-full bg-stone-300 transition-colors peer-checked:bg-emerald-500 dark:bg-stone-600" />
+                            <span className="absolute left-[2px] top-[2px] h-2.5 w-2.5 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-[10px]" />
+                          </span>
+                        </label>
+                      </div>
+                      <Input
+                        id="profile-x-dm-url"
+                        value={state.xUrl}
+                        onChange={(event) => setField("xUrl", event.target.value)}
+                        placeholder="Xのリンク"
+                        type="url"
+                        aria-label="Xのリンク"
+                        disabled={!canEditAlumniProfile || !state.acceptContact}
+                        className={!state.acceptContact ? "opacity-50" : ""}
+                      />
+                      <Input
+                        id="profile-instagram-dm-url"
+                        value={state.instagramUrl}
+                        onChange={(event) => setField("instagramUrl", event.target.value)}
+                        placeholder="Instagramのリンク"
+                        type="url"
+                        aria-label="Instagramのリンク"
+                        disabled={!canEditAlumniProfile || !state.acceptContact}
+                        className={!state.acceptContact ? "opacity-50" : ""}
+                      />
+                      <p className="text-[10px] leading-relaxed text-stone-400 dark:text-stone-500">
+                        一覧・詳細の連絡ボタンから、設定したSNSリンクへ遷移します。
+                      </p>
+                    </div>
+
                     {/* Skills */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">

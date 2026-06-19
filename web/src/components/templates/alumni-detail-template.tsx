@@ -1,9 +1,14 @@
 "use client";
 
 import { Button } from "@/components/atoms/button";
-import { ChevronLeftIcon, ExternalLinkIcon, MousePointerClickIcon } from "@/components/atoms/icons";
+import {
+  ChevronLeftIcon,
+  ExternalLinkIcon,
+  HeartIcon,
+  MousePointerClickIcon,
+} from "@/components/atoms/icons";
 import { SocialContactIcon } from "@/components/atoms/social-contact-icon";
-import type { AlumniProfile } from "@/graphql/types";
+import type { AlumniProfile, HelpfulReactionSummary } from "@/graphql/types";
 import { getAlumniContactClassName, getAlumniContactLinks } from "@/lib/alumni-contact";
 import { departmentGradient } from "@/lib/department-theme";
 import {
@@ -65,6 +70,24 @@ const selectionFormatLabel: Record<string, string> = {
   UNKNOWN: "不明",
 };
 
+const jobHuntingPeriodLabel: Record<string, string> = {
+  FIRST_YEAR_FIRST_HALF: "1年前期",
+  FIRST_YEAR_SECOND_HALF: "1年後期",
+  SECOND_YEAR_FIRST_HALF: "2年前期",
+  SUMMER_BREAK: "夏休み",
+  PRE_GRADUATION_AUTUMN: "卒業前年の秋",
+  OTHER: "その他",
+};
+
+type CompanyExperienceItem = AlumniProfile["companyExperiences"][number];
+
+function hasSelectionFlow(company: CompanyExperienceItem) {
+  const experience = company.selectionExperience;
+  return Boolean(
+    experience?.entryTrigger || experience?.steps.some((step) => step.stepKind !== "OFFER"),
+  );
+}
+
 export function AlumniDetailTemplate({
   alumni,
   selectedCompanyExperienceId,
@@ -74,7 +97,7 @@ export function AlumniDetailTemplate({
   const displayName = alumni.nickname ?? "匿名";
   const initial = (displayName || "匿")[0];
   const companyNames = alumni.companyNames.length > 0 ? alumni.companyNames : ["未設定"];
-  const companyExperiences = useMemo(() => {
+  const companyExperiences = useMemo<CompanyExperienceItem[]>(() => {
     if (alumni.companyExperiences.length > 0) {
       return alumni.companyExperiences;
     }
@@ -82,6 +105,8 @@ export function AlumniDetailTemplate({
     return companyNames.map((companyName, index) => ({
       id: `${companyName}-${index}`,
       companyName,
+      isPublic: true,
+      motivation: null,
       selectionExperience: null,
     }));
   }, [alumni.companyExperiences, companyNames]);
@@ -94,15 +119,50 @@ export function AlumniDetailTemplate({
   const selectedCompany =
     companyExperiences.find((company) => company.id === selectedCompanyId) ?? companyExperiences[0];
   const selectedExperience = selectedCompany?.selectionExperience ?? null;
+  const selectedCompanyMotivation = selectedCompany?.motivation ?? null;
+  const selectedHasSelectionFlow = selectedCompany ? hasSelectionFlow(selectedCompany) : false;
+  const profileActivityPeriod = alumni.activityPeriod;
+  const profileActivityPeriodNote = alumni.activityPeriodNote;
   const visibleSelectionSteps =
     selectedExperience?.steps.filter((step) => step.stepKind !== "OFFER") ?? [];
-  const companiesWithExperienceCount = companyExperiences.filter(
-    (company) => company.selectionExperience,
-  ).length;
+  const companiesWithExperienceCount = companyExperiences.filter(hasSelectionFlow).length;
   const contactLinks = getAlumniContactLinks(alumni);
   const canContact = alumni.acceptContact && contactLinks.length > 0;
   const hasDeepDive =
     alumni.skills.length > 0 || alumni.portfolioUrl || alumni.gakuchika || alumni.usefulCoursework;
+  const [helpfulReaction, setHelpfulReaction] = useState<HelpfulReactionSummary>(
+    alumni.helpfulReaction,
+  );
+  const [isHelpfulReactionPending, setIsHelpfulReactionPending] = useState(false);
+  const [isHelpfulReactionAnimating, setIsHelpfulReactionAnimating] = useState(false);
+
+  const handleHelpfulReaction = async () => {
+    setIsHelpfulReactionPending(true);
+    const wasReacted = helpfulReaction.reactedByViewer;
+    try {
+      const response = await fetch(`/api/alumni/${alumni.id}/helpful-reactions`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+      });
+      const json = (await response.json()) as {
+        ok?: boolean;
+        helpfulReaction?: HelpfulReactionSummary;
+      };
+
+      if (response.ok && json.ok && json.helpfulReaction) {
+        setHelpfulReaction(json.helpfulReaction);
+        if (!wasReacted && json.helpfulReaction.reactedByViewer) {
+          setIsHelpfulReactionAnimating(false);
+          window.setTimeout(() => setIsHelpfulReactionAnimating(true), 0);
+          window.setTimeout(() => setIsHelpfulReactionAnimating(false), 760);
+        }
+      }
+    } finally {
+      setIsHelpfulReactionPending(false);
+    }
+  };
 
   useEffect(() => {
     if (
@@ -179,6 +239,42 @@ export function AlumniDetailTemplate({
                 年卒
               </p>
             </div>
+            <Button
+              type="button"
+              onClick={handleHelpfulReaction}
+              disabled={isHelpfulReactionPending}
+              variant="ghost"
+              aria-label={helpfulReaction.reactedByViewer ? "役に立ったを取り消す" : "役に立った"}
+              title={helpfulReaction.reactedByViewer ? "役に立ったを取り消す" : "役に立った"}
+              className={`mb-1 ml-auto h-11 shrink-0 gap-2 rounded-full px-2.5 text-stone-500 hover:bg-transparent hover:text-stone-900 dark:text-stone-400 dark:hover:bg-transparent dark:hover:text-stone-100 ${
+                helpfulReaction.reactedByViewer
+                  ? "text-rose-500 hover:text-rose-600 dark:text-rose-400 dark:hover:text-rose-300"
+                  : ""
+              }`}
+            >
+              <span
+                className="helpful-reaction-icon relative inline-flex size-8 items-center justify-center"
+                data-animate={isHelpfulReactionAnimating ? "true" : "false"}
+              >
+                <span aria-hidden className="helpful-reaction-burst">
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                </span>
+                <HeartIcon
+                  size={32}
+                  strokeWidth={2.25}
+                  fill={helpfulReaction.reactedByViewer ? "currentColor" : "none"}
+                  title="役に立った"
+                />
+              </span>
+              <span className="min-w-5 text-left text-xl font-semibold tabular-nums">
+                {helpfulReaction.count}
+              </span>
+            </Button>
           </div>
 
           {/* Companies */}
@@ -193,12 +289,38 @@ export function AlumniDetailTemplate({
             ))}
           </div>
 
-          {/* Remarks */}
-          {alumni.remarks ? (
-            <p className="mt-4 break-words border-l-2 border-stone-200 pl-3 text-[13px] leading-relaxed text-stone-600 dark:border-stone-700 dark:text-stone-400">
-              {alumni.remarks}
-            </p>
-          ) : null}
+          <div className="mt-5 border-t border-stone-100 pt-4 dark:border-stone-800/70">
+            {canContact ? (
+              <div className="flex items-center justify-between gap-3">
+                <p className="shrink-0 text-[11px] font-bold text-stone-400 dark:text-stone-500">
+                  SNSで連絡する
+                </p>
+                <div className="flex min-w-0 flex-wrap justify-end gap-2">
+                  {contactLinks.map((contactLink) => (
+                    <a
+                      key={contactLink.label}
+                      href={contactLink.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${contactLink.label}で連絡する`}
+                      title={`${contactLink.label}で連絡する`}
+                      className={`group/cta inline-flex size-10 shrink-0 items-center justify-center rounded-full transition-all duration-200 hover:shadow-md active:scale-[0.98] ${getAlumniContactClassName(contactLink.label)}`}
+                    >
+                      <SocialContactIcon
+                        platform={contactLink.label}
+                        size={17}
+                        className="shrink-0 transition-transform group-hover/cta:scale-110"
+                      />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center rounded-2xl border border-dashed border-stone-200 px-4 py-3 text-[12px] text-stone-400 dark:border-stone-800 dark:text-stone-600">
+                現在は連絡を受け付けていません
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
@@ -215,20 +337,37 @@ export function AlumniDetailTemplate({
             <p className="mt-1 text-[11px] text-stone-500 dark:text-stone-400">
               {companiesWithExperienceCount > 0
                 ? `${companiesWithExperienceCount}社の選考フローが公開されています`
-                : "この先輩は企業名のみ公開しています"}
+                : "選考フローはまだ公開されていません"}
             </p>
           </div>
-          {selectedExperience ? (
+          {selectedHasSelectionFlow ? (
             <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700 shadow-sm dark:border-emerald-900/50 dark:bg-emerald-900/30 dark:text-emerald-300">
               選考フローあり
             </span>
           ) : null}
         </div>
 
+        {profileActivityPeriod ? (
+          <div className="mt-4 rounded-xl border border-amber-100 bg-amber-50/70 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
+            <p className="text-[11px] font-bold text-amber-700 dark:text-amber-300">
+              就活を始めた時期
+            </p>
+            <p className="mt-2 text-[15px] font-extrabold text-amber-950 dark:text-amber-100">
+              {jobHuntingPeriodLabel[profileActivityPeriod] ?? profileActivityPeriod}
+            </p>
+            {profileActivityPeriodNote ? (
+              <p className="mt-2 whitespace-pre-wrap text-[13px] leading-relaxed text-amber-900 dark:text-amber-100">
+                {profileActivityPeriodNote}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
         {companyExperiences.length > 1 ? (
           <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
             {companyExperiences.map((company) => {
               const isSelected = company.id === selectedCompany?.id;
+              const companyHasSelectionFlow = hasSelectionFlow(company);
               return (
                 <Button
                   key={company.id}
@@ -244,7 +383,7 @@ export function AlumniDetailTemplate({
                   <span className="block max-w-40 truncate text-[12px] font-bold">
                     {company.companyName}
                   </span>
-                  {company.selectionExperience ? (
+                  {companyHasSelectionFlow ? (
                     <span
                       className={`mt-0.5 block text-[10px] ${
                         isSelected ? "text-white/70 dark:text-stone-600" : "text-stone-400"
@@ -280,143 +419,143 @@ export function AlumniDetailTemplate({
               ) : null}
             </div>
 
-            {selectedExperience ? (
-              <div className="mt-4 space-y-4">
-                {visibleSelectionSteps.length > 0 ? (
-                  <div className="relative space-y-3">
-                    <div className="absolute bottom-4 left-[15px] top-4 w-px bg-stone-200 dark:bg-stone-700" />
-                    {visibleSelectionSteps.map((step, index) =>
-                      (() => {
-                        const isWebTestStep = step.stepKind === "WEB_TEST";
-                        const isCodingTestStep = step.stepKind === "CODING_TEST";
-                        const isDocumentScreeningStep = step.stepKind === "DOCUMENT_SCREENING";
-                        const webTestTypeLabel = getWebTestTypeLabel(
-                          decodeWebTestType(step.questions),
-                        );
-                        const webTestTimeAssessmentLabel = getWebTestTimeAssessmentLabel(
-                          decodeWebTestTimeAssessment(step.atmosphere),
-                        );
-
-                        return (
-                          <div
-                            key={step.id}
-                            className="relative grid grid-cols-[32px_minmax(0,1fr)] gap-3"
-                          >
-                            <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full bg-stone-900 text-[11px] font-bold text-white dark:bg-stone-100 dark:text-stone-900">
-                              {index + 1}
-                            </div>
-                            <article className="rounded-xl border border-stone-200 bg-stone-50/70 p-4 dark:border-stone-800 dark:bg-stone-950/60">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <h4 className="text-sm font-extrabold text-stone-900 dark:text-stone-100">
-                                  {selectionStepKindLabel[step.stepKind] || "選考ステップ"}
-                                </h4>
-                                {!isDocumentScreeningStep ? (
-                                  <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
-                                    {selectionFormatLabel[step.format] ?? step.format}
-                                  </span>
-                                ) : null}
-                                {!isWebTestStep &&
-                                !isDocumentScreeningStep &&
-                                step.interviewerCount ? (
-                                  <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
-                                    {step.interviewerCount >= 4
-                                      ? isCodingTestStep
-                                        ? "試験官 複数人"
-                                        : "面接官 複数人"
-                                      : isCodingTestStep
-                                        ? `試験官 ${step.interviewerCount}人`
-                                        : `面接官 ${step.interviewerCount}人`}
-                                  </span>
-                                ) : null}
-                                {!isDocumentScreeningStep && step.durationMinutes ? (
-                                  <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
-                                    {isWebTestStep
-                                      ? `所要時間 ${step.durationMinutes}分`
-                                      : isCodingTestStep
-                                        ? `制限時間 ${step.durationMinutes}分`
-                                        : `面接時間 ${step.durationMinutes}分`}
-                                  </span>
-                                ) : null}
-                              </div>
-
-                              {isWebTestStep && webTestTypeLabel ? (
-                                <div className="mt-3">
-                                  <p className="text-[10px] font-bold text-stone-400">
-                                    Webテストの種類
-                                  </p>
-                                  <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
-                                    {webTestTypeLabel}
-                                  </p>
-                                </div>
-                              ) : null}
-                              {isWebTestStep && webTestTimeAssessmentLabel ? (
-                                <div className="mt-3">
-                                  <p className="text-[10px] font-bold text-stone-400">時間の感覚</p>
-                                  <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
-                                    {webTestTimeAssessmentLabel}
-                                  </p>
-                                </div>
-                              ) : null}
-                              {!isWebTestStep && step.questions ? (
-                                <div className="mt-3">
-                                  <p className="text-[10px] font-bold text-stone-400">
-                                    {isCodingTestStep
-                                      ? "出題内容"
-                                      : isDocumentScreeningStep
-                                        ? "確認される内容"
-                                        : "聞かれた質問"}
-                                  </p>
-                                  <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
-                                    {step.questions}
-                                  </p>
-                                </div>
-                              ) : null}
-                              {!isWebTestStep && !isDocumentScreeningStep && step.atmosphere ? (
-                                <div className="mt-3">
-                                  <p className="text-[10px] font-bold text-stone-400">
-                                    {isCodingTestStep ? "使用言語・実行環境" : "雰囲気"}
-                                  </p>
-                                  <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
-                                    {step.atmosphere}
-                                  </p>
-                                </div>
-                              ) : null}
-                              {!isDocumentScreeningStep && step.preparation ? (
-                                <div className="mt-3">
-                                  <p className="text-[10px] font-bold text-stone-400">
-                                    {isWebTestStep
-                                      ? "対策してよかったこと"
-                                      : isCodingTestStep
-                                        ? "解き方や対策で役立ったこと"
-                                        : "準備してよかったこと"}
-                                  </p>
-                                  <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
-                                    {step.preparation}
-                                  </p>
-                                </div>
-                              ) : null}
-                            </article>
-                          </div>
-                        );
-                      })(),
-                    )}
-                  </div>
-                ) : null}
-
-                {selectedExperience.overallTip ? (
-                  <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20">
-                    <p className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
-                      この企業を受ける後輩へ
-                    </p>
-                    <p className="mt-2 whitespace-pre-wrap text-[13px] leading-relaxed text-emerald-900 dark:text-emerald-100">
-                      {selectedExperience.overallTip}
-                    </p>
-                  </div>
-                ) : null}
+            {selectedCompanyMotivation ? (
+              <div className="mt-4">
+                <div className="rounded-xl border border-violet-100 bg-violet-50/70 p-4 dark:border-violet-900/40 dark:bg-violet-950/20">
+                  <p className="text-[11px] font-bold text-violet-700 dark:text-violet-300">
+                    なぜこの会社を選んだか
+                  </p>
+                  <p className="mt-2 whitespace-pre-wrap text-[13px] leading-relaxed text-violet-950 dark:text-violet-100">
+                    {selectedCompanyMotivation}
+                  </p>
+                </div>
               </div>
-            ) : (
+            ) : null}
+
+            {selectedHasSelectionFlow && visibleSelectionSteps.length > 0 ? (
+              <div className="mt-4 space-y-4">
+                <div className="relative space-y-3">
+                  <div className="absolute bottom-4 left-[15px] top-4 w-px bg-stone-200 dark:bg-stone-700" />
+                  {visibleSelectionSteps.map((step, index) =>
+                    (() => {
+                      const isWebTestStep = step.stepKind === "WEB_TEST";
+                      const isCodingTestStep = step.stepKind === "CODING_TEST";
+                      const isDocumentScreeningStep = step.stepKind === "DOCUMENT_SCREENING";
+                      const webTestTypeLabel = getWebTestTypeLabel(
+                        decodeWebTestType(step.questions),
+                      );
+                      const webTestTimeAssessmentLabel = getWebTestTimeAssessmentLabel(
+                        decodeWebTestTimeAssessment(step.atmosphere),
+                      );
+
+                      return (
+                        <div
+                          key={step.id}
+                          className="relative grid grid-cols-[32px_minmax(0,1fr)] gap-3"
+                        >
+                          <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full bg-stone-900 text-[11px] font-bold text-white dark:bg-stone-100 dark:text-stone-900">
+                            {index + 1}
+                          </div>
+                          <article className="rounded-xl border border-stone-200 bg-stone-50/70 p-4 dark:border-stone-800 dark:bg-stone-950/60">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h4 className="text-sm font-extrabold text-stone-900 dark:text-stone-100">
+                                {selectionStepKindLabel[step.stepKind] || "選考ステップ"}
+                              </h4>
+                              {!isDocumentScreeningStep ? (
+                                <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
+                                  {selectionFormatLabel[step.format] ?? step.format}
+                                </span>
+                              ) : null}
+                              {!isWebTestStep &&
+                              !isDocumentScreeningStep &&
+                              step.interviewerCount ? (
+                                <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
+                                  {step.interviewerCount >= 4
+                                    ? isCodingTestStep
+                                      ? "試験官 複数人"
+                                      : "面接官 複数人"
+                                    : isCodingTestStep
+                                      ? `試験官 ${step.interviewerCount}人`
+                                      : `面接官 ${step.interviewerCount}人`}
+                                </span>
+                              ) : null}
+                              {!isDocumentScreeningStep && step.durationMinutes ? (
+                                <span className="rounded-md border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500 shadow-sm dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400">
+                                  {isWebTestStep
+                                    ? `所要時間 ${step.durationMinutes}分`
+                                    : isCodingTestStep
+                                      ? `制限時間 ${step.durationMinutes}分`
+                                      : `面接時間 ${step.durationMinutes}分`}
+                                </span>
+                              ) : null}
+                            </div>
+
+                            {isWebTestStep && webTestTypeLabel ? (
+                              <div className="mt-3">
+                                <p className="text-[10px] font-bold text-stone-400">
+                                  Webテストの種類
+                                </p>
+                                <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
+                                  {webTestTypeLabel}
+                                </p>
+                              </div>
+                            ) : null}
+                            {isWebTestStep && webTestTimeAssessmentLabel ? (
+                              <div className="mt-3">
+                                <p className="text-[10px] font-bold text-stone-400">時間の感覚</p>
+                                <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
+                                  {webTestTimeAssessmentLabel}
+                                </p>
+                              </div>
+                            ) : null}
+                            {!isWebTestStep && step.questions ? (
+                              <div className="mt-3">
+                                <p className="text-[10px] font-bold text-stone-400">
+                                  {isCodingTestStep
+                                    ? "出題内容"
+                                    : isDocumentScreeningStep
+                                      ? "確認される内容"
+                                      : "聞かれた質問"}
+                                </p>
+                                <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
+                                  {step.questions}
+                                </p>
+                              </div>
+                            ) : null}
+                            {!isWebTestStep && !isDocumentScreeningStep && step.atmosphere ? (
+                              <div className="mt-3">
+                                <p className="text-[10px] font-bold text-stone-400">
+                                  {isCodingTestStep ? "使用言語・実行環境" : "雰囲気"}
+                                </p>
+                                <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
+                                  {step.atmosphere}
+                                </p>
+                              </div>
+                            ) : null}
+                            {!isDocumentScreeningStep && step.preparation ? (
+                              <div className="mt-3">
+                                <p className="text-[10px] font-bold text-stone-400">
+                                  {isWebTestStep
+                                    ? "対策してよかったこと"
+                                    : isCodingTestStep
+                                      ? "解き方や対策で役立ったこと"
+                                      : "準備してよかったこと"}
+                                </p>
+                                <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-stone-700 dark:text-stone-300">
+                                  {step.preparation}
+                                </p>
+                              </div>
+                            ) : null}
+                          </article>
+                        </div>
+                      );
+                    })(),
+                  )}
+                </div>
+              </div>
+            ) : selectedHasSelectionFlow ? null : (
               <div className="mt-4 rounded-xl border border-dashed border-stone-200 p-4 text-center text-[12px] text-stone-500 dark:border-stone-800 dark:text-stone-400">
-                未登録
+                選考フローは未登録です
               </div>
             )}
           </div>
@@ -500,40 +639,6 @@ export function AlumniDetailTemplate({
           ) : null}
         </div>
       ) : null}
-
-      {/* ── Contact CTA ── */}
-      <div className="mt-6">
-        {canContact ? (
-          <div className="space-y-2">
-            <p className="text-[11px] font-bold text-stone-400 dark:text-stone-500">
-              SNSで連絡する
-            </p>
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(0,1fr))] gap-2">
-              {contactLinks.map((contactLink) => (
-                <a
-                  key={contactLink.label}
-                  href={contactLink.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`${contactLink.label}で連絡する`}
-                  title={`${contactLink.label}で連絡する`}
-                  className={`group/cta flex min-w-0 items-center justify-center rounded-2xl px-4 py-3.5 transition-all duration-200 hover:shadow-lg active:scale-[0.98] ${getAlumniContactClassName(contactLink.label)}`}
-                >
-                  <SocialContactIcon
-                    platform={contactLink.label}
-                    size={18}
-                    className="shrink-0 transition-transform group-hover/cta:scale-110"
-                  />
-                </a>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-stone-200 px-5 py-3.5 text-[13px] text-stone-400 dark:border-stone-800 dark:text-stone-600">
-            <span>現在は連絡を受け付けていません</span>
-          </div>
-        )}
-      </div>
     </main>
   );
 }

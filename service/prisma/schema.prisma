@@ -78,6 +78,15 @@ enum SelectionFormat {
   UNKNOWN
 }
 
+enum JobHuntingPeriod {
+  FIRST_YEAR_FIRST_HALF
+  FIRST_YEAR_SECOND_HALF
+  SECOND_YEAR_FIRST_HALF
+  SUMMER_BREAK
+  PRE_GRADUATION_AUTUMN
+  OTHER
+}
+
 // ------------------------------------------------------
 // 3. User Models
 // ------------------------------------------------------
@@ -99,6 +108,7 @@ model User {
   department     Department?
 
   alumniProfile AlumniProfile?
+  helpfulReactions HelpfulReaction[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -137,6 +147,9 @@ model AlumniProfile {
   portfolioUrl     String?
   gakuchika        String?  @db.Text
   usefulCoursework String?  @db.Text
+  activityPeriod   JobHuntingPeriod?
+  activityPeriodNote String?
+  helpfulReactions HelpfulReaction[]
 
   isPublic      Boolean @default(true)
   acceptContact Boolean @default(true)
@@ -157,6 +170,7 @@ model AlumniCompany {
   companyName         String
   companyNameSearch   String               @default("")
   isPublic            Boolean              @default(true)
+  motivation          String?              @db.Text
   selectionExperience SelectionExperience?
   createdAt           DateTime             @default(now())
 
@@ -171,11 +185,27 @@ model SelectionExperience {
   alumniCompany   AlumniCompany @relation(fields: [alumniCompanyId], references: [id], onDelete: Cascade)
 
   entryTrigger String?
+  motivation   String?           @db.Text
+  activityPeriod JobHuntingPeriod?
+  activityPeriodNote String?
   overallTip   String?         @db.Text
   steps        SelectionStep[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model HelpfulReaction {
+  id              String              @id @default(cuid())
+  alumniProfileId String
+  alumniProfile   AlumniProfile       @relation(fields: [alumniProfileId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime            @default(now())
+
+  @@unique([alumniProfileId, userId])
+  @@index([alumniProfileId])
+  @@index([userId])
 }
 
 model SelectionStep {

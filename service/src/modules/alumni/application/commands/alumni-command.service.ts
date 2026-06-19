@@ -125,7 +125,23 @@ export class AlumniCommandService {
       portfolioUrl: normalized.portfolioUrl,
       gakuchika: normalized.gakuchika,
       usefulCoursework: normalized.usefulCoursework,
+      activityPeriod: normalized.activityPeriod,
+      activityPeriodNote: normalized.activityPeriodNote,
     });
+  }
+
+  async toggleHelpfulReaction(userId: string, alumniProfileId: string): Promise<AlumniProfileDto> {
+    const user = await this.alumniRepository.findUserById(userId);
+    if (!user) {
+      throw new BadRequestException("User not found");
+    }
+
+    const updated = await this.alumniRepository.toggleHelpfulReaction(alumniProfileId, userId);
+    if (!updated) {
+      throw new BadRequestException("Alumni profile not found");
+    }
+
+    return updated;
   }
 
   getUploadUrl(userId: string, fileName: string, contentType: string): Promise<UploadUrlResponse> {

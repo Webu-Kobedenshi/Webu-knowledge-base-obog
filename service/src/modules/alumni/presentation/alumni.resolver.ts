@@ -88,8 +88,11 @@ export class AlumniResolver {
 
   @Query("getAlumniDetail")
   @UseGuards(GqlAuthGuard)
-  getAlumniDetail(@Args("id") id: string): Promise<AlumniProfileDto | null> {
-    return this.alumniQueryService.getAlumniDetail(id);
+  getAlumniDetail(
+    @CurrentUserId() userId: string,
+    @Args("id") id: string,
+  ): Promise<AlumniProfileDto | null> {
+    return this.alumniQueryService.getAlumniDetail(id, userId);
   }
 
   @Query("getMyProfile")
@@ -169,6 +172,15 @@ export class AlumniResolver {
     @Args("input") input: UpdateAlumniProfileInput,
   ): Promise<AlumniProfileDto> {
     return this.alumniCommandService.updateAlumniProfile(userId, input);
+  }
+
+  @Mutation("toggleHelpfulReaction")
+  @UseGuards(GqlAuthGuard)
+  toggleHelpfulReaction(
+    @CurrentUserId() userId: string,
+    @Args("alumniProfileId") alumniProfileId: string,
+  ): Promise<AlumniProfileDto> {
+    return this.alumniCommandService.toggleHelpfulReaction(userId, alumniProfileId);
   }
 
   @Mutation("deleteMyAccount")

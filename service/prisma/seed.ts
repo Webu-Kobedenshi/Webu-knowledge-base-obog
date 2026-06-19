@@ -1,6 +1,7 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import {
   Department,
+  JobHuntingPeriod,
   PrismaClient,
   Role,
   SelectionFormat,
@@ -26,9 +27,9 @@ type SeedStep = {
 
 type SeedCompany = {
   companyName: string;
+  motivation?: string;
   selectionExperience?: {
     entryTrigger?: string;
-    overallTip?: string;
     steps: SeedStep[];
   };
 };
@@ -40,11 +41,12 @@ type SeedAlumni = {
   enrollmentYear: number;
   department: Department;
   companies: SeedCompany[];
-  remarks?: string;
   skills: string[];
   portfolioUrl?: string;
   gakuchika?: string;
   usefulCoursework?: string;
+  activityPeriod?: JobHuntingPeriod;
+  activityPeriodNote?: string;
   acceptContact: boolean;
   xUrl?: string;
   instagramUrl?: string;
@@ -129,8 +131,6 @@ const engineeringFlow = (options?: {
       preparation: "会社のプロダクトを実際に触り、良い点と改善案をまとめました。",
     },
   ],
-  overallTip:
-    "技術力だけでなく、学んだことを次の制作にどう活かしたかを聞かれます。制作物の失敗談も前向きに話せるようにしておくと安心です。",
 });
 
 const creativeFlow = (entryTrigger = "ポートフォリオ経由"): SeedCompany["selectionExperience"] => ({
@@ -161,8 +161,6 @@ const creativeFlow = (entryTrigger = "ポートフォリオ経由"): SeedCompany
       preparation: "会社の制作実績を見て、好きな表現と理由を整理しました。",
     },
   ],
-  overallTip:
-    "ポートフォリオは完成度だけでなく、制作意図、修正力、チーム内での動き方まで説明できると説得力が出ます。",
 });
 
 const soundFlow = (entryTrigger = "学校紹介"): SeedCompany["selectionExperience"] => ({
@@ -193,8 +191,6 @@ const soundFlow = (entryTrigger = "学校紹介"): SeedCompany["selectionExperie
       preparation: "好きな作品の音作りを分析して、自分ならどう再現するかを整理しました。",
     },
   ],
-  overallTip:
-    "音の技術だけでなく、作品全体の世界観を理解して動けるかが大切です。担当範囲と改善の工夫を具体的に話せると強いです。",
 });
 
 const businessFlow = (entryTrigger = "就活サイト"): SeedCompany["selectionExperience"] => ({
@@ -226,9 +222,143 @@ const businessFlow = (entryTrigger = "就活サイト"): SeedCompany["selectionE
       preparation: "競合企業との違いを自分の言葉で説明できるようにしました。",
     },
   ],
-  overallTip:
-    "人柄と再現性を見られます。経験そのものより、何を考えてどう動いたかを具体的に話せることが大切です。",
 });
+
+type CompanyExperienceQuality = {
+  motivation: string;
+  activityPeriod: JobHuntingPeriod;
+  activityPeriodNote: string;
+};
+
+const selectionQualityPresets: Record<SeedTrack, CompanyExperienceQuality[]> = {
+  engineering: [
+    {
+      motivation:
+        "学生時代に作ったWebアプリの経験を、ユーザーに近い開発で活かせると感じたためです。説明会で若手でも設計や改善提案に関われると聞き、入社後の成長イメージが持てました。",
+      activityPeriod: JobHuntingPeriod.SECOND_YEAR_FIRST_HALF,
+      activityPeriodNote:
+        "2年の4月ごろからポートフォリオを整理し、学校求人と学内説明会を見ながら応募先を絞りました。",
+    },
+    {
+      motivation:
+        "チーム開発の進め方やコードレビューの文化が自分に合っていると感じました。面接で制作物の工夫を丁寧に聞いてもらえたことも、入社後に学び続けられそうだと思った理由です。",
+      activityPeriod: JobHuntingPeriod.FIRST_YEAR_SECOND_HALF,
+      activityPeriodNote:
+        "1年後期からGitHubの整理を始め、冬休みに自己PRと制作物説明をまとめました。",
+    },
+    {
+      motivation:
+        "授業で学んだプログラミングやデータベースの知識を、生活や業務を支えるシステム開発に活かしたいと思いました。会社の事例を調べる中で、長く技術を磨ける環境だと感じました。",
+      activityPeriod: JobHuntingPeriod.SUMMER_BREAK,
+      activityPeriodNote:
+        "夏休みに求人を見比べ、9月から先生に添削してもらいながら応募書類を整えました。",
+    },
+  ],
+  game: [
+    {
+      motivation:
+        "自分が制作で大切にしてきた操作感や遊びやすさを、実際のゲーム開発で磨きたいと思ったためです。作品へのフィードバックが具体的で、ここなら成長できそうだと感じました。",
+      activityPeriod: JobHuntingPeriod.SECOND_YEAR_FIRST_HALF,
+      activityPeriodNote: "2年の4月から応募作品を絞り込み、5月には動画とREADMEを見直しました。",
+    },
+    {
+      motivation:
+        "チームでゲームを完成させる経験を通して、実装だけでなく企画意図を理解して動く仕事に興味を持ちました。会社の作品の雰囲気が自分の作りたい方向と近かったことも決め手です。",
+      activityPeriod: JobHuntingPeriod.FIRST_YEAR_SECOND_HALF,
+      activityPeriodNote:
+        "1年後期からチーム制作の記録を残し、春休みにポートフォリオ用の説明文を作りました。",
+    },
+    {
+      motivation:
+        "面接で作品の改善点まで一緒に話してもらえたことで、ものづくりに真剣な会社だと感じました。自分の得意な実装領域を活かしながら、演出や品質にも関われる点に惹かれました。",
+      activityPeriod: JobHuntingPeriod.SUMMER_BREAK,
+      activityPeriodNote:
+        "夏休みに過去作品を作り直し、9月から企業ごとに見せる作品の順番を変えました。",
+    },
+  ],
+  creative: [
+    {
+      motivation:
+        "ポートフォリオを見てもらった時に、完成品だけでなく考え方や修正の過程まで評価してもらえたためです。自分の表現を仕事として伸ばせる環境だと感じました。",
+      activityPeriod: JobHuntingPeriod.SECOND_YEAR_FIRST_HALF,
+      activityPeriodNote:
+        "2年の4月から作品を選び直し、5月に先生へ見せて構成と説明文を修正しました。",
+    },
+    {
+      motivation:
+        "会社の制作実績を調べる中で、授業で取り組んできたデザインや映像表現と近い領域に挑戦できると思いました。面接での雰囲気もよく、相談しながら作れる印象がありました。",
+      activityPeriod: JobHuntingPeriod.FIRST_YEAR_SECOND_HALF,
+      activityPeriodNote:
+        "1年後期から作品をため始め、春休みにポートフォリオサイトとPDFを整えました。",
+    },
+    {
+      motivation:
+        "自分の強みである情報整理や見せ方の工夫を、実際の案件で活かしたいと考えました。入社後に幅広い制作に関われる点が、成長につながると感じました。",
+      activityPeriod: JobHuntingPeriod.SUMMER_BREAK,
+      activityPeriodNote: "夏休みに作品の見せ方を変え、応募前に制作意図を短く話す練習をしました。",
+    },
+  ],
+  sound: [
+    {
+      motivation:
+        "作品の世界観を音で支える仕事に関わりたいと思ったためです。面接で音源の意図を丁寧に聞いてもらえ、技術だけでなく考え方も見てくれる会社だと感じました。",
+      activityPeriod: JobHuntingPeriod.SECOND_YEAR_FIRST_HALF,
+      activityPeriodNote: "2年の4月から音源を整理し、5月に提出用データと説明文をまとめました。",
+    },
+    {
+      motivation:
+        "収録や編集で学んだことを、現場に近い制作環境で活かしたいと考えました。好きな作品の音作りと会社の制作領域が重なっていたことが志望理由です。",
+      activityPeriod: JobHuntingPeriod.FIRST_YEAR_SECOND_HALF,
+      activityPeriodNote: "1年後期から制作音源を残し、春休みにポートフォリオの順番を見直しました。",
+    },
+    {
+      motivation:
+        "チーム制作で音の役割を考える楽しさを知り、映像やゲームを支える音響職に進みたいと思いました。会社説明で現場の動き方を聞けたことが決め手になりました。",
+      activityPeriod: JobHuntingPeriod.SUMMER_BREAK,
+      activityPeriodNote: "夏休みに作品ごとの担当範囲を整理し、9月から面接で話す練習を始めました。",
+    },
+  ],
+  construction: [
+    {
+      motivation:
+        "授業で学んだCADや設計の知識を、実際の住まいや空間づくりに活かしたいと思ったためです。説明会で現場と設計の両方を理解して働ける点に魅力を感じました。",
+      activityPeriod: JobHuntingPeriod.SECOND_YEAR_FIRST_HALF,
+      activityPeriodNote: "2年の4月から求人を見始め、5月に図面課題と自己PRを整理しました。",
+    },
+    {
+      motivation:
+        "利用者の動線や安全性を考える課題にやりがいを感じ、実務でも人の生活に近い仕事をしたいと思いました。面接で学んだ内容を具体的に聞いてもらえたことも印象に残っています。",
+      activityPeriod: JobHuntingPeriod.FIRST_YEAR_SECOND_HALF,
+      activityPeriodNote: "1年後期から業界研究を始め、冬休みに企業ごとの施工実績を調べました。",
+    },
+    {
+      motivation:
+        "図面だけでなく、現場で人と連携しながら形にしていく働き方に惹かれました。会社見学で社員同士のやり取りを見て、自分もここで成長したいと感じました。",
+      activityPeriod: JobHuntingPeriod.SUMMER_BREAK,
+      activityPeriodNote: "夏休みに会社見学へ行き、9月から志望理由を企業ごとに書き分けました。",
+    },
+  ],
+  business: [
+    {
+      motivation:
+        "接客や授業で身につけた相手に合わせて伝える力を、仕事で活かせると感じたためです。面接で人柄だけでなく行動の理由まで聞いてもらえ、長く働く姿を想像できました。",
+      activityPeriod: JobHuntingPeriod.SECOND_YEAR_FIRST_HALF,
+      activityPeriodNote: "2年の4月から説明会に参加し、5月にSPIと面接練習を並行して進めました。",
+    },
+    {
+      motivation:
+        "会社の商品やサービスが身近で、利用者の困りごとを支える仕事に関わりたいと思いました。アルバイト経験で工夫したことを評価してもらえたことも決め手です。",
+      activityPeriod: JobHuntingPeriod.FIRST_YEAR_SECOND_HALF,
+      activityPeriodNote: "1年後期から自己分析を始め、春休みにガクチカと自己PRを書き直しました。",
+    },
+    {
+      motivation:
+        "数字を見ながら改善する仕事と、人と関わる仕事の両方に挑戦できる点に惹かれました。説明会で若手の仕事例を聞き、学んだことを活かせそうだと感じました。",
+      activityPeriod: JobHuntingPeriod.SUMMER_BREAK,
+      activityPeriodNote: "夏休みに業界を絞り、9月から企業ごとに志望理由と逆質問を準備しました。",
+    },
+  ],
+};
 
 const trackPlans: Array<{ track: SeedTrack; count: number }> = [
   { track: "engineering", count: 56 },
@@ -469,39 +599,6 @@ const skillPools: Record<SeedTrack, string[]> = {
   business: ["Excel", "簿記", "提案", "接客", "販売", "資料作成"],
 };
 
-const remarksTemplates: Record<SeedTrack, string[]> = {
-  engineering: [
-    "技術面接やポートフォリオの整理なら相談できます。",
-    "SIer志望の準備を共有できます。",
-    "Web系と業務系の両方を見ていました。",
-  ],
-  game: [
-    "ゲーム会社の選考対策を共有できます。",
-    "作品の説明をどう話すか一緒に整理できます。",
-    "C#やUnityの面接相談なら話せます。",
-  ],
-  creative: [
-    "ポートフォリオの見せ方を相談できます。",
-    "制作意図の言語化を手伝えます。",
-    "作品の並べ方を一緒に考えられます。",
-  ],
-  sound: [
-    "音源の見せ方と作品説明を共有できます。",
-    "サウンド職の選考準備を話せます。",
-    "収録や編集の工夫を整理できます。",
-  ],
-  construction: [
-    "施工・設計系の面接対策を共有できます。",
-    "現場志望と設計志望の違いを話せます。",
-    "CADや施工管理の勉強法を共有できます。",
-  ],
-  business: [
-    "営業・事務系の就活相談に乗れます。",
-    "接客経験の話し方を整理できます。",
-    "SPI対策と面接準備を共有できます。",
-  ],
-};
-
 const gakuchikaTemplates: Record<SeedTrack, string[]> = {
   engineering: [
     "学内チームで予約管理アプリを制作し、画面設計と実装の両方を担当しました。",
@@ -645,14 +742,6 @@ function buildSkills(track: SeedTrack, index: number) {
   return [pool[offset], pool[(offset + 2) % pool.length], pool[(offset + 4) % pool.length]];
 }
 
-function buildRemarks(track: SeedTrack, index: number, rng: () => number) {
-  if (rng() < 0.35) {
-    return undefined;
-  }
-
-  return pickByIndex(remarksTemplates[track], index);
-}
-
 function buildGakuchika(track: SeedTrack, index: number, rng: () => number) {
   if (rng() < 0.18) {
     return undefined;
@@ -682,48 +771,57 @@ function buildSelectionExperience(
   track: SeedTrack,
   profileIndex: number,
   department: Department,
+  companyIndex: number,
 ): SeedCompany["selectionExperience"] {
-  const triggerIndex = profileIndex + departmentDurationYears[department];
+  const baseProfileIndex = profileIndex + departmentDurationYears[department];
+  const triggerIndex = baseProfileIndex + companyIndex;
 
-  switch (track) {
-    case "engineering":
-      return engineeringFlow({
-        entryTrigger: pickByIndex(
-          ["学校求人", "インターン経由", "逆求人・スカウト", "学内説明会"],
-          triggerIndex,
-        ),
-        coding:
-          department === Department.IT_EXPERT ||
-          department === Department.AI_SYSTEM ||
-          department === Department.PROGRAMMING,
-        finalFormat: triggerIndex % 3 === 0 ? SelectionFormat.IN_PERSON : SelectionFormat.ONLINE,
-      });
-    case "game":
-      return engineeringFlow({
-        entryTrigger: pickByIndex(
-          ["学校求人", "作品応募", "インターン経由", "学内説明会"],
-          triggerIndex,
-        ),
-        coding: true,
-        finalFormat: triggerIndex % 2 === 0 ? SelectionFormat.ONLINE : SelectionFormat.IN_PERSON,
-      });
-    case "creative":
-      return creativeFlow(
-        pickByIndex(["ポートフォリオ経由", "作品応募", "学校紹介", "インターン経由"], triggerIndex),
-      );
-    case "sound":
-      return soundFlow(
-        pickByIndex(["学校紹介", "ポートフォリオ経由", "先生紹介", "作品応募"], triggerIndex),
-      );
-    case "construction":
-      return businessFlow(
-        pickByIndex(["学校求人", "合同説明会", "就活サイト", "インターン経由"], triggerIndex),
-      );
-    case "business":
-      return businessFlow(
-        pickByIndex(["学校求人", "就活サイト", "合同説明会", "インターン経由"], triggerIndex),
-      );
-  }
+  const experience = (() => {
+    switch (track) {
+      case "engineering":
+        return engineeringFlow({
+          entryTrigger: pickByIndex(
+            ["学校求人", "インターン経由", "逆求人・スカウト", "学内説明会"],
+            triggerIndex,
+          ),
+          coding:
+            department === Department.IT_EXPERT ||
+            department === Department.AI_SYSTEM ||
+            department === Department.PROGRAMMING,
+          finalFormat: triggerIndex % 3 === 0 ? SelectionFormat.IN_PERSON : SelectionFormat.ONLINE,
+        });
+      case "game":
+        return engineeringFlow({
+          entryTrigger: pickByIndex(
+            ["学校求人", "作品応募", "インターン経由", "学内説明会"],
+            triggerIndex,
+          ),
+          coding: true,
+          finalFormat: triggerIndex % 2 === 0 ? SelectionFormat.ONLINE : SelectionFormat.IN_PERSON,
+        });
+      case "creative":
+        return creativeFlow(
+          pickByIndex(
+            ["ポートフォリオ経由", "作品応募", "学校紹介", "インターン経由"],
+            triggerIndex,
+          ),
+        );
+      case "sound":
+        return soundFlow(
+          pickByIndex(["学校紹介", "ポートフォリオ経由", "先生紹介", "作品応募"], triggerIndex),
+        );
+      case "construction":
+        return businessFlow(
+          pickByIndex(["学校求人", "合同説明会", "就活サイト", "インターン経由"], triggerIndex),
+        );
+      case "business":
+        return businessFlow(
+          pickByIndex(["学校求人", "就活サイト", "合同説明会", "インターン経由"], triggerIndex),
+        );
+    }
+  })();
+
+  return experience;
 }
 
 function pickDepartment(track: SeedTrack, rng: () => number, localIndex: number) {
@@ -767,18 +865,23 @@ function buildCompanies(
     }
 
     used.add(companyName);
+    const companyQuality = pickByIndex(
+      selectionQualityPresets[track],
+      profileIndex + companies.length,
+    );
 
     const selectionExperience =
       companies.length === 0
         ? rng() < 0.82
-          ? buildSelectionExperience(track, profileIndex + companies.length, department)
+          ? buildSelectionExperience(track, profileIndex, department, companies.length)
           : undefined
         : rng() < 0.28
-          ? buildSelectionExperience(track, profileIndex + companies.length, department)
+          ? buildSelectionExperience(track, profileIndex, department, companies.length)
           : undefined;
 
     companies.push({
       companyName,
+      motivation: companyQuality.motivation,
       selectionExperience,
     });
   }
@@ -801,6 +904,8 @@ function buildSeedAlumni() {
       const enrollmentYear = graduationYear - durationYears;
       const emailLocal = `${plan.track}.${String(index + 1).padStart(3, "0")}`;
       const skills = buildSkills(plan.track, index);
+      const companies = buildCompanies(plan.track, department, index, rng);
+      const activitySource = pickByIndex(selectionQualityPresets[plan.track], index);
 
       seedAlumni.push({
         emailLocal,
@@ -808,12 +913,13 @@ function buildSeedAlumni() {
         nickname,
         enrollmentYear,
         department,
-        companies: buildCompanies(plan.track, department, index, rng),
-        remarks: buildRemarks(plan.track, index, rng),
+        companies,
         skills,
         portfolioUrl: buildPortfolioUrl(plan.track, index, emailLocal, rng),
         gakuchika: buildGakuchika(plan.track, index, rng),
         usefulCoursework: buildCoursework(plan.track, index, rng),
+        activityPeriod: activitySource?.activityPeriod,
+        activityPeriodNote: activitySource?.activityPeriodNote,
         acceptContact: rng() > 0.28,
         xUrl: `https://x.com/${emailLocal.replaceAll(".", "_")}`,
         instagramUrl: `https://www.instagram.com/${emailLocal.replaceAll(".", "_")}/`,
@@ -827,6 +933,47 @@ function buildSeedAlumni() {
 }
 
 const seedAlumni = buildSeedAlumni();
+
+type SeededProfileForReaction = {
+  id: string;
+  userId: string;
+};
+
+type SeededUserForReaction = {
+  id: string;
+};
+
+function buildHelpfulReactionRows(
+  profiles: SeededProfileForReaction[],
+  users: SeededUserForReaction[],
+) {
+  const userIds = users.map((user) => user.id);
+
+  return profiles.flatMap((profile, profileIndex) => {
+    const targetCount = Math.min(
+      4 + (profileIndex % 8) + (profileIndex % 9 === 0 ? 8 : profileIndex % 4 === 0 ? 4 : 0),
+      Math.max(userIds.length - 1, 0),
+    );
+    const rows: Array<{ alumniProfileId: string; userId: string }> = [];
+    let cursor = profileIndex + 1;
+
+    while (rows.length < targetCount && rows.length < userIds.length - 1) {
+      const userId = userIds[cursor % userIds.length];
+      cursor += 1;
+
+      if (!userId || userId === profile.userId || rows.some((row) => row.userId === userId)) {
+        continue;
+      }
+
+      rows.push({
+        alumniProfileId: profile.id,
+        userId,
+      });
+    }
+
+    return rows;
+  });
+}
 
 async function main() {
   const connectionString =
@@ -868,7 +1015,6 @@ async function main() {
               nickname: alumni.nickname,
               graduationYear: calculatedGraduationYear,
               department: alumni.department,
-              remarks: alumni.remarks,
               contactEmail: email,
               xUrl: alumni.acceptContact ? alumni.xUrl : undefined,
               instagramUrl: alumni.acceptContact ? alumni.instagramUrl : undefined,
@@ -878,15 +1024,17 @@ async function main() {
               portfolioUrl: alumni.portfolioUrl,
               gakuchika: alumni.gakuchika,
               usefulCoursework: alumni.usefulCoursework,
+              activityPeriod: alumni.activityPeriod,
+              activityPeriodNote: alumni.activityPeriodNote,
               companies: {
                 create: alumni.companies.map((company) => ({
                   companyName: company.companyName,
                   companyNameSearch: normalizeCompanyNameForSearch(company.companyName),
+                  motivation: company.motivation,
                   selectionExperience: company.selectionExperience
                     ? {
                         create: {
                           entryTrigger: company.selectionExperience.entryTrigger,
-                          overallTip: company.selectionExperience.overallTip,
                           steps: {
                             create: company.selectionExperience.steps.map((step, sortOrder) => ({
                               stepKind: step.stepKind,
@@ -910,6 +1058,44 @@ async function main() {
       });
     }
 
+    const seededProfiles = await prisma.alumniProfile.findMany({
+      where: {
+        user: {
+          email: {
+            endsWith: `@${SEED_EMAIL_DOMAIN}`,
+          },
+        },
+      },
+      select: {
+        id: true,
+        userId: true,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+    const seededUsers = await prisma.user.findMany({
+      where: {
+        email: {
+          endsWith: `@${SEED_EMAIL_DOMAIN}`,
+        },
+      },
+      select: {
+        id: true,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+    const helpfulReactionRows = buildHelpfulReactionRows(seededProfiles, seededUsers);
+
+    if (helpfulReactionRows.length > 0) {
+      await prisma.helpfulReaction.createMany({
+        data: helpfulReactionRows,
+        skipDuplicates: true,
+      });
+    }
+
     const companyCount = seedAlumni.reduce((sum, alumni) => sum + alumni.companies.length, 0);
     const experienceCount = seedAlumni.reduce(
       (sum, alumni) =>
@@ -918,7 +1104,7 @@ async function main() {
     );
 
     console.log(
-      `Seed completed: ${seedAlumni.length} users, ${companyCount} companies, ${experienceCount} selection experiences.`,
+      `Seed completed: ${seedAlumni.length} users, ${companyCount} companies, ${experienceCount} selection experiences, ${helpfulReactionRows.length} helpful reactions.`,
     );
   } finally {
     await prisma.$disconnect();

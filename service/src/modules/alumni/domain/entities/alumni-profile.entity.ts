@@ -18,6 +18,8 @@ export type AlumniProfileDraftInput = {
   portfolioUrl?: string;
   gakuchika?: string;
   usefulCoursework?: string;
+  activityPeriod?: JobHuntingPeriod;
+  activityPeriodNote?: string;
 };
 
 export type SelectionStepKind =
@@ -33,6 +35,14 @@ export type SelectionStepKind =
 
 export type SelectionFormat = "ONLINE" | "IN_PERSON" | "UNKNOWN";
 
+export type JobHuntingPeriod =
+  | "FIRST_YEAR_FIRST_HALF"
+  | "FIRST_YEAR_SECOND_HALF"
+  | "SECOND_YEAR_FIRST_HALF"
+  | "SUMMER_BREAK"
+  | "PRE_GRADUATION_AUTUMN"
+  | "OTHER";
+
 export type SelectionStepDraftInput = {
   stepKind: SelectionStepKind;
   format?: SelectionFormat;
@@ -45,6 +55,9 @@ export type SelectionStepDraftInput = {
 
 export type SelectionExperienceDraftInput = {
   entryTrigger?: string;
+  motivation?: string;
+  activityPeriod?: JobHuntingPeriod;
+  activityPeriodNote?: string;
   overallTip?: string;
   steps?: SelectionStepDraftInput[];
 };
@@ -52,6 +65,7 @@ export type SelectionExperienceDraftInput = {
 export type CompanyExperienceDraftInput = {
   companyName: string;
   isPublic?: boolean;
+  motivation?: string;
   selectionExperience?: SelectionExperienceDraftInput | null;
 };
 
@@ -68,6 +82,8 @@ export type AlumniProfileDraftData = {
   portfolioUrl?: string;
   gakuchika?: string;
   usefulCoursework?: string;
+  activityPeriod?: JobHuntingPeriod;
+  activityPeriodNote?: string;
 };
 
 export class AlumniProfileDraft {
@@ -100,6 +116,9 @@ export class AlumniProfileDraft {
       gakuchika: input.gakuchika !== undefined ? input.gakuchika.trim() : undefined,
       usefulCoursework:
         input.usefulCoursework !== undefined ? input.usefulCoursework.trim() : undefined,
+      activityPeriod: normalizeJobHuntingPeriod(input.activityPeriod),
+      activityPeriodNote:
+        input.activityPeriodNote !== undefined ? input.activityPeriodNote.trim() : undefined,
     });
 
     draft.assertPublishable();
@@ -149,6 +168,22 @@ export class AlumniProfileDraft {
       throw new DomainValidationError("nickname is required when isPublic is true");
     }
 
+    if (this.data.isPublic && !this.data.activityPeriod) {
+      throw new DomainValidationError("activityPeriod is required when isPublic is true");
+    }
+
+    if (
+      this.data.isPublic &&
+      (!this.data.companyExperiences ||
+        !this.data.companyExperiences.some(
+          (company) => company.isPublic !== false && Boolean(company.motivation),
+        ))
+    ) {
+      throw new DomainValidationError(
+        "at least one public company motivation is required when isPublic is true",
+      );
+    }
+
     if (
       this.data.isPublic &&
       this.data.acceptContact &&
@@ -175,6 +210,22 @@ const validStepKinds = new Set<SelectionStepKind>([
 ]);
 
 const validFormats = new Set<SelectionFormat>(["ONLINE", "IN_PERSON", "UNKNOWN"]);
+const validJobHuntingPeriods = new Set<JobHuntingPeriod>([
+  "FIRST_YEAR_FIRST_HALF",
+  "FIRST_YEAR_SECOND_HALF",
+  "SECOND_YEAR_FIRST_HALF",
+  "SUMMER_BREAK",
+  "PRE_GRADUATION_AUTUMN",
+  "OTHER",
+]);
+
+function normalizeJobHuntingPeriod(value: string | undefined): JobHuntingPeriod | undefined {
+  const activityPeriod = value?.trim() as JobHuntingPeriod | undefined;
+  if (activityPeriod && !validJobHuntingPeriods.has(activityPeriod)) {
+    throw new DomainValidationError("job hunting period is invalid");
+  }
+  return activityPeriod;
+}
 
 function normalizeCompanyExperiences(
   input: CompanyExperienceDraftInput[],
@@ -192,6 +243,7 @@ function normalizeCompanyExperiences(
     normalized.push({
       companyName,
       isPublic: item.isPublic ?? true,
+      motivation: item.motivation?.trim() || undefined,
       selectionExperience: item.selectionExperience
         ? normalizeSelectionExperience(item.selectionExperience)
         : null,
@@ -208,14 +260,27 @@ function normalizeSelectionExperience(
     .map(normalizeSelectionStep)
     .filter((step): step is SelectionStepDraftInput => Boolean(step));
   const entryTrigger = input.entryTrigger?.trim();
+  const motivation = input.motivation?.trim();
+  const activityPeriod = normalizeJobHuntingPeriod(input.activityPeriod);
+  const activityPeriodNote = input.activityPeriodNote?.trim();
   const overallTip = input.overallTip?.trim();
 
-  if (!entryTrigger && !overallTip && steps.length === 0) {
+  if (
+    !entryTrigger &&
+    !motivation &&
+    !activityPeriod &&
+    !activityPeriodNote &&
+    !overallTip &&
+    steps.length === 0
+  ) {
     return null;
   }
 
   return {
     entryTrigger: entryTrigger || undefined,
+    motivation: motivation || undefined,
+    activityPeriod,
+    activityPeriodNote: activityPeriodNote || undefined,
     overallTip: overallTip || undefined,
     steps,
   };

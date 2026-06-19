@@ -1,4 +1,4 @@
-import { CheckIcon } from "@/components/atoms/icons";
+import { CheckIcon, HeartIcon } from "@/components/atoms/icons";
 import { SocialContactIcon } from "@/components/atoms/social-contact-icon";
 import { AlumniDetailLink } from "@/components/molecules/alumni-detail-link";
 import type { AlumniListItem } from "@/graphql/types";
@@ -42,11 +42,17 @@ export function AlumniCard({ alumni, returnTo }: AlumniCardProps) {
   const companyNames = alumni.companyNames.length > 0 ? alumni.companyNames : ["未設定"];
   const [primaryCompany, ...otherCompanies] = companyNames;
   const selectionExperienceCount = alumni.companyExperiences.filter(
-    (company) => company.selectionExperience,
+    (company) => company.selectionExperience?.hasSelectionFlow,
   ).length;
   const contactLinks = getAlumniContactLinks(alumni);
   const canContact = alumni.acceptContact && contactLinks.length > 0;
   const displayName = alumni.nickname ?? "匿名";
+  const hasDetailInfo =
+    alumni.skills.length > 0 ||
+    alumni.hasGakuchika ||
+    alumni.hasUsefulCoursework ||
+    alumni.hasPortfolio ||
+    selectionExperienceCount > 0;
   const detailPath = `/alumni/${alumni.id}`;
   const createDetailHref = (companyExperienceId?: string, hash?: string) => {
     const query = new URLSearchParams();
@@ -192,34 +198,29 @@ export function AlumniCard({ alumni, returnTo }: AlumniCardProps) {
           ) : null}
         </div>
 
-        {/* ── Remarks as personal quote ── */}
-        <p className="mt-2 min-h-[3.25rem] line-clamp-2 border-l-2 border-stone-200 pl-2.5 text-[12px] leading-relaxed text-stone-500 dark:border-stone-700 dark:text-stone-400">
-          {alumni.remarks ? (
-            alumni.remarks
-          ) : (
-            <span className="italic text-stone-300 dark:text-stone-600">なし</span>
-          )}
-        </p>
-
         {/* ── Detail Link ── */}
-        <div className="mt-2 min-h-[1.25rem]">
-          {alumni.skills.length > 0 ||
-          alumni.hasGakuchika ||
-          alumni.hasUsefulCoursework ||
-          alumni.hasPortfolio ||
-          selectionExperienceCount > 0 ? (
-            <AlumniDetailLink href={detailHref} />
-          ) : null}
+        <div className="mt-3 flex min-h-[1.75rem] items-center justify-between gap-3">
+          <div
+            className="inline-flex w-fit items-center gap-1.5 rounded-full text-stone-500 dark:text-stone-400"
+            aria-label={`役に立った ${alumni.helpfulReaction.count}件`}
+            title={`役に立った ${alumni.helpfulReaction.count}件`}
+          >
+            <HeartIcon size={18} strokeWidth={2.25} title="役に立った" />
+            <span className="text-[13px] font-semibold tabular-nums">
+              {alumni.helpfulReaction.count}
+            </span>
+          </div>
+          {hasDetailInfo ? <AlumniDetailLink href={detailHref} /> : null}
         </div>
 
         {/* ── Contact CTA ── */}
         <div className="mt-auto pt-3">
           {canContact ? (
-            <div className="space-y-1">
-              <p className="text-[10px] font-semibold text-stone-400 dark:text-stone-500">
+            <div className="flex items-center justify-between gap-2 border-t border-stone-100 pt-3 dark:border-stone-800/70">
+              <p className="shrink-0 text-[10px] font-semibold text-stone-400 dark:text-stone-500">
                 SNSで連絡する
               </p>
-              <div className="grid grid-cols-[repeat(auto-fit,minmax(0,1fr))] gap-2">
+              <div className="flex min-w-0 flex-wrap justify-end gap-1.5">
                 {contactLinks.map((contactLink) => (
                   <a
                     key={contactLink.label}
@@ -228,7 +229,7 @@ export function AlumniCard({ alumni, returnTo }: AlumniCardProps) {
                     rel="noopener noreferrer"
                     aria-label={`${contactLink.label}で連絡する`}
                     title={`${contactLink.label}で連絡する`}
-                    className={`group/cta flex min-w-0 items-center justify-center rounded-xl px-3 py-2 transition-all duration-200 hover:shadow-lg active:scale-[0.98] ${getAlumniContactClassName(contactLink.label)}`}
+                    className={`group/cta inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-all duration-200 hover:shadow-md active:scale-[0.98] ${getAlumniContactClassName(contactLink.label)}`}
                   >
                     <SocialContactIcon
                       platform={contactLink.label}

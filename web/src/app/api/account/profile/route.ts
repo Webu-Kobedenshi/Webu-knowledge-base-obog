@@ -40,11 +40,23 @@ type SelectionStepKind =
 
 type SelectionFormat = "ONLINE" | "IN_PERSON" | "UNKNOWN";
 
+type JobHuntingPeriod =
+  | "FIRST_YEAR_FIRST_HALF"
+  | "FIRST_YEAR_SECOND_HALF"
+  | "SECOND_YEAR_FIRST_HALF"
+  | "SUMMER_BREAK"
+  | "PRE_GRADUATION_AUTUMN"
+  | "OTHER";
+
 type CompanyExperienceBody = {
   companyName: string;
   isPublic?: boolean;
+  motivation?: string;
   selectionExperience?: {
     entryTrigger?: string;
+    motivation?: string;
+    activityPeriod?: JobHuntingPeriod;
+    activityPeriodNote?: string;
     overallTip?: string;
     steps?: Array<{
       stepKind: SelectionStepKind;
@@ -77,6 +89,8 @@ type Body = {
   portfolioUrl?: string;
   gakuchika?: string;
   usefulCoursework?: string;
+  activityPeriod?: JobHuntingPeriod;
+  activityPeriodNote?: string;
 };
 
 type GraphQlResponse<T> = {
@@ -114,15 +128,18 @@ const updateAlumniProfileMutation = `
     updateAlumniProfile(input: $input) {
       id
       companyNames
-      companyExperiences {
-        id
-        companyName
-        isPublic
-        selectionExperience {
+	      companyExperiences {
+	        id
+	        companyName
+	        isPublic
+	        motivation
+	        selectionExperience {
           id
         }
-      }
-      isPublic
+	      }
+	      activityPeriod
+	      activityPeriodNote
+	      isPublic
       acceptContact
       xUrl
       instagramUrl
@@ -259,12 +276,39 @@ export async function POST(request: Request) {
       body.companyExperiences?.filter(
         (item) => item.companyName.trim().length > 0 && item.isPublic !== false,
       ).length ?? companyNames.length;
+    const publicCompanyMotivationCount =
+      body.companyExperiences?.filter(
+        (item) =>
+          item.companyName.trim().length > 0 &&
+          item.isPublic !== false &&
+          Boolean(item.motivation?.trim()),
+      ).length ?? 0;
 
     if (isPublic && publicCompanyCount === 0) {
       return NextResponse.json(
         {
           ok: false,
           message: "公開する場合は公開する内定先を1件以上指定してください",
+        },
+        { status: 400 },
+      );
+    }
+
+    if (isPublic && !body.activityPeriod) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "公開する場合は就活を始めた時期を指定してください",
+        },
+        { status: 400 },
+      );
+    }
+
+    if (isPublic && publicCompanyMotivationCount === 0) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "公開する場合は公開する内定先のうち1社以上に選んだ理由を入力してください",
         },
         { status: 400 },
       );
@@ -282,7 +326,6 @@ export async function POST(request: Request) {
           department: body.department,
           companyNames,
           companyExperiences: body.companyExperiences,
-          remarks: body.remarks,
           contactEmail,
           xUrl,
           instagramUrl,
@@ -292,6 +335,8 @@ export async function POST(request: Request) {
           portfolioUrl: body.portfolioUrl,
           gakuchika: body.gakuchika,
           usefulCoursework: body.usefulCoursework,
+          activityPeriod: body.activityPeriod,
+          activityPeriodNote: body.activityPeriodNote,
         },
       },
     );

@@ -42,8 +42,10 @@ export class AlumniQueryService {
     return this.alumniRepository.findPublicCompanyNameSuggestions(normalizedQuery, limit);
   }
 
-  getAlumniDetail(id: string): Promise<AlumniProfileDto | null> {
-    return this.alumniRepository.findPublicById(id);
+  getAlumniDetail(id: string, viewerUserId?: string): Promise<AlumniProfileDto | null> {
+    return viewerUserId
+      ? this.alumniRepository.findPublicById(id, viewerUserId)
+      : this.alumniRepository.findPublicById(id);
   }
 
   async getMyProfile(userId: string): Promise<UserDto | null> {
