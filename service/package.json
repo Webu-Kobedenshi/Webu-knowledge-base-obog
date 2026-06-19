@@ -8,6 +8,7 @@
   "scripts": {
     "build": "nest build",
     "format": "biome format --write .",
+    "format:check": "biome format .",
     "typecheck": "tsc --noEmit",
     "start": "nest start",
     "start:dev": "nest start --watch",

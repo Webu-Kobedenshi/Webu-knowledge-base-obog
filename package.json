@@ -11,6 +11,7 @@
     "lint": "pnpm -r lint",
     "lint:check": "pnpm -r lint:check",
     "format": "pnpm -r format",
+    "format:check": "pnpm -r format:check",
     "typecheck": "pnpm prisma:generate && pnpm -r typecheck",
     "build": "pnpm prisma:generate && pnpm -r build",
     "prisma:generate": "pnpm --filter service exec prisma generate",
