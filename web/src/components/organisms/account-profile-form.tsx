@@ -189,7 +189,10 @@ const entryTriggerOptions = [
   "その他",
 ];
 
-const jobHuntingPeriodOptions: Array<{ value: JobHuntingPeriod; label: string }> = [
+const jobHuntingPeriodOptions: Array<{
+  value: JobHuntingPeriod;
+  label: string;
+}> = [
   { value: "FIRST_YEAR_FIRST_HALF", label: "1年前期" },
   { value: "FIRST_YEAR_SECOND_HALF", label: "1年後期" },
   { value: "SECOND_YEAR_FIRST_HALF", label: "2年前期" },
@@ -1048,9 +1051,6 @@ export function AccountProfileForm({
                   <h3 className="text-sm font-bold text-stone-900 dark:text-stone-100">
                     公開プロフィール設定
                   </h3>
-                  <p className="mt-0.5 text-[11px] text-stone-500 dark:text-stone-400">
-                    内定先や表示名を後輩に公開できます
-                  </p>
                 </div>
               </div>
 
@@ -1129,9 +1129,6 @@ export function AccountProfileForm({
                     <span className="text-[12px] font-bold text-stone-900 dark:text-stone-100">
                       就活を始めた時期
                     </span>
-                    <p className="mt-1 text-[10px] leading-relaxed text-stone-500 dark:text-stone-400">
-                      企業ごとではなく、あなたの就活全体としていつ動き始めたかを公開します。
-                    </p>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)]">
                     <div className="space-y-1.5">
