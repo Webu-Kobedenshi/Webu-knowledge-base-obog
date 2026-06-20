@@ -1,7 +1,7 @@
+import type { Department } from "../../../../common/domain/department";
+import { DomainValidationError } from "../../../../common/domain/domain-validation.error";
+import type { UserRole, UserStatus } from "../../../../common/domain/user";
 import { getDurationYears } from "../department-duration";
-import { DomainValidationError } from "../errors/domain-validation.error";
-import type { Department } from "../types/department";
-import type { UserRole, UserStatus } from "../types/user";
 import { resolveRoleAndStatus } from "../user-role-transition";
 
 export type InitialSettingsDraftInput = {

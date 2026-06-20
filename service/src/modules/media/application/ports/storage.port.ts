@@ -1,4 +1,4 @@
-import type { UploadUrlResponse } from "../dto/alumni.input";
+import type { UploadUrlResponse } from "../dto/media.dto";
 
 export const STORAGE = Symbol("STORAGE");
 

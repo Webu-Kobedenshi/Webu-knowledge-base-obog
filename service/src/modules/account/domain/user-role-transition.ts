@@ -1,5 +1,5 @@
+import type { UserRole, UserStatus } from "../../../common/domain/user";
 import { calculateGraduationYear, isGraduatedAt } from "./graduation-policy";
-import type { UserRole, UserStatus } from "./types/user";
 
 export type RoleStatusResolutionInput = {
   enrollmentYear: number;

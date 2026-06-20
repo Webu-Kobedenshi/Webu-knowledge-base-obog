@@ -1,21 +1,9 @@
+import type { Department } from "../../../../common/domain/department";
 import type {
   JobHuntingPeriod,
   SelectionFormat,
   SelectionStepKind,
 } from "../../domain/entities/alumni-profile.entity";
-import type { Department } from "../../domain/types/department";
-
-export type InitialSettingsInput = {
-  name: string;
-  studentId: string;
-  enrollmentYear: number;
-  durationYears: number;
-  department: Department;
-};
-
-export type AdminNameInput = {
-  name: string;
-};
 
 export type UpdateAlumniProfileInput = {
   nickname?: string;
@@ -61,10 +49,4 @@ export type CompanyExperienceInput = {
   isPublic?: boolean;
   motivation?: string;
   selectionExperience?: SelectionExperienceInput | null;
-};
-
-export type UploadUrlResponse = {
-  uploadUrl: string;
-  fileUrl: string;
-  key: string;
 };

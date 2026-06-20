@@ -1,0 +1,54 @@
+enum Role {
+  STUDENT
+  ALUMNI
+  ADMIN
+}
+
+enum UserStatus {
+  ENROLLED
+  GRADUATED
+  WITHDRAWN
+}
+
+type User {
+  id: ID!
+  email: String!
+  name: String
+  studentId: String
+  linkedGmail: String
+  role: Role!
+  status: UserStatus!
+  enrollmentYear: Int
+  durationYears: Int
+  department: Department
+  alumniProfile: AlumniProfile
+  createdAt: String!
+  updatedAt: String!
+}
+
+input InitialSettingsInput {
+  name: String!
+  studentId: String!
+  enrollmentYear: Int!
+  durationYears: Int!
+  department: Department!
+}
+
+input AdminNameInput {
+  name: String!
+}
+
+extend type Query {
+  getMyProfile: User!
+  getMyProfileSummary: User!
+  findUserByLinkedGmail(gmail: String!): User
+  isAdminEmail(email: String!): Boolean!
+}
+
+extend type Mutation {
+  updateInitialSettings(input: InitialSettingsInput!): User!
+  updateAdminName(input: AdminNameInput!): User!
+  deleteMyAccount: Boolean!
+  linkGmail(verificationToken: String!): User!
+  unlinkGmail: User!
+}

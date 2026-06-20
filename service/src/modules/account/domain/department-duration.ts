@@ -1,4 +1,4 @@
-import type { Department } from "./types/department";
+import type { Department } from "../../../common/domain/department";
 
 const FOUR_YEAR_DEPARTMENTS: ReadonlySet<Department> = new Set(["IT_EXPERT", "GAME_RESEARCH"]);
 

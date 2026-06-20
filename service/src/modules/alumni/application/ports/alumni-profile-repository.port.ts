@@ -1,3 +1,4 @@
+import type { Department } from "../../../../common/domain/department";
 import type {
   JobHuntingPeriod,
   SelectionFormat,
@@ -7,22 +8,9 @@ import type {
   AlumniConnectionDto,
   AlumniListConnectionDto,
   AlumniProfileDto,
-  UserDto,
 } from "../../domain/read-models/alumni.read-model";
-import type { Department } from "../../domain/types/department";
-import type { UserRole, UserStatus } from "../../domain/types/user";
 
-export const ALUMNI_REPOSITORY = Symbol("ALUMNI_REPOSITORY");
-
-export type InitialSettingsPersistenceInput = {
-  name: string;
-  studentId: string;
-  enrollmentYear: number;
-  durationYears: number;
-  department: Department;
-  role: UserRole;
-  status: UserStatus;
-};
+export const ALUMNI_PROFILE_REPOSITORY = Symbol("ALUMNI_PROFILE_REPOSITORY");
 
 export type SelectionStepPersistenceInput = {
   stepKind: SelectionStepKind;
@@ -78,23 +66,15 @@ export type FindPublicAlumniListParams = {
   offset: number;
 };
 
-export interface AlumniRepositoryPort {
+export interface AlumniProfileRepositoryPort {
   findPublicList(params: FindPublicAlumniListParams): Promise<AlumniConnectionDto>;
   findPublicListItems(params: FindPublicAlumniListParams): Promise<AlumniListConnectionDto>;
   findPublicCompanyNameSuggestions(query: string, limit: number): Promise<string[]>;
   findPublicById(id: string, viewerUserId?: string): Promise<AlumniProfileDto | null>;
-  findUserById(userId: string): Promise<UserDto | null>;
-  findUserByEmail(email: string): Promise<UserDto | null>;
-  findUserByLinkedGmail(gmail: string): Promise<UserDto | null>;
-  isAdminEmail(email: string): Promise<boolean>;
-  updateInitialSettings(userId: string, input: InitialSettingsPersistenceInput): Promise<UserDto>;
-  updateAdminName(userId: string, name: string): Promise<UserDto>;
   upsertAlumniProfile(
     userId: string,
     input: UpdateAlumniProfilePersistenceInput,
   ): Promise<AlumniProfileDto>;
   updateAvatarUrl(userId: string, avatarUrl: string): Promise<AlumniProfileDto | null>;
-  updateLinkedGmail(userId: string, gmail: string | null): Promise<UserDto>;
   toggleHelpfulReaction(alumniProfileId: string, userId: string): Promise<AlumniProfileDto | null>;
-  deleteUserById(userId: string): Promise<boolean>;
 }

@@ -1,4 +1,4 @@
-import { DomainValidationError } from "../errors/domain-validation.error";
+import { DomainValidationError } from "../../../../common/domain/domain-validation.error";
 
 export type SocialContactPlatform = "x" | "instagram";
 

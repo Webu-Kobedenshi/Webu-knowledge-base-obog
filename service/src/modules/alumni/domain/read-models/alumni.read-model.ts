@@ -1,5 +1,5 @@
-import type { Department } from "../types/department";
-import type { UserRole, UserStatus } from "../types/user";
+import type { Department } from "../../../../common/domain/department";
+import type { UserRole, UserStatus } from "../../../../common/domain/user";
 
 export type UserDto = {
   id: string;

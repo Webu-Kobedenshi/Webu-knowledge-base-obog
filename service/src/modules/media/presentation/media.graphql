@@ -1,0 +1,9 @@
+type UploadUrlResponse {
+  uploadUrl: String!
+  fileUrl: String!
+  key: String!
+}
+
+extend type Mutation {
+  getUploadUrl(fileName: String!, contentType: String!): UploadUrlResponse!
+}

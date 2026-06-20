@@ -23,18 +23,6 @@ enum Department {
   OTHERS
 }
 
-enum Role {
-  STUDENT
-  ALUMNI
-  ADMIN
-}
-
-enum UserStatus {
-  ENROLLED
-  GRADUATED
-  WITHDRAWN
-}
-
 enum SelectionStepKind {
   DOCUMENT_SCREENING
   WEB_TEST
@@ -61,22 +49,6 @@ enum JobHuntingPeriod {
   SUMMER_BREAK
   PRE_GRADUATION_AUTUMN
   OTHER
-}
-
-type User {
-  id: ID!
-  email: String!
-  name: String
-  studentId: String
-  linkedGmail: String
-  role: Role!
-  status: UserStatus!
-  enrollmentYear: Int
-  durationYears: Int
-  department: Department
-  alumniProfile: AlumniProfile
-  createdAt: String!
-  updatedAt: String!
 }
 
 type AlumniProfile {
@@ -235,18 +207,6 @@ input SelectionStepInput {
   preparation: String
 }
 
-input InitialSettingsInput {
-  name: String!
-  studentId: String!
-  enrollmentYear: Int!
-  durationYears: Int!
-  department: Department!
-}
-
-input AdminNameInput {
-  name: String!
-}
-
 extend type Query {
   getAlumniList(
     department: Department
@@ -263,20 +223,11 @@ extend type Query {
     offset: Int!
   ): AlumniListConnection!
   getCompanyNameSuggestions(query: String!, limit: Int): [String!]!
-  getMyProfile: User!
-  getMyProfileSummary: User!
   getAlumniDetail(id: ID!): AlumniProfile
-  findUserByLinkedGmail(gmail: String!): User
-  isAdminEmail(email: String!): Boolean!
 }
 
 extend type Mutation {
-  updateInitialSettings(input: InitialSettingsInput!): User!
-  updateAdminName(input: AdminNameInput!): User!
   updateAlumniProfile(input: UpdateAlumniProfileInput!): AlumniProfile!
   toggleHelpfulReaction(alumniProfileId: ID!): AlumniProfile!
   updateAvatar(url: String!): AlumniProfile!
-  deleteMyAccount: Boolean!
-  linkGmail(verificationToken: String!): User!
-  unlinkGmail: User!
 }

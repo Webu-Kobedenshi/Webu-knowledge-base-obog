@@ -1,30 +1,23 @@
 import { Module } from "@nestjs/common";
-import { GqlAuthGuard } from "../../common/auth/gql-auth.guard";
-import { PrismaService } from "../../prisma.service";
-import { AlumniCommandService } from "./application/commands/alumni-command.service";
-import { ALUMNI_REPOSITORY } from "./application/ports/alumni-repository.port";
-import { STORAGE } from "./application/ports/storage.port";
+import { CommonModule } from "../../common/common.module";
+import { AccountModule } from "../account/account.module";
+import { MediaModule } from "../media/media.module";
+import { AlumniProfileCommandService } from "./application/commands/alumni-profile-command.service";
+import { ALUMNI_PROFILE_REPOSITORY } from "./application/ports/alumni-profile-repository.port";
 import { AlumniQueryService } from "./application/queries/alumni-query.service";
-import { AlumniRepository } from "./infrastructure/alumni.repository";
-import { StorageService } from "./infrastructure/storage.service";
+import { AlumniProfileRepository } from "./infrastructure/alumni-profile.repository";
 import { AlumniResolver } from "./presentation/alumni.resolver";
 
 @Module({
+  imports: [CommonModule, AccountModule, MediaModule],
   providers: [
-    PrismaService,
-    AlumniRepository,
-    StorageService,
+    AlumniProfileRepository,
     {
-      provide: ALUMNI_REPOSITORY,
-      useExisting: AlumniRepository,
-    },
-    {
-      provide: STORAGE,
-      useExisting: StorageService,
+      provide: ALUMNI_PROFILE_REPOSITORY,
+      useExisting: AlumniProfileRepository,
     },
     AlumniQueryService,
-    AlumniCommandService,
-    GqlAuthGuard,
+    AlumniProfileCommandService,
     AlumniResolver,
   ],
 })

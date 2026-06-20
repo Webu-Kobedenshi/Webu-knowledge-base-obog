@@ -1,5 +1,5 @@
+import { DomainValidationError } from "../../../../common/domain/domain-validation.error";
 import { resolveProfileVisibility } from "../alumni-profile-policy";
-import { DomainValidationError } from "../errors/domain-validation.error";
 import { CompanyNameCollection } from "../value-objects/company-name";
 import { EmailAddress } from "../value-objects/email";
 import { SkillList } from "../value-objects/skill-list";

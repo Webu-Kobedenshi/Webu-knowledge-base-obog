@@ -43,6 +43,16 @@ UI を追加するときは、既存 layer に合う場所へ置きます。
 
 Command は更新系、Query は参照系として分けます。
 
+### Backend Module Ownership
+
+`service/src/modules` は機能単位で分けます。
+
+- `account`: ログインユーザー、管理者メール判定、初期設定、Gmail 引き継ぎ、退会
+- `alumni`: 公開プロフィール、OB/OG 一覧・詳細、企業名検索、役に立ったリアクション
+- `media`: S3 compatible storage の署名付き URL 発行と保存済みオブジェクト操作
+
+新しい use case を追加するときは、まず画面/API の目的が `account`、`alumni`、`media` のどれに属するかを決めます。複数機能をまたぐ処理は、呼び出し元の application service が他 module の port を使って調停し、単一 module に横断責務を集約しません。
+
 ## Data Flow
 
 1. `web` が NextAuth で Google login を行う

@@ -1,17 +1,21 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { Department } from "../../domain/types/department";
-import { resolveRoleAndStatus } from "../../domain/user-role-transition";
+import type { Department } from "../../../../common/domain/department";
 import type {
   AlumniConnectionDto,
   AlumniListConnectionDto,
   AlumniProfileDto,
-  UserDto,
 } from "../dto/alumni.dto";
-import { ALUMNI_REPOSITORY, type AlumniRepositoryPort } from "../ports/alumni-repository.port";
+import {
+  ALUMNI_PROFILE_REPOSITORY,
+  type AlumniProfileRepositoryPort,
+} from "../ports/alumni-profile-repository.port";
 
 @Injectable()
 export class AlumniQueryService {
-  constructor(@Inject(ALUMNI_REPOSITORY) private readonly alumniRepository: AlumniRepositoryPort) {}
+  constructor(
+    @Inject(ALUMNI_PROFILE_REPOSITORY)
+    private readonly alumniProfileRepository: AlumniProfileRepositoryPort,
+  ) {}
 
   getAlumniList(params: {
     department?: Department;
@@ -20,7 +24,7 @@ export class AlumniQueryService {
     limit: number;
     offset: number;
   }): Promise<AlumniConnectionDto> {
-    return this.alumniRepository.findPublicList(params);
+    return this.alumniProfileRepository.findPublicList(params);
   }
 
   getAlumniListItems(params: {
@@ -30,7 +34,7 @@ export class AlumniQueryService {
     limit: number;
     offset: number;
   }): Promise<AlumniListConnectionDto> {
-    return this.alumniRepository.findPublicListItems(params);
+    return this.alumniProfileRepository.findPublicListItems(params);
   }
 
   getCompanyNameSuggestions(query: string, limit = 8): Promise<string[]> {
@@ -39,48 +43,12 @@ export class AlumniQueryService {
       return Promise.resolve([]);
     }
 
-    return this.alumniRepository.findPublicCompanyNameSuggestions(normalizedQuery, limit);
+    return this.alumniProfileRepository.findPublicCompanyNameSuggestions(normalizedQuery, limit);
   }
 
   getAlumniDetail(id: string, viewerUserId?: string): Promise<AlumniProfileDto | null> {
     return viewerUserId
-      ? this.alumniRepository.findPublicById(id, viewerUserId)
-      : this.alumniRepository.findPublicById(id);
-  }
-
-  async getMyProfile(userId: string): Promise<UserDto | null> {
-    const profile = await this.alumniRepository.findUserById(userId);
-    if (!profile) {
-      return null;
-    }
-
-    if (profile.role === "ADMIN") {
-      return profile;
-    }
-
-    if (profile.enrollmentYear && profile.durationYears) {
-      const resolved = resolveRoleAndStatus({
-        enrollmentYear: profile.enrollmentYear,
-        durationYears: profile.durationYears,
-      });
-
-      if (profile.role !== resolved.role || profile.status !== resolved.status) {
-        return {
-          ...profile,
-          role: resolved.role,
-          status: resolved.status,
-        };
-      }
-    }
-
-    return profile;
-  }
-
-  findUserByLinkedGmail(gmail: string): Promise<UserDto | null> {
-    return this.alumniRepository.findUserByLinkedGmail(gmail);
-  }
-
-  isAdminEmail(email: string): Promise<boolean> {
-    return this.alumniRepository.isAdminEmail(email);
+      ? this.alumniProfileRepository.findPublicById(id, viewerUserId)
+      : this.alumniProfileRepository.findPublicById(id);
   }
 }
