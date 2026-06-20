@@ -115,6 +115,24 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
                 <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
                   <p className="font-bold">教員アカウント</p>
                   <p className="mt-1 text-xs opacity-80">{email}</p>
+                  <div className="mt-4 rounded-xl border border-amber-200/80 bg-white/60 p-3 dark:border-amber-900/50 dark:bg-amber-950/30">
+                    <p className="font-bold">就活情報 Excel 出力</p>
+                    <p className="mt-1 text-xs leading-5 opacity-80">
+                      登録済みの学籍番号、本名、学科、卒業年度、内定先、会社を選んだ理由、始めた就活時期、ガクチカを
+                      Excel でダウンロードできます。
+                    </p>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Link
+                      href="/api/admin/career-export"
+                      className="inline-flex h-10 items-center justify-center rounded-xl bg-amber-600 px-4 text-sm font-bold text-white shadow-sm transition-colors hover:bg-amber-500"
+                    >
+                      就活情報Excelをダウンロード
+                    </Link>
+                    <span className="inline-flex h-10 cursor-not-allowed items-center justify-center rounded-xl border border-amber-300 bg-white/50 px-4 text-sm font-bold text-amber-900/50 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100/50">
+                      Excelアップロード ※ 将来リリース予定
+                    </span>
+                  </div>
                 </div>
                 <AccountProfileForm
                   initialProfile={profile}

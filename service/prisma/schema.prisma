@@ -87,6 +87,17 @@ enum JobHuntingPeriod {
   OTHER
 }
 
+enum CareerImportBatchStatus {
+  PREVIEWED
+  CONFIRMED
+}
+
+enum CareerImportRowStatus {
+  VALID
+  ERROR
+  PENDING_USER
+}
+
 // ------------------------------------------------------
 // 3. User Models
 // ------------------------------------------------------
@@ -109,6 +120,7 @@ model User {
 
   alumniProfile AlumniProfile?
   helpfulReactions HelpfulReaction[]
+  careerImportBatches CareerImportBatch[] @relation("CareerImportAdmin")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -226,4 +238,43 @@ model SelectionStep {
   updatedAt DateTime @updatedAt
 
   @@index([selectionExperienceId, sortOrder])
+}
+
+model CareerImportBatch {
+  id          String                  @id @default(cuid())
+  fileName    String
+  adminUserId String
+  adminUser   User                    @relation("CareerImportAdmin", fields: [adminUserId], references: [id], onDelete: Restrict)
+  status      CareerImportBatchStatus @default(PREVIEWED)
+  totalCount  Int
+  validCount  Int
+  errorCount  Int
+  pendingCount Int
+  overwriteCount Int
+  confirmedAt DateTime?
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  rows        CareerImportRow[]
+
+  @@index([adminUserId, createdAt(sort: Desc)])
+}
+
+model CareerImportRow {
+  id               String                @id @default(cuid())
+  batchId          String
+  batch            CareerImportBatch     @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  rowNumber        Int
+  status           CareerImportRowStatus
+  rawValues        Json
+  normalizedValues Json?
+  errors           String[]
+  studentId        String?
+  companyName      String?
+  userId           String?
+  alumniProfileId  String?
+  willOverwrite    Boolean               @default(false)
+  createdAt        DateTime              @default(now())
+
+  @@index([batchId, rowNumber])
+  @@index([studentId])
 }

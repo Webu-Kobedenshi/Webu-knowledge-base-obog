@@ -1,0 +1,83 @@
+enum CareerImportRowStatus {
+  VALID
+  ERROR
+  PENDING_USER
+}
+
+type CareerImportPreview {
+  batchId: ID!
+  fileName: String!
+  totalCount: Int!
+  validCount: Int!
+  errorCount: Int!
+  pendingCount: Int!
+  overwriteCount: Int!
+  rows: [CareerImportPreviewRow!]!
+}
+
+type CareerImportPreviewRow {
+  id: ID!
+  rowNumber: Int!
+  status: CareerImportRowStatus!
+  errors: [String!]!
+  studentId: String
+  fullName: String
+  department: Department
+  graduationYear: Int
+  companyName: String
+  companyMotivation: String
+  activityPeriod: JobHuntingPeriod
+  gakuchika: String
+  matchedUserId: String
+  matchedAlumniProfileId: String
+  willOverwrite: Boolean!
+}
+
+type CareerImportResult {
+  batchId: ID!
+  totalCount: Int!
+  appliedCount: Int!
+  skippedCount: Int!
+  pendingCount: Int!
+  errorCount: Int!
+}
+
+type CareerExportRow {
+  studentId: String
+  fullName: String
+  department: Department!
+  graduationYear: Int!
+  companyName: String!
+  companyMotivation: String
+  activityPeriod: JobHuntingPeriod
+  gakuchika: String
+}
+
+input CareerExcelImportPreviewInput {
+  fileName: String!
+  rows: [CareerExcelImportRowInput!]!
+}
+
+input CareerExcelImportRowInput {
+  rowNumber: Int!
+  studentId: String
+  fullName: String
+  department: String
+  graduationYear: String
+  companyName: String
+  companyMotivation: String
+  activityPeriod: String
+  gakuchika: String
+  email: String
+  remarks: String
+  consent: String
+}
+
+extend type Query {
+  getCareerExportRows: [CareerExportRow!]!
+}
+
+extend type Mutation {
+  previewCareerExcelImport(input: CareerExcelImportPreviewInput!): CareerImportPreview!
+  confirmCareerExcelImport(batchId: ID!): CareerImportResult!
+}
