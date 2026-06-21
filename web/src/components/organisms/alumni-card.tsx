@@ -9,6 +9,7 @@ import Link from "next/link";
 type AlumniCardProps = {
   alumni: AlumniListItem;
   returnTo?: string;
+  highlightHelpful?: boolean;
 };
 
 const departmentLabel: Record<AlumniListItem["department"], string> = {
@@ -36,7 +37,7 @@ const departmentLabel: Record<AlumniListItem["department"], string> = {
   OTHERS: "その他",
 };
 
-export function AlumniCard({ alumni, returnTo }: AlumniCardProps) {
+export function AlumniCard({ alumni, returnTo, highlightHelpful = false }: AlumniCardProps) {
   const initial = (alumni.nickname ?? "匿")[0];
   const gradient = departmentGradient[alumni.department];
   const companyNames = alumni.companyNames.length > 0 ? alumni.companyNames : ["未設定"];
@@ -201,7 +202,11 @@ export function AlumniCard({ alumni, returnTo }: AlumniCardProps) {
         {/* ── Detail Link ── */}
         <div className="mt-3 flex min-h-[1.75rem] items-center justify-between gap-3">
           <div
-            className="inline-flex w-fit items-center gap-1.5 rounded-full text-stone-500 dark:text-stone-400"
+            className={`inline-flex w-fit items-center gap-1.5 rounded-full transition-colors ${
+              highlightHelpful
+                ? "bg-rose-50 px-2 py-1 text-rose-600 ring-1 ring-rose-100 dark:bg-rose-950/30 dark:text-rose-300 dark:ring-rose-900/50"
+                : "text-stone-500 dark:text-stone-400"
+            }`}
             aria-label={`役に立った ${alumni.helpfulReaction.count}件`}
             title={`役に立った ${alumni.helpfulReaction.count}件`}
           >

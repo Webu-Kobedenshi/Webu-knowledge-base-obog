@@ -3,8 +3,9 @@ import {
   AlumniListResultsSkeleton,
   AlumniListTemplateFrame,
 } from "@/components/templates/alumni-list-template";
-import { fetchMyProfileSummary } from "@/graphql/account";
+import { fetchMyProfile } from "@/graphql/account";
 import { fetchAlumniList } from "@/graphql/alumni";
+import type { AlumniListSort, MyAccountProfile } from "@/graphql/types";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
@@ -14,7 +15,7 @@ type PageProps = {
 
 export default async function Home({ searchParams }: PageProps) {
   const [{ profile, error: profileError }, params] = await Promise.all([
-    fetchMyProfileSummary(),
+    fetchMyProfile(),
     searchParams,
   ]);
 
@@ -54,10 +55,13 @@ export default async function Home({ searchParams }: PageProps) {
   const graduationYearParam = resolvedParams.graduationYear;
   const pageParam = resolvedParams.page;
   const pageSizeParam = resolvedParams.pageSize;
+  const sortParam = resolvedParams.sort;
 
   const department =
     (Array.isArray(departmentParam) ? departmentParam[0] : departmentParam)?.trim() ?? "";
   const company = (Array.isArray(companyParam) ? companyParam[0] : companyParam)?.trim() ?? "";
+  const sortRaw = (Array.isArray(sortParam) ? sortParam[0] : sortParam)?.trim() ?? "";
+  const sort: AlumniListSort = sortRaw === "helpful" ? "HELPFUL" : "DEFAULT";
   const graduationYearRaw =
     (Array.isArray(graduationYearParam) ? graduationYearParam[0] : graduationYearParam)?.trim() ??
     "";
@@ -79,6 +83,7 @@ export default async function Home({ searchParams }: PageProps) {
     name: profile.name ?? "ユーザー",
     email: profile.email,
     role: profile.role,
+    avatarUrl: profile.alumniProfile?.avatarUrl ?? null,
   };
 
   return (
@@ -87,16 +92,18 @@ export default async function Home({ searchParams }: PageProps) {
       initialCompany={company}
       initialGraduationYear={graduationYear ? String(graduationYear) : ""}
       pageSize={pageSize}
+      sort={sort}
       account={account}
     >
       <Suspense
-        key={[department, company, graduationYear ?? "", currentPage, pageSize].join(":")}
+        key={[department, company, graduationYear ?? "", sort, currentPage, pageSize].join(":")}
         fallback={
           <AlumniListResultsSkeleton
             initialDepartment={department}
             initialCompany={company}
             initialGraduationYear={graduationYear ? String(graduationYear) : ""}
             pageSize={pageSize}
+            sort={sort}
             account={account}
           />
         }
@@ -105,6 +112,7 @@ export default async function Home({ searchParams }: PageProps) {
           department={department || undefined}
           company={company || undefined}
           graduationYear={graduationYear}
+          sort={sort}
           currentPage={currentPage}
           pageSize={pageSize}
           offset={offset}
@@ -122,24 +130,21 @@ type AlumniListDataProps = {
   department?: string;
   company?: string;
   graduationYear?: number;
+  sort: AlumniListSort;
   currentPage: number;
   pageSize: number;
   offset: number;
   initialDepartment: string;
   initialCompany: string;
   initialGraduationYear: string;
-  account: {
-    id: string;
-    name: string;
-    email: string;
-    role: "ADMIN" | "STUDENT" | "ALUMNI";
-  };
+  account: MyAccountProfile;
 };
 
 async function AlumniListData({
   department,
   company,
   graduationYear,
+  sort,
   currentPage,
   pageSize,
   offset,
@@ -152,6 +157,7 @@ async function AlumniListData({
     department,
     company,
     graduationYear,
+    sort,
     limit: pageSize,
     offset,
   });
@@ -165,6 +171,7 @@ async function AlumniListData({
       totalCount={totalCount}
       currentPage={currentPage}
       pageSize={pageSize}
+      sort={sort}
       hasNextPage={hasNextPage}
       account={account}
       error={error}

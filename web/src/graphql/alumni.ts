@@ -1,5 +1,11 @@
 import { getCachedServerSession } from "./session";
-import type { AlumniListConnection, AlumniListItem, AlumniProfile, Department } from "./types";
+import type {
+  AlumniListConnection,
+  AlumniListItem,
+  AlumniListSort,
+  AlumniProfile,
+  Department,
+} from "./types";
 
 type AlumniListData = {
   getAlumniListItems: AlumniListConnection;
@@ -23,6 +29,7 @@ const alumniListQuery = `
     $department: Department
     $company: String
     $graduationYear: Int
+    $sort: AlumniListSort
     $limit: Int!
     $offset: Int!
   ) {
@@ -30,6 +37,7 @@ const alumniListQuery = `
       department: $department
       company: $company
       graduationYear: $graduationYear
+      sort: $sort
       limit: $limit
       offset: $offset
     ) {
@@ -77,6 +85,7 @@ export async function fetchAlumniList(params: {
   department?: string;
   company?: string;
   graduationYear?: number;
+  sort?: AlumniListSort;
   limit?: number;
   offset?: number;
 }) {
@@ -109,6 +118,7 @@ export async function fetchAlumniList(params: {
           department: params.department as Department | undefined,
           company: params.company,
           graduationYear: params.graduationYear,
+          sort: params.sort,
           limit,
           offset,
         },

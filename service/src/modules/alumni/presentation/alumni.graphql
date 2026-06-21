@@ -101,6 +101,11 @@ type HelpfulReactionSummary {
   reactedByViewer: Boolean!
 }
 
+enum AlumniListSort {
+  DEFAULT
+  HELPFUL
+}
+
 type SelectionStep {
   id: ID!
   stepKind: SelectionStepKind!
@@ -212,6 +217,7 @@ extend type Query {
     department: Department
     company: String
     graduationYear: Int
+    sort: AlumniListSort
     limit: Int!
     offset: Int!
   ): AlumniConnection!
@@ -219,6 +225,7 @@ extend type Query {
     department: Department
     company: String
     graduationYear: Int
+    sort: AlumniListSort
     limit: Int!
     offset: Int!
   ): AlumniListConnection!

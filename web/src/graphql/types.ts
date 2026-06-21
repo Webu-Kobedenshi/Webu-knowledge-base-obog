@@ -51,6 +51,8 @@ export type HelpfulReactionSummary = {
   reactedByViewer: boolean;
 };
 
+export type AlumniListSort = "DEFAULT" | "HELPFUL";
+
 export type SelectionStep = {
   id: string;
   stepKind: SelectionStepKind;
@@ -153,4 +155,5 @@ export type MyAccountProfile = {
   name: string;
   email: string;
   role: "STUDENT" | "ALUMNI" | "ADMIN";
+  avatarUrl?: string | null;
 };

@@ -33,6 +33,7 @@ describe("AlumniQueryService", () => {
       department: "IT_EXPERT",
       company: "ACME",
       graduationYear: 2027,
+      sort: "HELPFUL",
       limit: 10,
       offset: 5,
     });
@@ -41,6 +42,7 @@ describe("AlumniQueryService", () => {
       department: "IT_EXPERT",
       company: "ACME",
       graduationYear: 2027,
+      sort: "HELPFUL",
       limit: 10,
       offset: 5,
     });
@@ -56,6 +58,7 @@ describe("AlumniQueryService", () => {
       department: "IT_EXPERT",
       company: "ACME",
       graduationYear: 2027,
+      sort: "HELPFUL",
       limit: 10,
       offset: 5,
     });
@@ -64,6 +67,7 @@ describe("AlumniQueryService", () => {
       department: "IT_EXPERT",
       company: "ACME",
       graduationYear: 2027,
+      sort: "HELPFUL",
       limit: 10,
       offset: 5,
     });

@@ -64,6 +64,7 @@ type AccountProfileFormProps = {
   description?: string;
   showBasicProfileFields?: boolean;
   showPublicProfileFields?: boolean;
+  showAvatarField?: boolean;
   showLinkedGmailField?: boolean;
   basicProfileRequiredMode?: "all" | "nameOnly";
   onSuccess?: () => void;
@@ -376,6 +377,7 @@ export function AccountProfileForm({
   description = "初期設定で入力した項目を更新できます。公開する内定先情報もここで管理します。",
   showBasicProfileFields = true,
   showPublicProfileFields = true,
+  showAvatarField = false,
   showLinkedGmailField = true,
   basicProfileRequiredMode = "all",
   onSuccess,
@@ -496,7 +498,7 @@ export function AccountProfileForm({
   const [loginInfoOpen, setLoginInfoOpen] = useState(false);
   const [skillInput, setSkillInput] = useState("");
   const [pendingStepDeleteKey, setPendingStepDeleteKey] = useState<string | null>(null);
-  const canUploadAvatar = Boolean(selectedAvatarFile && state.isPublic && !isUploadingAvatar);
+  const canUploadAvatar = Boolean(selectedAvatarFile && !isUploadingAvatar);
   const avatarUploadHint = selectedAvatarFile
     ? "選択した画像をアップロードできます"
     : "画像を選択するとアップロードできます";
@@ -944,6 +946,7 @@ export function AccountProfileForm({
         avatarFileInputRef.current.value = "";
       }
       showSuccessToast("プロフィール画像を更新しました。");
+      router.refresh();
     } catch (uploadError) {
       showErrorToast(
         uploadError instanceof Error ? uploadError.message : "画像アップロードに失敗しました",
@@ -1019,6 +1022,92 @@ export function AccountProfileForm({
           }}
           requiredMode={basicProfileRequiredMode}
         />
+      ) : null}
+
+      {showAvatarField ? (
+        <Card className="gap-0 border-stone-200/90 bg-white p-5 shadow-[0_8px_24px_-18px_rgba(0,0,0,0.25)] dark:border-stone-800/80 dark:bg-stone-900/40">
+          <div className="space-y-3">
+            <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
+              プロフィール画像
+            </span>
+            <div className="grid items-start gap-3 sm:grid-cols-[96px_minmax(0,1fr)]">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="プロフィール画像"
+                  className="h-24 w-24 rounded-2xl border border-stone-200/80 object-cover dark:border-stone-700/60"
+                />
+              ) : (
+                <div className="flex h-24 w-24 items-center justify-center rounded-2xl border border-dashed border-stone-300 text-[10px] font-medium text-stone-400 dark:border-stone-600 dark:text-stone-500">
+                  No Image
+                </div>
+              )}
+
+              <div className="min-w-0 flex-1 space-y-2">
+                <input
+                  ref={avatarFileInputRef}
+                  id="profile-avatar-file"
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => setSelectedAvatarFile(event.target.files?.[0] ?? null)}
+                  disabled={isUploadingAvatar}
+                  className="sr-only"
+                />
+
+                <div className="grid grid-cols-2 gap-2">
+                  <label
+                    htmlFor="profile-avatar-file"
+                    className="inline-flex h-9 w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-stone-300 px-3 text-xs font-semibold text-stone-700 transition-colors hover:bg-stone-50 dark:border-stone-700 dark:text-stone-200 dark:hover:bg-stone-800"
+                  >
+                    <ImagePlusIcon className="size-3.5" aria-hidden="true" />
+                    写真を選択
+                  </label>
+
+                  <Button
+                    type="button"
+                    onClick={handleAvatarUpload}
+                    disabled={!canUploadAvatar}
+                    aria-disabled={!canUploadAvatar}
+                    title={avatarUploadHint}
+                    variant="secondary"
+                    className={
+                      canUploadAvatar
+                        ? "h-9 w-full gap-1.5 px-3 text-xs font-bold"
+                        : "h-9 w-full gap-1.5 border border-dashed border-stone-300 bg-stone-100 px-3 text-xs font-bold text-stone-400 shadow-none hover:bg-stone-100 disabled:opacity-100 dark:border-stone-700 dark:bg-stone-800/60 dark:text-stone-500 dark:hover:bg-stone-800/60"
+                    }
+                  >
+                    {isUploadingAvatar ? (
+                      <>
+                        <LoaderCircleIcon className="size-3.5 animate-spin" aria-hidden="true" />
+                        アップロード中…
+                      </>
+                    ) : canUploadAvatar ? (
+                      <>
+                        <UploadIcon className="size-3.5" aria-hidden="true" />
+                        アップロード
+                      </>
+                    ) : (
+                      <>
+                        <BanIcon className="size-3.5" aria-hidden="true" />
+                        未選択
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {selectedAvatarFile ? (
+                  <p className="truncate rounded-lg border border-stone-200/80 bg-stone-50 px-2 py-1 text-[11px] text-stone-500 dark:border-stone-700/60 dark:bg-stone-800/60 dark:text-stone-400">
+                    {selectedAvatarFile.name}
+                  </p>
+                ) : (
+                  <p className="text-[11px] font-medium text-stone-400 dark:text-stone-500">
+                    画像を選択するとアップロードできます
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </Card>
       ) : null}
 
       {shouldShowLinkedGmailField ? (
@@ -1836,93 +1925,6 @@ export function AccountProfileForm({
                       deepDiveOpen ? "max-h-[3200px] opacity-100" : "max-h-0 opacity-0"
                     }`}
                   >
-                    <div className="space-y-3">
-                      <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
-                        プロフィール画像
-                      </span>
-                      <div className="grid items-start gap-3 sm:grid-cols-[96px_minmax(0,1fr)]">
-                        {avatarUrl ? (
-                          <img
-                            src={avatarUrl}
-                            alt="プロフィール画像"
-                            className="h-24 w-24 rounded-2xl border border-stone-200/80 object-cover dark:border-stone-700/60"
-                          />
-                        ) : (
-                          <div className="flex h-24 w-24 items-center justify-center rounded-2xl border border-dashed border-stone-300 text-[10px] font-medium text-stone-400 dark:border-stone-600 dark:text-stone-500">
-                            No Image
-                          </div>
-                        )}
-
-                        <div className="min-w-0 flex-1 space-y-2">
-                          <input
-                            ref={avatarFileInputRef}
-                            id="profile-avatar-file"
-                            type="file"
-                            accept="image/*"
-                            onChange={(event) =>
-                              setSelectedAvatarFile(event.target.files?.[0] ?? null)
-                            }
-                            disabled={isUploadingAvatar || !state.isPublic}
-                            className="sr-only"
-                          />
-
-                          <div className="grid grid-cols-2 gap-2">
-                            <label
-                              htmlFor="profile-avatar-file"
-                              className="inline-flex h-9 w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-stone-300 px-3 text-xs font-semibold text-stone-700 transition-colors hover:bg-stone-50 dark:border-stone-700 dark:text-stone-200 dark:hover:bg-stone-800"
-                            >
-                              <ImagePlusIcon className="size-3.5" aria-hidden="true" />
-                              写真を選択
-                            </label>
-
-                            <Button
-                              type="button"
-                              onClick={handleAvatarUpload}
-                              disabled={!canUploadAvatar}
-                              aria-disabled={!canUploadAvatar}
-                              title={avatarUploadHint}
-                              variant="secondary"
-                              className={
-                                canUploadAvatar
-                                  ? "h-9 w-full gap-1.5 px-3 text-xs font-bold"
-                                  : "h-9 w-full gap-1.5 border border-dashed border-stone-300 bg-stone-100 px-3 text-xs font-bold text-stone-400 shadow-none hover:bg-stone-100 disabled:opacity-100 dark:border-stone-700 dark:bg-stone-800/60 dark:text-stone-500 dark:hover:bg-stone-800/60"
-                              }
-                            >
-                              {isUploadingAvatar ? (
-                                <>
-                                  <LoaderCircleIcon
-                                    className="size-3.5 animate-spin"
-                                    aria-hidden="true"
-                                  />
-                                  アップロード中…
-                                </>
-                              ) : canUploadAvatar ? (
-                                <>
-                                  <UploadIcon className="size-3.5" aria-hidden="true" />
-                                  アップロード
-                                </>
-                              ) : (
-                                <>
-                                  <BanIcon className="size-3.5" aria-hidden="true" />
-                                  未選択
-                                </>
-                              )}
-                            </Button>
-                          </div>
-
-                          {selectedAvatarFile ? (
-                            <p className="truncate rounded-lg border border-stone-200/80 bg-stone-50 px-2 py-1 text-[11px] text-stone-500 dark:border-stone-700/60 dark:bg-stone-800/60 dark:text-stone-400">
-                              {selectedAvatarFile.name}
-                            </p>
-                          ) : (
-                            <p className="text-[11px] font-medium text-stone-400 dark:text-stone-500">
-                              画像を選択するとアップロードできます
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-[11px] font-semibold text-stone-500 dark:text-stone-400">
                         <span>SNSリンク</span>

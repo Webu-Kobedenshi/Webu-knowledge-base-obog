@@ -79,6 +79,11 @@ export const CheckIcon = createShadcnIcon("CheckIcon", [
   ["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }],
 ]);
 
+export const CrownIcon = createShadcnIcon("CrownIcon", [
+  ["path", { d: "m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7z", key: "1uwrx8" }],
+  ["path", { d: "M5 20h14", key: "1r9h4u" }],
+]);
+
 export const ChevronDownIcon = createShadcnIcon("ChevronDownIcon", [
   ["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }],
 ]);

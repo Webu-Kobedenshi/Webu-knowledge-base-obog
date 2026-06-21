@@ -12,6 +12,8 @@ import type {
 import type { UpdateAlumniProfileInput } from "../application/dto/alumni.input";
 import { AlumniQueryService } from "../application/queries/alumni-query.service";
 
+type AlumniListSort = "DEFAULT" | "HELPFUL";
+
 @Resolver()
 export class AlumniResolver {
   constructor(
@@ -27,6 +29,7 @@ export class AlumniResolver {
     @Args("department", { nullable: true }) department?: Department,
     @Args("company", { nullable: true }) company?: string,
     @Args("graduationYear", { nullable: true }) graduationYear?: number,
+    @Args("sort", { nullable: true }) sort?: AlumniListSort,
     @Args("limit") limit?: number,
     @Args("offset") offset?: number,
   ): Promise<AlumniConnectionDto> {
@@ -34,6 +37,7 @@ export class AlumniResolver {
       department,
       company,
       graduationYear,
+      sort,
       limit: limit ?? 12,
       offset: offset ?? 0,
     });
@@ -45,6 +49,7 @@ export class AlumniResolver {
     @Args("department", { nullable: true }) department?: Department,
     @Args("company", { nullable: true }) company?: string,
     @Args("graduationYear", { nullable: true }) graduationYear?: number,
+    @Args("sort", { nullable: true }) sort?: AlumniListSort,
     @Args("limit") limit?: number,
     @Args("offset") offset?: number,
   ): Promise<AlumniListConnectionDto> {
@@ -52,6 +57,7 @@ export class AlumniResolver {
       department,
       company,
       graduationYear,
+      sort,
       limit: limit ?? 12,
       offset: offset ?? 0,
     });

@@ -2,7 +2,7 @@ import { AccountActions } from "@/app/account/account-actions";
 import { ChevronLeftIcon } from "@/components/atoms/icons";
 import { ToastOnMount } from "@/components/atoms/toast-on-mount";
 import { AccountProfileForm } from "@/components/organisms/account-profile-form";
-import { fetchMyProfileSummary } from "@/graphql/account";
+import { fetchMyProfile } from "@/graphql/account";
 import { getCachedServerSession } from "@/graphql/session";
 import Link from "next/link";
 
@@ -29,7 +29,7 @@ function getSearchParamValue(value: string | string[] | undefined): string {
 export default async function AccountPage({ searchParams }: AccountPageProps) {
   const [session, { profile }, params] = await Promise.all([
     getCachedServerSession(),
-    fetchMyProfileSummary(),
+    fetchMyProfile(),
     searchParams,
   ]);
   const resolvedParams = params ?? {};
@@ -40,6 +40,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
   const email = profile?.email ?? session?.user?.email ?? "";
   const initial = (displayName || "U")[0].toUpperCase();
   const gradient = roleGradient[role ?? "STUDENT"];
+  const avatarUrl = profile?.alumniProfile?.avatarUrl ?? null;
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-2xl px-4 py-6 md:px-6 md:py-10">
@@ -82,11 +83,19 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
         {/* Avatar + identity */}
         <div className="relative px-5 pb-5 md:px-6 md:pb-6">
           <div className="-mt-12">
-            <div
-              className={`flex h-24 w-24 items-center justify-center rounded-2xl border-4 border-white bg-gradient-to-br ${gradient} text-3xl font-extrabold text-white shadow-lg dark:border-stone-950`}
-            >
-              {initial}
-            </div>
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt="プロフィール画像"
+                className="h-24 w-24 rounded-2xl border-4 border-white object-cover shadow-lg dark:border-stone-950"
+              />
+            ) : (
+              <div
+                className={`flex h-24 w-24 items-center justify-center rounded-2xl border-4 border-white bg-gradient-to-br ${gradient} text-3xl font-extrabold text-white shadow-lg dark:border-stone-950`}
+              >
+                {initial}
+              </div>
+            )}
           </div>
 
           <div className="mt-3 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
@@ -153,6 +162,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
                 title="プロフィール"
                 description="初期設定で入力した項目を更新できます。"
                 showPublicProfileFields={false}
+                showAvatarField
               />
             )}
 

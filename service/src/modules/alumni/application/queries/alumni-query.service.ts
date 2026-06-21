@@ -21,6 +21,7 @@ export class AlumniQueryService {
     department?: Department;
     company?: string;
     graduationYear?: number;
+    sort?: "DEFAULT" | "HELPFUL";
     limit: number;
     offset: number;
   }): Promise<AlumniConnectionDto> {
@@ -31,6 +32,7 @@ export class AlumniQueryService {
     department?: Department;
     company?: string;
     graduationYear?: number;
+    sort?: "DEFAULT" | "HELPFUL";
     limit: number;
     offset: number;
   }): Promise<AlumniListConnectionDto> {

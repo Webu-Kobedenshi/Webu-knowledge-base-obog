@@ -22,9 +22,17 @@ export function AccountBadge({ account }: AccountBadgeProps) {
       aria-label="マイページへ移動"
     >
       <div className="flex items-center gap-2.5">
-        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 text-sm font-bold text-white shadow-sm">
-          {initial}
-        </span>
+        {account.avatarUrl ? (
+          <img
+            src={account.avatarUrl}
+            alt="プロフィール画像"
+            className="h-9 w-9 shrink-0 rounded-full object-cover shadow-sm ring-1 ring-stone-200/80 dark:ring-stone-700/70"
+          />
+        ) : (
+          <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 text-sm font-bold text-white shadow-sm">
+            {initial}
+          </span>
+        )}
         <span className="min-w-0">
           <span className="block truncate text-[13px] font-bold text-stone-800 dark:text-stone-200">
             {account.name}

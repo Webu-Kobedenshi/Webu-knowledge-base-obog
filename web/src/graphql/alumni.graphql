@@ -2,6 +2,7 @@ query GetAlumniList(
   $department: Department
   $company: String
   $graduationYear: Int
+  $sort: AlumniListSort
   $limit: Int!
   $offset: Int!
 ) {
@@ -9,6 +10,7 @@ query GetAlumniList(
     department: $department
     company: $company
     graduationYear: $graduationYear
+    sort: $sort
     limit: $limit
     offset: $offset
   ) {

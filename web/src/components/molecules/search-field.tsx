@@ -19,6 +19,7 @@ type SearchFieldProps = {
   initialCompany: string;
   initialGraduationYear: string;
   initialPageSize: number;
+  initialSort: "DEFAULT" | "HELPFUL";
 };
 
 export function SearchField({
@@ -26,6 +27,7 @@ export function SearchField({
   initialCompany,
   initialGraduationYear,
   initialPageSize,
+  initialSort,
 }: SearchFieldProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -134,9 +136,13 @@ export function SearchField({
       query.set("pageSize", pageSize);
     }
 
+    if (initialSort === "HELPFUL") {
+      query.set("sort", "helpful");
+    }
+
     const serialized = query.toString();
     return serialized ? `${pathname}?${serialized}` : pathname;
-  }, [company, department, graduationYear, pageSize, pathname]);
+  }, [company, department, graduationYear, initialSort, pageSize, pathname]);
 
   useEffect(() => {
     router.replace(nextHref, { scroll: false });

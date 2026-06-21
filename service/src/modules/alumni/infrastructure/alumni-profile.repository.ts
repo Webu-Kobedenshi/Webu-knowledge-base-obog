@@ -71,15 +71,31 @@ export class AlumniProfileRepository implements AlumniProfileRepositoryPort {
     } satisfies Prisma.AlumniProfileWhereInput;
   }
 
+  private buildPublicListOrderBy(
+    sort: FindPublicAlumniListParams["sort"],
+  ): Prisma.AlumniProfileOrderByWithRelationInput[] {
+    const defaultOrderBy: Prisma.AlumniProfileOrderByWithRelationInput[] = [
+      { graduationYear: "desc" },
+      { createdAt: "desc" },
+    ];
+
+    if (sort === "HELPFUL") {
+      return [{ helpfulReactions: { _count: "desc" } }, ...defaultOrderBy];
+    }
+
+    return defaultOrderBy;
+  }
+
   async findPublicList(params: FindPublicAlumniListParams): Promise<AlumniConnectionDto> {
     const { limit, offset } = params;
     const where = this.buildPublicListWhere(params);
+    const orderBy = this.buildPublicListOrderBy(params.sort);
 
     const [items, totalCount] = await this.prisma.$transaction([
       this.prisma.alumniProfile.findMany({
         where,
         select: alumniProfileSelect,
-        orderBy: [{ graduationYear: "desc" }, { createdAt: "desc" }],
+        orderBy,
         skip: offset,
         take: limit,
       }),
@@ -96,12 +112,13 @@ export class AlumniProfileRepository implements AlumniProfileRepositoryPort {
   async findPublicListItems(params: FindPublicAlumniListParams): Promise<AlumniListConnectionDto> {
     const { limit, offset } = params;
     const where = this.buildPublicListWhere(params);
+    const orderBy = this.buildPublicListOrderBy(params.sort);
 
     const [items, totalCount] = await this.prisma.$transaction([
       this.prisma.alumniProfile.findMany({
         where,
         select: alumniListItemSelect,
-        orderBy: [{ graduationYear: "desc" }, { createdAt: "desc" }],
+        orderBy,
         skip: offset,
         take: limit,
       }),
