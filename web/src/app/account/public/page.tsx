@@ -29,8 +29,8 @@ export default async function AccountPublicProfilePage() {
   }
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-2xl px-4 py-6 md:px-6 md:py-10">
-      <nav className="mb-6">
+    <main className="mx-auto min-h-screen w-full max-w-2xl px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-10">
+      <nav className="mb-4 sm:mb-6">
         <Link
           href="/"
           className="group inline-flex items-center gap-1.5 text-[13px] font-medium text-stone-500 transition-colors hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
@@ -44,7 +44,7 @@ export default async function AccountPublicProfilePage() {
         </Link>
       </nav>
 
-      <section className="rounded-3xl border border-stone-200/90 bg-white p-6 shadow-[0_10px_30px_-18px_rgba(0,0,0,0.25)] dark:border-stone-800 dark:bg-stone-950">
+      <section className="rounded-2xl border border-stone-200/90 bg-white p-4 shadow-[0_10px_30px_-18px_rgba(0,0,0,0.25)] sm:rounded-3xl sm:p-6 dark:border-stone-800 dark:bg-stone-950">
         <h1 className="text-xl font-extrabold text-stone-900 dark:text-stone-100">
           公開プロフィール設定
         </h1>

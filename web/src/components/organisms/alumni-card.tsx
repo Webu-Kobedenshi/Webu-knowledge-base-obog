@@ -77,7 +77,7 @@ export function AlumniCard({ alumni, returnTo, highlightHelpful = false }: Alumn
     alumni.companyExperiences.find((company) => company.companyName === companyName);
 
   return (
-    <article className="alumni-card group relative isolate flex h-full flex-col overflow-hidden rounded-3xl border border-stone-200 bg-white transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_20px_60px_-12px_rgba(0,0,0,0.15)] dark:border-stone-800 dark:bg-stone-950 dark:hover:shadow-[0_20px_60px_-12px_rgba(0,0,0,0.5)]">
+    <article className="alumni-card group relative isolate flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_20px_60px_-12px_rgba(0,0,0,0.15)] sm:rounded-3xl dark:border-stone-800 dark:bg-stone-950 dark:hover:shadow-[0_20px_60px_-12px_rgba(0,0,0,0.5)]">
       {/* ── Hero zone ── */}
       <div className="relative h-24 overflow-hidden">
         {/* Gradient background — always present */}
@@ -96,17 +96,17 @@ export function AlumniCard({ alumni, returnTo, highlightHelpful = false }: Alumn
           <span className="absolute left-[88%] top-[25%] h-1.5 w-1.5 rounded-full bg-white/40 blur-[0.5px]" />
         </div>
         {/* Celebration badge — floats in hero zone */}
-        <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold tracking-wide text-amber-700 shadow-sm backdrop-blur-md dark:bg-black/50 dark:text-amber-200">
+        <span className="absolute left-3 top-3 inline-flex max-w-[48%] items-center gap-1 truncate rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold tracking-wide text-amber-700 shadow-sm backdrop-blur-md dark:bg-black/50 dark:text-amber-200">
           🎉 内定おめでとう！
         </span>
         {/* Department tag */}
-        <span className="absolute right-3 top-3 rounded-full bg-black/25 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-md">
+        <span className="absolute right-3 top-3 max-w-[46%] truncate rounded-full bg-black/25 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-md">
           {departmentLabel[alumni.department]}
         </span>
       </div>
 
       {/* ── Avatar row (overlapping hero/body) ── */}
-      <div className="relative z-10 -mt-8 flex min-h-[4.75rem] items-start justify-between gap-3 px-4">
+      <div className="relative z-10 -mt-8 flex min-h-[4.75rem] items-start justify-between gap-2 px-3 sm:gap-3 sm:px-4">
         {/* Avatar */}
         <div className="relative inline-block">
           {alumni.avatarUrl ? (
@@ -140,7 +140,7 @@ export function AlumniCard({ alumni, returnTo, highlightHelpful = false }: Alumn
                   <span
                     key={skill}
                     title={skill}
-                    className="min-w-0 max-w-20 shrink truncate rounded-md bg-violet-100/80 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700 dark:bg-violet-900/30 dark:text-violet-300"
+                    className="min-w-0 max-w-16 shrink truncate rounded-md bg-violet-100/80 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700 sm:max-w-20 dark:bg-violet-900/30 dark:text-violet-300"
                   >
                     {skill}
                   </span>
@@ -152,7 +152,7 @@ export function AlumniCard({ alumni, returnTo, highlightHelpful = false }: Alumn
       </div>
 
       {/* ── Body ── */}
-      <div className="relative flex flex-1 flex-col px-4 pb-3 pt-2">
+      <div className="relative flex flex-1 flex-col px-3 pb-3 pt-2 sm:px-4">
         {/* Name + year */}
         <div className="flex items-baseline gap-2">
           <h3 className="truncate text-[15px] font-bold text-stone-900 dark:text-stone-100">
@@ -171,8 +171,10 @@ export function AlumniCard({ alumni, returnTo, highlightHelpful = false }: Alumn
         >
           <Link
             href={createCompanyDetailHref(getCompanyExperience(primaryCompany, 0)?.id)}
-            className={`line-clamp-2 font-extrabold leading-tight tracking-tight text-stone-900 transition-colors hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 dark:text-stone-100 dark:hover:text-violet-300 dark:focus-visible:ring-offset-stone-950 ${
-              otherCompanies.length === 0 ? "text-[26px]" : "text-[20px]"
+            className={`line-clamp-2 break-words font-extrabold leading-tight tracking-tight text-stone-900 transition-colors [overflow-wrap:anywhere] hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 dark:text-stone-100 dark:hover:text-violet-300 dark:focus-visible:ring-offset-stone-950 ${
+              otherCompanies.length === 0
+                ? "text-[22px] sm:text-[26px]"
+                : "text-[18px] sm:text-[20px]"
             }`}
             aria-label={`${primaryCompany}の詳細を見る`}
           >
@@ -188,10 +190,10 @@ export function AlumniCard({ alumni, returnTo, highlightHelpful = false }: Alumn
                   <Link
                     key={`${name}-${companyExperience?.id ?? companyIndex}`}
                     href={createCompanyDetailHref(companyExperience?.id)}
-                    className="rounded-md bg-stone-100 px-1.5 py-0.5 text-[10px] font-semibold text-stone-600 transition-colors hover:bg-violet-100 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-violet-900/40 dark:hover:text-violet-300 dark:focus-visible:ring-offset-stone-950"
+                    className="inline-flex max-w-full rounded-md bg-stone-100 px-1.5 py-0.5 text-[10px] font-semibold text-stone-600 transition-colors hover:bg-violet-100 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-violet-900/40 dark:hover:text-violet-300 dark:focus-visible:ring-offset-stone-950"
                     aria-label={`${name}の詳細を見る`}
                   >
-                    ＋ {name}
+                    <span className="truncate">＋ {name}</span>
                   </Link>
                 );
               })}
@@ -200,7 +202,7 @@ export function AlumniCard({ alumni, returnTo, highlightHelpful = false }: Alumn
         </div>
 
         {/* ── Detail Link ── */}
-        <div className="mt-3 flex min-h-[1.75rem] items-center justify-between gap-3">
+        <div className="mt-3 flex min-h-[1.75rem] flex-wrap items-center justify-between gap-3">
           <div
             className={`inline-flex w-fit items-center gap-1.5 rounded-full transition-colors ${
               highlightHelpful
@@ -221,11 +223,11 @@ export function AlumniCard({ alumni, returnTo, highlightHelpful = false }: Alumn
         {/* ── Contact CTA ── */}
         <div className="mt-auto pt-3">
           {canContact ? (
-            <div className="flex items-center justify-between gap-2 border-t border-stone-100 pt-3 dark:border-stone-800/70">
+            <div className="flex flex-col items-start gap-2 border-t border-stone-100 pt-3 sm:flex-row sm:items-center sm:justify-between dark:border-stone-800/70">
               <p className="shrink-0 text-[10px] font-semibold text-stone-400 dark:text-stone-500">
                 SNSで連絡する
               </p>
-              <div className="flex min-w-0 flex-wrap justify-end gap-1.5">
+              <div className="flex min-w-0 flex-wrap justify-start gap-1.5 sm:justify-end">
                 {contactLinks.map((contactLink) => (
                   <a
                     key={contactLink.label}

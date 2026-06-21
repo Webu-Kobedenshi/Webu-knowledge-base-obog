@@ -43,13 +43,13 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
   const avatarUrl = profile?.alumniProfile?.avatarUrl ?? null;
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-2xl px-4 py-6 md:px-6 md:py-10">
+    <main className="mx-auto min-h-screen w-full max-w-2xl px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-10">
       <ToastOnMount
         variant={gmailLinkStatus === "success" ? "success" : "error"}
         message={gmailLinkMessage}
       />
       {/* ── Navigation ── */}
-      <nav className="mb-6">
+      <nav className="mb-4 sm:mb-6">
         <Link
           href="/"
           className="group inline-flex items-center gap-1.5 text-[13px] font-medium text-stone-500 transition-colors hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
@@ -64,7 +64,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
       </nav>
 
       {/* ── Profile Hero ── */}
-      <section className="relative isolate overflow-hidden rounded-3xl border border-stone-200/90 bg-white shadow-[0_10px_30px_-18px_rgba(0,0,0,0.25)] ring-1 ring-stone-100/80 dark:border-stone-800 dark:bg-stone-950 dark:ring-stone-800/60">
+      <section className="relative isolate overflow-hidden rounded-2xl border border-stone-200/90 bg-white shadow-[0_10px_30px_-18px_rgba(0,0,0,0.25)] ring-1 ring-stone-100/80 sm:rounded-3xl dark:border-stone-800 dark:bg-stone-950 dark:ring-stone-800/60">
         {/* Hero banner */}
         <div className={`relative h-32 bg-gradient-to-br ${gradient} md:h-36`}>
           <div
@@ -81,7 +81,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
         </div>
 
         {/* Avatar + identity */}
-        <div className="relative px-5 pb-5 md:px-6 md:pb-6">
+        <div className="relative px-4 pb-5 sm:px-5 md:px-6 md:pb-6">
           <div className="-mt-12">
             {avatarUrl ? (
               <img

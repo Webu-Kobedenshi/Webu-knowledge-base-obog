@@ -1,5 +1,5 @@
 import { Badge } from "@/components/atoms/badge";
-import { CrownIcon } from "@/components/atoms/icons";
+import { ChevronRightIcon, CrownIcon } from "@/components/atoms/icons";
 import { ToastOnMount } from "@/components/atoms/toast-on-mount";
 import { SearchField } from "@/components/molecules/search-field";
 import { AccountBadge } from "@/components/organisms/account-badge";
@@ -24,7 +24,7 @@ type AlumniListTemplateProps = {
 };
 
 const publishButtonClassName =
-  "metallic-publish-button ml-auto inline-flex h-9 min-w-[10.75rem] items-center justify-center px-4 text-xs font-bold transition-all duration-200 active:scale-[0.98]";
+  "metallic-publish-button inline-flex h-10 w-full items-center justify-center px-4 text-xs font-bold transition-all duration-200 active:scale-[0.98] sm:ml-auto sm:h-9 sm:w-auto sm:min-w-[10.75rem]";
 
 type PodiumRank = 1 | 2 | 3;
 
@@ -121,10 +121,10 @@ export function AlumniListTemplateFrame({
   children,
 }: AlumniListTemplateFrameProps) {
   return (
-    <main className="mx-auto min-h-screen w-full max-w-[1400px] px-4 py-6 md:px-8 md:py-8">
-      <header className="liquid-glass-strong rounded-2xl p-5 md:p-6">
+    <main className="mx-auto min-h-screen w-full max-w-[1400px] px-3 py-4 sm:px-4 sm:py-6 md:px-8 md:py-8">
+      <header className="liquid-glass-strong rounded-2xl p-4 md:p-6">
         <div className="flex items-start justify-between gap-4">
-          <div>
+          <div className="min-w-0">
             <div className="mb-2 flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500" />
               <p className="text-[11px] font-semibold tracking-[0.12em] text-violet-600 dark:text-violet-400">
@@ -139,7 +139,7 @@ export function AlumniListTemplateFrame({
                 (ver.就活)
               </span>
             </h1>
-            <p className="mt-1.5 text-[13px] font-medium text-stone-500 dark:text-stone-400">
+            <p className="mt-1.5 text-[13px] font-medium leading-relaxed text-stone-500 dark:text-stone-400">
               あの企業に就職した先輩に話が聞けるかも！？
             </p>
           </div>
@@ -147,6 +147,39 @@ export function AlumniListTemplateFrame({
             <AccountBadge account={account} />
           </div>
         </div>
+        <Link
+          href="/account"
+          className="mt-4 flex items-center justify-between rounded-xl border border-stone-200/80 bg-white/70 px-3 py-2 text-left shadow-sm transition-colors hover:bg-violet-50/60 dark:border-stone-700/60 dark:bg-stone-900/50 dark:hover:bg-violet-900/20 lg:hidden"
+          aria-label="マイページへ移動"
+        >
+          <span className="flex min-w-0 items-center gap-2.5">
+            {account.avatarUrl ? (
+              <img
+                src={account.avatarUrl}
+                alt="プロフィール画像"
+                className="h-8 w-8 shrink-0 rounded-full object-cover ring-1 ring-stone-200/80 dark:ring-stone-700/70"
+              />
+            ) : (
+              <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 text-xs font-bold text-white">
+                {(account.name || account.email || "U").slice(0, 1).toUpperCase()}
+              </span>
+            )}
+            <span className="min-w-0">
+              <span className="block truncate text-[12px] font-bold text-stone-800 dark:text-stone-200">
+                {account.name}
+              </span>
+              <span className="block text-[10px] font-semibold text-stone-500 dark:text-stone-400">
+                マイページ
+              </span>
+            </span>
+          </span>
+          <ChevronRightIcon
+            size={16}
+            strokeWidth={2.5}
+            className="shrink-0 text-stone-400"
+            title="マイページへ"
+          />
+        </Link>
       </header>
 
       <section className="mt-4">
@@ -258,53 +291,55 @@ export function AlumniListResults({
 
   return (
     <>
-      <section className="mt-4 flex flex-wrap items-center gap-2">
-        <div className="flex items-center gap-1.5 text-[13px] font-medium text-stone-600 dark:text-stone-400">
-          <span className="tabular-nums font-semibold text-stone-900 dark:text-stone-200">
-            {totalCount}
-          </span>
-          <span>件</span>
-        </div>
-        <div className="h-3.5 w-px bg-stone-200 dark:bg-stone-700" />
-        <div
-          className={`inline-flex items-center gap-1 rounded-full border bg-white/80 p-1 shadow-sm dark:bg-stone-900/60 ${
-            isHelpfulSort
-              ? "helpful-sort-control border-rose-200/80 dark:border-rose-900/50"
-              : "border-stone-200/80 dark:border-stone-700/60"
-          }`}
-          aria-label="並び順"
-        >
-          <Link
-            href={buildSortHref("DEFAULT")}
-            className={`rounded-full px-2.5 py-1 text-[11px] font-bold transition-colors ${
-              !isHelpfulSort
-                ? "bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-950"
-                : "text-stone-500 hover:bg-stone-100 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100"
-            }`}
-          >
-            通常順
-          </Link>
-          <Link
-            href={buildSortHref("HELPFUL")}
-            className={`rounded-full px-2.5 py-1 text-[11px] font-bold transition-colors ${
+      <section className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 text-[13px] font-medium text-stone-600 dark:text-stone-400">
+            <span className="tabular-nums font-semibold text-stone-900 dark:text-stone-200">
+              {totalCount}
+            </span>
+            <span>件</span>
+          </div>
+          <div className="h-3.5 w-px bg-stone-200 dark:bg-stone-700" />
+          <div
+            className={`inline-flex items-center gap-1 rounded-full border bg-white/80 p-1 shadow-sm dark:bg-stone-900/60 ${
               isHelpfulSort
-                ? "bg-rose-500 text-white shadow-sm shadow-rose-500/25"
-                : "text-stone-500 hover:bg-rose-50 hover:text-rose-600 dark:text-stone-400 dark:hover:bg-rose-950/30 dark:hover:text-rose-300"
+                ? "helpful-sort-control border-rose-200/80 dark:border-rose-900/50"
+                : "border-stone-200/80 dark:border-stone-700/60"
             }`}
+            aria-label="並び順"
           >
-            役に立った順
-          </Link>
+            <Link
+              href={buildSortHref("DEFAULT")}
+              className={`rounded-full px-2.5 py-1 text-[11px] font-bold transition-colors ${
+                !isHelpfulSort
+                  ? "bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-950"
+                  : "text-stone-500 hover:bg-stone-100 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100"
+              }`}
+            >
+              通常順
+            </Link>
+            <Link
+              href={buildSortHref("HELPFUL")}
+              className={`rounded-full px-2.5 py-1 text-[11px] font-bold transition-colors ${
+                isHelpfulSort
+                  ? "bg-rose-500 text-white shadow-sm shadow-rose-500/25"
+                  : "text-stone-500 hover:bg-rose-50 hover:text-rose-600 dark:text-stone-400 dark:hover:bg-rose-950/30 dark:hover:text-rose-300"
+              }`}
+            >
+              役に立った順
+            </Link>
+          </div>
+          {isHelpfulSort ? <Badge variant="default">感謝が多い投稿から表示中</Badge> : null}
+          {initialDepartment ? (
+            <Badge variant="default">学科で絞り込み中</Badge>
+          ) : (
+            <Badge variant="secondary">全学科</Badge>
+          )}
+          {initialGraduationYear ? (
+            <Badge variant="default">卒業年度: {initialGraduationYear}</Badge>
+          ) : null}
+          {initialCompany ? <Badge variant="default">企業: {initialCompany}</Badge> : null}
         </div>
-        {isHelpfulSort ? <Badge variant="default">感謝が多い投稿から表示中</Badge> : null}
-        {initialDepartment ? (
-          <Badge variant="default">学科で絞り込み中</Badge>
-        ) : (
-          <Badge variant="secondary">全学科</Badge>
-        )}
-        {initialGraduationYear ? (
-          <Badge variant="default">卒業年度: {initialGraduationYear}</Badge>
-        ) : null}
-        {initialCompany ? <Badge variant="default">企業: {initialCompany}</Badge> : null}
         {account.role !== "ADMIN" ? (
           <Link href="/account/public" className={publishButtonClassName}>
             <span className="relative z-10">内定先を公開する</span>
@@ -424,6 +459,9 @@ function HelpfulPodium({ entries, returnTo }: { entries: PodiumEntry[]; returnTo
   const orderedEntries = [2, 1, 3]
     .map((rank) => entryByRank.get(rank as PodiumRank))
     .filter((entry): entry is PodiumEntry => Boolean(entry));
+  const mobileEntries = [1, 2, 3]
+    .map((rank) => entryByRank.get(rank as PodiumRank))
+    .filter((entry): entry is PodiumEntry => Boolean(entry));
 
   return (
     <section className="relative mt-6 overflow-hidden rounded-3xl border border-amber-100/80 bg-gradient-to-b from-amber-50 via-white to-stone-50 px-4 pb-5 pt-12 shadow-lg shadow-amber-100/50 dark:border-amber-900/30 dark:from-amber-950/20 dark:via-stone-950 dark:to-stone-950 dark:shadow-black/20">
@@ -458,8 +496,14 @@ function HelpfulPodium({ entries, returnTo }: { entries: PodiumEntry[]; returnTo
           </p>
         </div>
 
-        <div className="-mx-4 overflow-x-auto px-4 pb-2 pt-3">
-          <div className="grid min-w-[960px] grid-cols-3 items-end gap-4">
+        <div className="space-y-4 lg:hidden">
+          {mobileEntries.map((entry) => (
+            <HelpfulPodiumMobileItem key={entry.alumni.id} entry={entry} returnTo={returnTo} />
+          ))}
+        </div>
+
+        <div className="hidden lg:block">
+          <div className="grid grid-cols-3 items-end gap-4">
             {orderedEntries.map((entry) => (
               <HelpfulPodiumColumn key={entry.alumni.id} entry={entry} returnTo={returnTo} />
             ))}
@@ -467,6 +511,25 @@ function HelpfulPodium({ entries, returnTo }: { entries: PodiumEntry[]; returnTo
         </div>
       </div>
     </section>
+  );
+}
+
+function HelpfulPodiumMobileItem({ entry, returnTo }: { entry: PodiumEntry; returnTo: string }) {
+  const theme = podiumTheme[entry.rank];
+
+  return (
+    <div className="rounded-2xl border border-white/80 bg-white/70 p-3 shadow-sm dark:border-white/10 dark:bg-stone-950/60">
+      <div
+        className={`mb-3 flex items-center justify-between rounded-xl bg-gradient-to-r px-3 py-2 ${theme.blockClassName}`}
+      >
+        <span className="inline-flex items-center gap-2 text-sm font-black">
+          <CrownIcon size={18} strokeWidth={2.5} title={`${entry.rank}位`} />
+          {entry.rank}位
+        </span>
+        <span className="text-[11px] font-bold opacity-80">感謝ランキング</span>
+      </div>
+      <AlumniCard alumni={entry.alumni} returnTo={returnTo} highlightHelpful />
+    </div>
   );
 }
 
@@ -521,22 +584,24 @@ export function AlumniListResultsSkeleton({
 
   return (
     <>
-      <section className="mt-4 flex flex-wrap items-center gap-2">
-        <div className="flex items-center gap-1.5 text-[13px] font-medium text-stone-600 dark:text-stone-400">
-          <div className="h-5 w-12 animate-pulse rounded bg-stone-200/80 dark:bg-stone-800/80" />
-          <span>件</span>
+      <section className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 text-[13px] font-medium text-stone-600 dark:text-stone-400">
+            <div className="h-5 w-12 animate-pulse rounded bg-stone-200/80 dark:bg-stone-800/80" />
+            <span>件</span>
+          </div>
+          <div className="h-3.5 w-px bg-stone-200 dark:bg-stone-700" />
+          {isHelpfulSort ? <Badge variant="default">感謝が多い投稿から表示中</Badge> : null}
+          {initialDepartment ? (
+            <Badge variant="default">学科で絞り込み中</Badge>
+          ) : (
+            <Badge variant="secondary">全学科</Badge>
+          )}
+          {initialGraduationYear ? (
+            <Badge variant="default">卒業年度: {initialGraduationYear}</Badge>
+          ) : null}
+          {initialCompany ? <Badge variant="default">企業: {initialCompany}</Badge> : null}
         </div>
-        <div className="h-3.5 w-px bg-stone-200 dark:bg-stone-700" />
-        {isHelpfulSort ? <Badge variant="default">感謝が多い投稿から表示中</Badge> : null}
-        {initialDepartment ? (
-          <Badge variant="default">学科で絞り込み中</Badge>
-        ) : (
-          <Badge variant="secondary">全学科</Badge>
-        )}
-        {initialGraduationYear ? (
-          <Badge variant="default">卒業年度: {initialGraduationYear}</Badge>
-        ) : null}
-        {initialCompany ? <Badge variant="default">企業: {initialCompany}</Badge> : null}
         {account.role !== "ADMIN" ? (
           <Link href="/account/public" className={publishButtonClassName}>
             <span className="relative z-10">内定先を公開する</span>

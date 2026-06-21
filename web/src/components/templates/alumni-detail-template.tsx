@@ -174,9 +174,9 @@ export function AlumniDetailTemplate({
   }, [companyExperiences, selectedCompanyExperienceId]);
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-2xl px-4 py-6 md:px-6 md:py-10">
+    <main className="mx-auto min-h-screen w-full max-w-2xl px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-10">
       {/* ── Navigation ── */}
-      <nav className="mb-6">
+      <nav className="mb-4 sm:mb-6">
         <Link
           href={returnHref}
           className="group inline-flex items-center gap-1.5 text-[13px] font-medium text-stone-500 transition-colors hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
@@ -191,7 +191,7 @@ export function AlumniDetailTemplate({
       </nav>
 
       {/* ── Hero Section ── */}
-      <section className="relative isolate overflow-hidden rounded-3xl border border-stone-200/90 bg-white shadow-[0_10px_30px_-18px_rgba(0,0,0,0.25)] ring-1 ring-stone-100/80 dark:border-stone-800 dark:bg-stone-950 dark:ring-stone-800/60">
+      <section className="relative isolate overflow-hidden rounded-2xl border border-stone-200/90 bg-white shadow-[0_10px_30px_-18px_rgba(0,0,0,0.25)] ring-1 ring-stone-100/80 sm:rounded-3xl dark:border-stone-800 dark:bg-stone-950 dark:ring-stone-800/60">
         {/* Hero banner */}
         <div className={`relative h-36 bg-gradient-to-br ${gradient} md:h-40`}>
           <div
@@ -206,35 +206,35 @@ export function AlumniDetailTemplate({
             <span className="absolute left-[82%] top-[50%] h-1.5 w-1.5 rounded-full bg-white/30" />
           </div>
           {/* Badges */}
-          <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold tracking-wide text-amber-700 shadow-sm backdrop-blur-md dark:bg-black/50 dark:text-amber-200">
+          <span className="absolute left-3 top-3 inline-flex max-w-[48%] items-center gap-1 truncate rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold tracking-wide text-amber-700 shadow-sm backdrop-blur-md dark:bg-black/50 dark:text-amber-200">
             🎉 内定おめでとう！
           </span>
-          <span className="absolute right-3 top-3 rounded-full bg-black/25 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-md">
+          <span className="absolute right-3 top-3 max-w-[46%] truncate rounded-full bg-black/25 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-md">
             {departmentLabel[alumni.department]}
           </span>
         </div>
 
         {/* Avatar + identity */}
-        <div className="relative px-5 pb-6 md:px-6">
-          <div className="-mt-14 flex items-end gap-4">
+        <div className="relative px-4 pb-5 sm:px-5 sm:pb-6 md:px-6">
+          <div className="-mt-12 flex flex-wrap items-end gap-3 sm:-mt-14 sm:gap-4">
             {alumni.avatarUrl ? (
               <img
                 src={alumni.avatarUrl}
                 alt={`${displayName}のプロフィール画像`}
-                className="h-28 w-28 rounded-2xl border-4 border-white object-cover shadow-lg dark:border-stone-950"
+                className="h-24 w-24 rounded-2xl border-4 border-white object-cover shadow-lg sm:h-28 sm:w-28 dark:border-stone-950"
               />
             ) : (
               <div
-                className={`flex h-28 w-28 items-center justify-center rounded-2xl border-4 border-white bg-gradient-to-br ${gradient} text-4xl font-extrabold text-white shadow-lg dark:border-stone-950`}
+                className={`flex h-24 w-24 items-center justify-center rounded-2xl border-4 border-white bg-gradient-to-br ${gradient} text-3xl font-extrabold text-white shadow-lg sm:h-28 sm:w-28 sm:text-4xl dark:border-stone-950`}
               >
                 {initial}
               </div>
             )}
-            <div className="mb-1 min-w-0 flex-1">
-              <h1 className="truncate text-2xl font-extrabold text-stone-900 dark:text-stone-100">
+            <div className="mb-1 min-w-0 flex-1 basis-[9rem] translate-y-4 sm:translate-y-0">
+              <h1 className="truncate text-xl font-extrabold text-stone-900 sm:text-2xl dark:text-stone-100">
                 {displayName}
               </h1>
-              <p className="mt-0.5 text-[13px] text-stone-500 dark:text-stone-400">
+              <p className="mt-0.5 break-words text-[13px] leading-relaxed text-stone-500 dark:text-stone-400">
                 {departmentLabel[alumni.department]} · {alumni.graduationYear}
                 年卒
               </p>
@@ -265,13 +265,13 @@ export function AlumniDetailTemplate({
                   <span />
                 </span>
                 <HeartIcon
-                  size={32}
+                  size={30}
                   strokeWidth={2.25}
                   fill={helpfulReaction.reactedByViewer ? "currentColor" : "none"}
                   title="役に立った"
                 />
               </span>
-              <span className="min-w-5 text-left text-xl font-semibold tabular-nums">
+              <span className="min-w-5 text-left text-lg font-semibold tabular-nums sm:text-xl">
                 {helpfulReaction.count}
               </span>
             </Button>
@@ -282,7 +282,7 @@ export function AlumniDetailTemplate({
             {companyNames.map((name, index) => (
               <p
                 key={name}
-                className={`${index === 0 ? "text-2xl font-extrabold" : "mt-1 text-base font-bold text-stone-600 dark:text-stone-400"} break-words leading-tight tracking-tight text-stone-900 dark:text-stone-100`}
+                className={`${index === 0 ? "text-xl font-extrabold sm:text-2xl" : "mt-1 text-base font-bold text-stone-600 dark:text-stone-400"} break-words leading-tight tracking-tight text-stone-900 [overflow-wrap:anywhere] dark:text-stone-100`}
               >
                 {index > 0 ? `＋ ${name}` : name}
               </p>
@@ -291,11 +291,11 @@ export function AlumniDetailTemplate({
 
           <div className="mt-5 border-t border-stone-100 pt-4 dark:border-stone-800/70">
             {canContact ? (
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="shrink-0 text-[11px] font-bold text-stone-400 dark:text-stone-500">
                   SNSで連絡する
                 </p>
-                <div className="flex min-w-0 flex-wrap justify-end gap-2">
+                <div className="flex min-w-0 flex-wrap justify-start gap-2 sm:justify-end">
                   {contactLinks.map((contactLink) => (
                     <a
                       key={contactLink.label}
@@ -327,9 +327,9 @@ export function AlumniDetailTemplate({
       {/* ── Company Selection Experience ── */}
       <section
         id="selection-flow"
-        className="mt-4 scroll-mt-4 rounded-2xl border border-stone-200/90 bg-white p-5 shadow-[0_8px_24px_-18px_rgba(0,0,0,0.15)] dark:border-stone-800/80 dark:bg-stone-900/40"
+        className="mt-4 scroll-mt-4 rounded-2xl border border-stone-200/90 bg-white p-4 shadow-[0_8px_24px_-18px_rgba(0,0,0,0.15)] sm:p-5 dark:border-stone-800/80 dark:bg-stone-900/40"
       >
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
           <div>
             <h2 className="text-sm font-bold text-stone-900 dark:text-stone-100">
               企業別の選考体験
@@ -364,7 +364,7 @@ export function AlumniDetailTemplate({
         ) : null}
 
         {companyExperiences.length > 1 ? (
-          <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+          <div className="mt-4 flex flex-wrap gap-2">
             {companyExperiences.map((company) => {
               const isSelected = company.id === selectedCompany?.id;
               const companyHasSelectionFlow = hasSelectionFlow(company);
@@ -374,13 +374,13 @@ export function AlumniDetailTemplate({
                   type="button"
                   onClick={() => setSelectedCompanyId(company.id)}
                   variant={isSelected ? "secondary" : "outline"}
-                  className={`h-auto shrink-0 px-3 py-2 text-left ${
+                  className={`h-auto max-w-full px-3 py-2 text-left ${
                     isSelected
                       ? "border-stone-900 bg-stone-900 text-white dark:border-stone-100 dark:bg-stone-100 dark:text-stone-900"
                       : "border-stone-200 bg-white text-stone-700 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-300"
                   }`}
                 >
-                  <span className="block max-w-40 truncate text-[12px] font-bold">
+                  <span className="block max-w-48 truncate text-[12px] font-bold">
                     {company.companyName}
                   </span>
                   {companyHasSelectionFlow ? (
@@ -401,18 +401,18 @@ export function AlumniDetailTemplate({
         {selectedCompany ? (
           <div className="mt-4">
             <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-              <h3 className="min-w-0 flex-1 break-words text-lg font-extrabold text-stone-900 dark:text-stone-100">
+              <h3 className="min-w-0 flex-1 basis-full break-words text-lg font-extrabold text-stone-900 sm:basis-auto dark:text-stone-100">
                 {selectedCompany.companyName}
               </h3>
               {selectedExperience?.entryTrigger ? (
-                <div className="inline-flex max-w-full shrink-0 items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-amber-950 shadow-sm dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-100">
+                <div className="inline-flex max-w-full flex-wrap items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-amber-950 shadow-sm dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-100">
                   <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/70 dark:text-amber-200">
                     <MousePointerClickIcon aria-hidden="true" className="size-3.5" />
                   </span>
                   <span className="text-[10px] font-bold leading-none text-amber-700 dark:text-amber-300">
                     エントリーのきっかけ
                   </span>
-                  <span className="min-w-0 truncate text-[12px] font-extrabold leading-none">
+                  <span className="min-w-0 break-words text-[12px] font-extrabold leading-none [overflow-wrap:anywhere]">
                     {selectedExperience.entryTrigger}
                   </span>
                 </div>

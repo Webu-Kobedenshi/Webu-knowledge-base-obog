@@ -1025,7 +1025,7 @@ export function AccountProfileForm({
       ) : null}
 
       {showAvatarField ? (
-        <Card className="gap-0 border-stone-200/90 bg-white p-5 shadow-[0_8px_24px_-18px_rgba(0,0,0,0.25)] dark:border-stone-800/80 dark:bg-stone-900/40">
+        <Card className="gap-0 border-stone-200/90 bg-white p-4 shadow-[0_8px_24px_-18px_rgba(0,0,0,0.25)] sm:p-5 dark:border-stone-800/80 dark:bg-stone-900/40">
           <div className="space-y-3">
             <span className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
               プロフィール画像
@@ -1054,7 +1054,7 @@ export function AccountProfileForm({
                   className="sr-only"
                 />
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid gap-2 min-[360px]:grid-cols-2">
                   <label
                     htmlFor="profile-avatar-file"
                     className="inline-flex h-9 w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-stone-300 px-3 text-xs font-semibold text-stone-700 transition-colors hover:bg-stone-50 dark:border-stone-700 dark:text-stone-200 dark:hover:bg-stone-800"
@@ -1126,7 +1126,7 @@ export function AccountProfileForm({
           {/* ─── Section 3: 公開プロフィール設定 (Progressive Disclosure) ─── */}
           <Card className="gap-0 overflow-hidden border-stone-200/90 bg-white p-0 shadow-[0_8px_24px_-18px_rgba(0,0,0,0.25)] dark:border-stone-800/80 dark:bg-stone-900/40">
             {/* Header Area with Toggle */}
-            <div className="flex flex-col gap-4 border-b border-stone-100 bg-stone-50/50 p-5 dark:border-stone-800/60 dark:bg-stone-900/20 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-4 border-b border-stone-100 bg-stone-50/50 p-4 dark:border-stone-800/60 dark:bg-stone-900/20 sm:flex-row sm:items-center sm:justify-between sm:p-5">
               <div className="flex items-start gap-3 sm:items-center">
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-violet-100/80 text-sm dark:bg-violet-900/30">
                   <UserIcon
@@ -1144,7 +1144,7 @@ export function AccountProfileForm({
               </div>
 
               {/* Master Toggle */}
-              <label className="flex cursor-pointer items-center gap-2.5 sm:justify-end">
+              <label className="flex cursor-pointer items-center justify-between gap-2.5 sm:justify-end">
                 <span className="text-[13px] font-semibold text-stone-700 dark:text-stone-300">
                   {state.isPublic ? "公開中" : "非公開"}
                 </span>
@@ -1169,11 +1169,11 @@ export function AccountProfileForm({
             </div>
 
             {/* Content Area (Progressive Disclosure) */}
-            <div className="relative p-5">
+            <div className="relative p-4 sm:p-5">
               {/* Overlay when disabled */}
               {!state.isPublic && (
-                <div className="absolute inset-x-0 bottom-0 top-0 z-10 flex flex-col items-center justify-center rounded-b-2xl bg-white/60 p-6 backdrop-blur-[2px] dark:bg-stone-950/60 transition-all duration-300">
-                  <div className="flex max-w-[280px] flex-col items-center gap-3 rounded-2xl border border-stone-200/80 bg-white/90 p-5 text-center shadow-lg backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/90">
+                <div className="absolute inset-x-0 bottom-0 top-0 z-10 flex flex-col items-center justify-center rounded-b-2xl bg-white/60 p-4 backdrop-blur-[2px] transition-all duration-300 sm:p-6 dark:bg-stone-950/60">
+                  <div className="flex max-w-[280px] flex-col items-center gap-3 rounded-2xl border border-stone-200/80 bg-white/90 p-4 text-center shadow-lg backdrop-blur-md sm:p-5 dark:border-stone-800 dark:bg-stone-900/90">
                     <span className="flex h-10 w-10 items-center justify-center rounded-full bg-stone-100 dark:bg-stone-800">
                       <LockIcon size={20} className="text-stone-400" title="非公開ロック" />
                     </span>
@@ -1305,7 +1305,7 @@ export function AccountProfileForm({
                           key={companyRowIds[index]}
                           className="rounded-2xl border border-stone-200/80 p-3 dark:border-stone-800/80"
                         >
-                          <div className="flex items-center gap-2">
+                          <div className="grid grid-cols-[36px_minmax(0,1fr)] items-center gap-2 min-[360px]:grid-cols-[36px_minmax(0,1fr)_36px]">
                             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100/80 text-[11px] font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
                               {index + 1}
                             </div>
@@ -1326,7 +1326,7 @@ export function AccountProfileForm({
                               disabled={!canEditAlumniProfile}
                               variant="ghost"
                               size="icon"
-                              className="h-9 w-9 shrink-0 text-stone-400 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-40 dark:hover:bg-rose-900/20 dark:hover:text-rose-400"
+                              className="col-start-2 ml-auto h-9 w-9 shrink-0 text-stone-400 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-40 min-[360px]:col-start-auto min-[360px]:ml-0 dark:hover:bg-rose-900/20 dark:hover:text-rose-400"
                               title="削除"
                             >
                               <Trash2Icon size={16} title="削除" />
@@ -1334,7 +1334,7 @@ export function AccountProfileForm({
                           </div>
 
                           <label className="mt-3 flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-stone-200/70 bg-white px-3 py-2 dark:border-stone-800/80 dark:bg-stone-950/40">
-                            <span>
+                            <span className="min-w-0">
                               <span className="block text-[12px] font-bold text-stone-800 dark:text-stone-100">
                                 この内定先を公開
                               </span>
@@ -1380,7 +1380,7 @@ export function AccountProfileForm({
                           </div>
 
                           <label className="mt-3 flex cursor-pointer items-center justify-between gap-3 rounded-xl bg-stone-50 px-3 py-2 dark:bg-stone-900/60">
-                            <span>
+                            <span className="min-w-0">
                               <span className="block text-[12px] font-bold text-stone-800 dark:text-stone-100">
                                 選考体験を詳しく書く
                               </span>
@@ -1481,14 +1481,14 @@ export function AccountProfileForm({
                                   </Button>
                                 </div>
 
-                                <ol className="flex gap-2 overflow-x-auto pb-1">
+                                <ol className="flex flex-wrap gap-2 pb-1">
                                   {experience.steps.map((step, stepIndex) => (
                                     <li key={`${companyRowIds[index]}-${stepIndex}-summary`}>
                                       <Button
                                         type="button"
                                         onClick={() => scrollToSelectionStep(index, stepIndex)}
                                         variant="ghost"
-                                        className="flex h-auto shrink-0 items-center gap-1.5 rounded-full border border-stone-200/80 bg-stone-50 px-2.5 py-1 text-[10px] font-bold text-stone-600 shadow-sm hover:bg-white disabled:opacity-40 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-300 dark:hover:bg-stone-800"
+                                        className="flex h-auto items-center gap-1.5 rounded-full border border-stone-200/80 bg-stone-50 px-2.5 py-1 text-[10px] font-bold text-stone-600 shadow-sm hover:bg-white disabled:opacity-40 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-300 dark:hover:bg-stone-800"
                                         disabled={!canEditAlumniProfile}
                                       >
                                         <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white text-[9px] text-stone-500 ring-1 ring-stone-200 dark:bg-stone-950 dark:text-stone-400 dark:ring-stone-700">
@@ -1504,9 +1504,9 @@ export function AccountProfileForm({
                                   ref={(node) => {
                                     selectionStepScrollerRefs.current[index] = node;
                                   }}
-                                  className="snap-x snap-mandatory overflow-x-auto scroll-smooth px-4 pb-2"
+                                  className="scroll-smooth pb-2 sm:snap-x sm:snap-mandatory sm:overflow-x-auto sm:px-4"
                                 >
-                                  <div className="flex gap-3">
+                                  <div className="grid gap-3 sm:flex">
                                     {experience.steps.map((step, stepIndex) => {
                                       const deleteKey = getStepDeleteKey(index, stepIndex);
                                       const isDeletePending = pendingStepDeleteKey === deleteKey;
@@ -1519,7 +1519,7 @@ export function AccountProfileForm({
                                         <div
                                           key={`${companyRowIds[index]}-${stepIndex}`}
                                           data-selection-step-index={stepIndex}
-                                          className="w-full shrink-0 snap-center snap-always space-y-3 rounded-2xl border border-stone-200/80 bg-white/95 p-4 dark:border-stone-800 dark:bg-stone-950/80"
+                                          className="w-full min-w-0 space-y-3 rounded-2xl border border-stone-200/80 bg-white/95 p-3 sm:shrink-0 sm:snap-center sm:snap-always sm:p-4 dark:border-stone-800 dark:bg-stone-950/80"
                                         >
                                           <div className="flex items-center justify-between gap-2 border-b border-stone-100 pb-3 dark:border-stone-800">
                                             <span className="text-[10px] font-bold tracking-[0.08em] text-stone-400 dark:text-stone-500">
@@ -1899,7 +1899,7 @@ export function AccountProfileForm({
                     type="button"
                     onClick={() => setDeepDiveOpen((prev) => !prev)}
                     variant="ghost"
-                    className="flex h-auto w-full items-center gap-2 p-0 text-left hover:bg-transparent dark:hover:bg-transparent"
+                    className="flex h-auto w-full items-center gap-2 whitespace-normal p-0 text-left hover:bg-transparent dark:hover:bg-transparent"
                   >
                     <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-sm dark:bg-amber-900/40">
                       💡
@@ -1908,7 +1908,7 @@ export function AccountProfileForm({
                       <h4 className="text-sm font-bold text-stone-900 dark:text-stone-100">
                         任意の深掘り情報
                       </h4>
-                      <p className="text-[10px] text-stone-500 dark:text-stone-400">
+                      <p className="break-words text-[10px] leading-relaxed text-stone-500 dark:text-stone-400">
                         任意 · スキルや制作物まで見せたいときに追記できます
                       </p>
                     </div>

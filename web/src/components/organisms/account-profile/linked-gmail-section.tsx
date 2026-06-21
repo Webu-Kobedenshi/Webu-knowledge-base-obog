@@ -27,9 +27,9 @@ export function LinkedGmailSection({
         type="button"
         onClick={onToggleLoginInfoOpen}
         variant="ghost"
-        className="flex h-auto w-full items-center justify-between p-0 hover:bg-transparent dark:hover:bg-transparent"
+        className="flex h-auto w-full items-center justify-between gap-3 whitespace-normal p-0 text-left hover:bg-transparent dark:hover:bg-transparent"
       >
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-sm dark:bg-emerald-900/40">
             <LinkIcon
               size={14}
