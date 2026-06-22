@@ -82,12 +82,12 @@ https://web-u.dev/api/account/gmail/verify/callback
 
 ## Cloudflare R2 CORS
 
-R2 bucket の CORS に `https://web-u.dev` を追加します。移行中に Vercel も併用する場合は、既存の Vercel URL も残します。
+R2 bucket の CORS に `https://web-u.dev` を追加します。
 
 ```json
 [
   {
-    "AllowedOrigins": ["https://web-u.dev", "https://webu-portal-web.vercel.app"],
+    "AllowedOrigins": ["https://web-u.dev"],
     "AllowedMethods": ["PUT", "GET", "HEAD"],
     "AllowedHeaders": ["*"],
     "ExposeHeaders": ["ETag"],
@@ -157,4 +157,4 @@ docker compose -f compose.xserver.yml restart web
 docker compose -f compose.xserver.yml restart service
 ```
 
-旧 Vercel / Fly.io 環境は、移行後しばらく rollback 用に残してから停止します。
+旧 Fly.io 環境は、移行後しばらく rollback 用に残してから停止します。

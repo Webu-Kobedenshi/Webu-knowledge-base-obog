@@ -132,8 +132,6 @@ R2 bucket の CORS に `https://web-u.dev` を含めます。
 ]
 ```
 
-移行期間中に旧 Vercel URL も使う場合は、旧 URL も `AllowedOrigins` に残します。
-
 ## 環境変数
 
 サーバー上のリポジトリルートで `.env.xserver` を作成します。

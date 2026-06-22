@@ -40,7 +40,7 @@ flyctl secrets set \
 ```json
 [
   {
-    "AllowedOrigins": ["https://webu-portal-web.vercel.app"],
+    "AllowedOrigins": ["https://web-u.dev"],
     "AllowedMethods": ["PUT", "GET", "HEAD"],
     "AllowedHeaders": ["*"],
     "ExposeHeaders": ["ETag"],

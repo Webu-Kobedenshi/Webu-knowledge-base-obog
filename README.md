@@ -184,8 +184,6 @@ pnpm prisma:seed:admin-emails
 - [Site Overview](./Docs/SITE_OVERVIEW.md)
 - [Database Migration](./Docs/DATABASE_MIGRATION.md)
 - [Git Workflow](./Docs/GIT_WORKFLOW.md)
-- [Deploy Overview](./Docs/DEPLOY_FREE_TIER.md)
-- [Vercel Deploy](./Docs/DEPLOY_VERCEL.md)
 - [Fly.io Deploy](./Docs/DEPLOY_FLYIO.md)
 - [Neon Deploy](./Docs/DEPLOY_NEON.md)
 - [Cloudflare R2 Deploy](./Docs/DEPLOY_R2.md)
