@@ -22,5 +22,14 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4"
+  },
+  "pnpm": {
+    "overrides": {
+      "handlebars": "4.7.9",
+      "minimatch@3": "3.1.5",
+      "minimatch@9": "9.0.9",
+      "minimatch@10": "10.2.5",
+      "multer": "2.2.0"
+    }
   }
 }
