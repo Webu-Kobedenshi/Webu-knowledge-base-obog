@@ -1,0 +1,75 @@
+name: CodeQL
+
+on:
+    push:
+        branches:
+            - main
+        paths-ignore:
+            - "**/*.md"
+            - "Docs/**"
+            - "deploy/**"
+            - ".gitignore"
+            - ".dockerignore"
+            - "**/Dockerfile*"
+            - "**/.env.example"
+    pull_request:
+        branches:
+            - main
+        paths-ignore:
+            - "**/*.md"
+            - "Docs/**"
+            - "deploy/**"
+            - ".gitignore"
+            - ".dockerignore"
+            - "**/Dockerfile*"
+            - "**/.env.example"
+    schedule:
+        - cron: "30 5 * * 1"
+
+# Cancel superseded runs on the same ref for PRs; let every push to main finish.
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+    analyze:
+        name: Analyze (${{ matrix.language }})
+        runs-on: ubuntu-latest
+        timeout-minutes: 60
+        permissions:
+            security-events: write
+            packages: read
+            actions: read
+            contents: read
+
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - language: javascript-typescript
+                      build-mode: none
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v6
+
+            - name: Initialize CodeQL
+              uses: github/codeql-action/init@v4
+              with:
+                  languages: ${{ matrix.language }}
+                  build-mode: ${{ matrix.build-mode }}
+                  queries: security-and-quality
+                  config: |
+                      paths-ignore:
+                          - "**/*.spec.ts"
+                          - "**/*.test.ts"
+                          - "service/test/**"
+                          - "web/public/**"
+                          - "**/dist/**"
+                          - "**/.next/**"
+                          - "**/coverage/**"
+
+            - name: Perform CodeQL Analysis
+              uses: github/codeql-action/analyze@v4
+              with:
+                  category: "/language:${{ matrix.language }}"
